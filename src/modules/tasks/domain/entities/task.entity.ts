@@ -12,6 +12,17 @@ export enum TaskPriority {
   URGENT = 'URGENT',
 }
 
+export const TASK_SORT_FIELDS = [
+  'createdAt',
+  'updatedAt',
+  'dueDate',
+  'priority',
+  'title',
+  'position',
+] as const;
+
+export type TaskSortField = (typeof TASK_SORT_FIELDS)[number];
+
 export interface TaskProps {
   id: string;
   title: string;

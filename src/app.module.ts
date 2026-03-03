@@ -4,6 +4,8 @@ import {
   NestModule,
   RequestMethod,
 } from '@nestjs/common';
+import { ConfigModule } from './infrastructure/config/config.module';
+import { CacheModule } from './infrastructure/cache/cache.module';
 import { WorkspacesModule } from './modules/workspaces/workspaces.module';
 import { LoggerMiddleware } from './infrastructure/common/middlewares/logger.middleware';
 import { requestTracker } from './infrastructure/common/middlewares/request-tracker.middleware';
@@ -15,9 +17,12 @@ import { TasksModule } from './modules/tasks/tasks.module';
 import { CommentsModule } from './modules/comments/comments.module';
 import { LabelsModule } from './modules/labels/labels.module';
 import { ActivityLogsModule } from './modules/activity-logs/activity-logs.module';
+import { DashboardModule } from './modules/dashboard/dashboard.module';
 
 @Module({
   imports: [
+    ConfigModule,
+    CacheModule,
     WorkspacesModule,
     UserModule,
     MemberModule,
@@ -26,6 +31,7 @@ import { ActivityLogsModule } from './modules/activity-logs/activity-logs.module
     CommentsModule,
     LabelsModule,
     ActivityLogsModule,
+    DashboardModule,
   ],
 })
 export class AppModule implements NestModule {

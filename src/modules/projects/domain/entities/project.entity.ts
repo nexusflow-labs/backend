@@ -4,6 +4,9 @@ export enum ProjectStatus {
   COMPLETED = 'COMPLETED',
 }
 
+export const PROJECT_SORT_FIELDS = ['createdAt', 'updatedAt', 'name'] as const;
+export type ProjectSortField = (typeof PROJECT_SORT_FIELDS)[number];
+
 export interface ProjectProps {
   id: string;
   name: string;

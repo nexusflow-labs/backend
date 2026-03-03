@@ -6,8 +6,12 @@ import {
   IsOptional,
   IsEnum,
   IsUUID,
+  IsInt,
+  Min,
+  Max,
 } from 'class-validator';
-import { ProjectStatus } from '../../domain/entities/project.entity';
+import { Transform, Type } from 'class-transformer';
+import * as projectEntity from '../../domain/entities/project.entity';
 
 export class CreateProjectDto {
   @IsString()
@@ -38,7 +42,47 @@ export class UpdateProjectDto {
   @MaxLength(500)
   description?: string;
 
-  @IsEnum(ProjectStatus)
+  @IsEnum(projectEntity.ProjectStatus)
   @IsOptional()
-  status?: ProjectStatus;
+  status?: projectEntity.ProjectStatus;
+}
+
+export class ProjectQueryDto {
+  // Pagination
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  page?: number = 1;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  @Max(100)
+  pageSize?: number = 20;
+
+  // Filters
+  @IsString()
+  @IsOptional()
+  @MaxLength(100)
+  search?: string;
+
+  @IsEnum(projectEntity.ProjectStatus)
+  @IsOptional()
+  status?: projectEntity.ProjectStatus;
+
+  @IsUUID()
+  @IsOptional()
+  ownerId?: string;
+
+  // Sorting
+  @IsOptional()
+  @IsString()
+  sortBy?: projectEntity.ProjectSortField = 'createdAt';
+
+  @IsOptional()
+  @IsEnum(['asc', 'desc'])
+  @Transform(({ value }) => value?.toLowerCase())
+  sortDirection?: 'asc' | 'desc' = 'desc';
 }

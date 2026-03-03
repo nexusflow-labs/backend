@@ -23,9 +23,11 @@ import {
   CreateTaskDto,
   UpdateTaskDto,
   AssignTaskDto,
-  TaskFilterDto,
+  TaskQueryDto,
 } from './dtos/task.request.dto';
 import { TaskResponseDto } from './dtos/task.response.dto';
+import { PaginatedResult } from 'src/infrastructure/common/pagination';
+import { TaskQueryFilters } from '../domain/repositories/task.repository';
 
 @Controller('projects/:projectId/tasks')
 export class TasksController {
@@ -42,10 +44,40 @@ export class TasksController {
   @Get()
   async list(
     @Param('projectId', new ParseUUIDPipe()) projectId: string,
-    @Query() filters: TaskFilterDto,
-  ): Promise<TaskResponseDto[]> {
-    const tasks = await this.listTasksUseCase.execute(projectId, filters);
-    return TaskResponseDto.fromEntities(tasks);
+    @Query() query: TaskQueryDto,
+  ): Promise<PaginatedResult<TaskResponseDto>> {
+    const filters: TaskQueryFilters = {
+      status: query.status,
+      priority: query.priority,
+      assigneeId: query.assigneeId,
+      rootOnly: query.rootOnly,
+      creatorId: query.creatorId,
+      dueDateFrom: query.dueDateFrom ? new Date(query.dueDateFrom) : undefined,
+      dueDateTo: query.dueDateTo ? new Date(query.dueDateTo) : undefined,
+      createdFrom: query.createdFrom ? new Date(query.createdFrom) : undefined,
+      createdTo: query.createdTo ? new Date(query.createdTo) : undefined,
+      search: query.search,
+      labelIds: query.labelIds,
+      overdue: query.overdue,
+    };
+
+    const pagination = {
+      page: query.page ?? 1,
+      pageSize: query.pageSize ?? 20,
+      sortBy: query.sortBy ?? 'createdAt',
+      sortDirection: query.sortDirection ?? 'desc',
+    };
+
+    const result = await this.listTasksUseCase.executePaginated(
+      projectId,
+      filters,
+      pagination,
+    );
+
+    return {
+      items: TaskResponseDto.fromEntities(result.items),
+      meta: result.meta,
+    };
   }
 
   @Get(':id')

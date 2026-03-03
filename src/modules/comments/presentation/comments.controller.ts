@@ -6,6 +6,7 @@ import {
   Param,
   Put,
   Delete,
+  Query,
   HttpCode,
   HttpStatus,
   ParseUUIDPipe,
@@ -14,11 +15,16 @@ import { CreateCommentUseCase } from '../application/use-cases/create-comment.us
 import { ListCommentsUseCase } from '../application/use-cases/list-comments.use-case';
 import { UpdateCommentUseCase } from '../application/use-cases/update-comment.use-case';
 import { DeleteCommentUseCase } from '../application/use-cases/delete-comment.use-case';
-import { CreateCommentDto, UpdateCommentDto } from './dtos/comment.request.dto';
+import {
+  CreateCommentDto,
+  UpdateCommentDto,
+  CommentQueryDto,
+} from './dtos/comment.request.dto';
 import {
   CommentResponseDto,
   CommentWithUserResponseDto,
 } from './dtos/comment.response.dto';
+import { PaginatedResult } from 'src/infrastructure/common/pagination';
 
 @Controller('tasks/:taskId/comments')
 export class CommentsController {
@@ -32,9 +38,22 @@ export class CommentsController {
   @Get()
   async list(
     @Param('taskId', new ParseUUIDPipe()) taskId: string,
-  ): Promise<CommentWithUserResponseDto[]> {
-    const comments = await this.listCommentsUseCase.execute(taskId);
-    return CommentWithUserResponseDto.fromEntities(comments);
+    @Query() query: CommentQueryDto,
+  ): Promise<PaginatedResult<CommentWithUserResponseDto>> {
+    const pagination = {
+      page: query.page ?? 1,
+      pageSize: query.pageSize ?? 20,
+    };
+
+    const result = await this.listCommentsUseCase.executePaginated(
+      taskId,
+      pagination,
+    );
+
+    return {
+      items: CommentWithUserResponseDto.fromEntities(result.items),
+      meta: result.meta,
+    };
   }
 
   @Post()

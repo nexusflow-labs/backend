@@ -8,9 +8,13 @@ import {
   IsUUID,
   IsDateString,
   IsBoolean,
+  IsArray,
+  IsInt,
+  Min,
+  Max,
 } from 'class-validator';
-import { Transform } from 'class-transformer';
-import { TaskStatus, TaskPriority } from '../../domain/entities/task.entity';
+import { Transform, Type } from 'class-transformer';
+import * as taskEntity from '../../domain/entities/task.entity';
 
 export class CreateTaskDto {
   @IsString()
@@ -28,9 +32,9 @@ export class CreateTaskDto {
   @IsNotEmpty()
   creatorId: string;
 
-  @IsEnum(TaskPriority)
+  @IsEnum(taskEntity.TaskPriority)
   @IsOptional()
-  priority?: TaskPriority;
+  priority?: taskEntity.TaskPriority;
 
   @IsDateString()
   @IsOptional()
@@ -53,13 +57,13 @@ export class UpdateTaskDto {
   @MaxLength(2000)
   description?: string;
 
-  @IsEnum(TaskStatus)
+  @IsEnum(taskEntity.TaskStatus)
   @IsOptional()
-  status?: TaskStatus;
+  status?: taskEntity.TaskStatus;
 
-  @IsEnum(TaskPriority)
+  @IsEnum(taskEntity.TaskPriority)
   @IsOptional()
-  priority?: TaskPriority;
+  priority?: taskEntity.TaskPriority;
 
   @IsDateString()
   @IsOptional()
@@ -73,13 +77,13 @@ export class AssignTaskDto {
 }
 
 export class TaskFilterDto {
-  @IsEnum(TaskStatus)
+  @IsEnum(taskEntity.TaskStatus)
   @IsOptional()
-  status?: TaskStatus;
+  status?: taskEntity.TaskStatus;
 
-  @IsEnum(TaskPriority)
+  @IsEnum(taskEntity.TaskPriority)
   @IsOptional()
-  priority?: TaskPriority;
+  priority?: taskEntity.TaskPriority;
 
   @IsUUID()
   @IsOptional()
@@ -89,4 +93,87 @@ export class TaskFilterDto {
   @IsOptional()
   @Transform(({ value }) => value === 'true' || value === true)
   rootOnly?: boolean;
+}
+
+export class TaskQueryDto {
+  // Pagination
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  page?: number = 1;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  @Max(100)
+  pageSize?: number = 20;
+
+  // Basic filters (from TaskFilterDto)
+  @IsEnum(taskEntity.TaskStatus)
+  @IsOptional()
+  status?: taskEntity.TaskStatus;
+
+  @IsEnum(taskEntity.TaskPriority)
+  @IsOptional()
+  priority?: taskEntity.TaskPriority;
+
+  @IsUUID()
+  @IsOptional()
+  assigneeId?: string;
+
+  @IsBoolean()
+  @IsOptional()
+  @Transform(({ value }) => value === 'true' || value === true)
+  rootOnly?: boolean;
+
+  // Extended filters
+  @IsUUID()
+  @IsOptional()
+  creatorId?: string;
+
+  @IsDateString()
+  @IsOptional()
+  dueDateFrom?: string;
+
+  @IsDateString()
+  @IsOptional()
+  dueDateTo?: string;
+
+  @IsDateString()
+  @IsOptional()
+  createdFrom?: string;
+
+  @IsDateString()
+  @IsOptional()
+  createdTo?: string;
+
+  @IsString()
+  @IsOptional()
+  @MaxLength(100)
+  search?: string;
+
+  @IsArray()
+  @IsUUID('4', { each: true })
+  @IsOptional()
+  @Transform(({ value }): string[] =>
+    typeof value === 'string' ? value.split(',') : value,
+  )
+  labelIds?: string[];
+
+  @IsBoolean()
+  @IsOptional()
+  @Transform(({ value }) => value === 'true' || value === true)
+  overdue?: boolean;
+
+  // Sorting
+  @IsOptional()
+  @IsString()
+  sortBy?: taskEntity.TaskSortField = 'createdAt';
+
+  @IsOptional()
+  @IsEnum(['asc', 'desc'])
+  @Transform(({ value }): string | undefined => value?.toLowerCase())
+  sortDirection?: 'asc' | 'desc' = 'desc';
 }

@@ -6,6 +6,7 @@ import {
   Param,
   Put,
   Delete,
+  Query,
   HttpCode,
   HttpStatus,
   ParseUUIDPipe,
@@ -15,8 +16,14 @@ import { ListProjectsUseCase } from '../application/use-cases/list-projects.use-
 import { GetProjectUseCase } from '../application/use-cases/get-project.use-case';
 import { UpdateProjectUseCase } from '../application/use-cases/update-project.use-case';
 import { DeleteProjectUseCase } from '../application/use-cases/delete-project.use-case';
-import { CreateProjectDto, UpdateProjectDto } from './dtos/project.request.dto';
+import {
+  CreateProjectDto,
+  UpdateProjectDto,
+  ProjectQueryDto,
+} from './dtos/project.request.dto';
 import { ProjectResponseDto } from './dtos/project.response.dto';
+import { PaginatedResult } from 'src/infrastructure/common/pagination';
+import { ProjectQueryFilters } from '../domain/repositories/project.repository';
 
 @Controller('workspaces/:workspaceId/projects')
 export class ProjectsController {
@@ -31,9 +38,31 @@ export class ProjectsController {
   @Get()
   async list(
     @Param('workspaceId', new ParseUUIDPipe()) workspaceId: string,
-  ): Promise<ProjectResponseDto[]> {
-    const projects = await this.listProjectsUseCase.execute(workspaceId);
-    return ProjectResponseDto.fromEntities(projects);
+    @Query() query: ProjectQueryDto,
+  ): Promise<PaginatedResult<ProjectResponseDto>> {
+    const filters: ProjectQueryFilters = {
+      search: query.search,
+      status: query.status,
+      ownerId: query.ownerId,
+    };
+
+    const pagination = {
+      page: query.page ?? 1,
+      pageSize: query.pageSize ?? 20,
+      sortBy: query.sortBy ?? 'createdAt',
+      sortDirection: query.sortDirection ?? 'desc',
+    };
+
+    const result = await this.listProjectsUseCase.executePaginated(
+      workspaceId,
+      filters,
+      pagination,
+    );
+
+    return {
+      items: ProjectResponseDto.fromEntities(result.items),
+      meta: result.meta,
+    };
   }
 
   @Get(':id')

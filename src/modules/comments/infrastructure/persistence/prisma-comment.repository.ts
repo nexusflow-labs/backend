@@ -2,11 +2,17 @@ import { Injectable } from '@nestjs/common';
 import {
   ICommentRepository,
   CreateCommentData,
+  CommentPaginationParams,
 } from '../../domain/repositories/comment.repository';
 import { Comment } from '../../domain/entities/comment.entity';
 import { CommentWithUser } from '../../domain/entities/comment-with-user.entity';
 import { CommentMapper } from '../mappers/comment.mapper';
 import { PrismaService } from 'src/infrastructure/prisma/prisma.service';
+import {
+  PaginatedResult,
+  buildOffsetPagination,
+  createOffsetPaginatedResult,
+} from 'src/infrastructure/common/pagination';
 
 @Injectable()
 export class PrismaCommentRepository implements ICommentRepository {
@@ -64,6 +70,39 @@ export class PrismaCommentRepository implements ICommentRepository {
     });
 
     return comments.map((c) => CommentMapper.toEntityWithUser(c));
+  }
+
+  async findByTaskWithUserPaginated(
+    taskId: string,
+    pagination: CommentPaginationParams,
+  ): Promise<PaginatedResult<CommentWithUser>> {
+    const where = { taskId };
+    const { skip, take } = buildOffsetPagination({
+      page: pagination.page,
+      pageSize: pagination.pageSize,
+    });
+
+    const [comments, totalItems] = await Promise.all([
+      this.prisma.comment.findMany({
+        where,
+        include: {
+          author: true,
+        },
+        orderBy: { createdAt: 'asc' },
+        skip,
+        take,
+      }),
+      this.prisma.comment.count({ where }),
+    ]);
+
+    const entities = comments.map((c) => CommentMapper.toEntityWithUser(c));
+
+    return createOffsetPaginatedResult(
+      entities,
+      totalItems,
+      pagination.page,
+      pagination.pageSize,
+    );
   }
 
   async delete(id: string): Promise<void> {
