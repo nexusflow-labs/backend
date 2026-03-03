@@ -1,0 +1,9 @@
+export enum ActivityAction {
+  CREATE = 'CREATE',
+  UPDATE = 'UPDATE',
+  DELETE = 'DELETE',
+  ASSIGN = 'ASSIGN',
+  UNASSIGN = 'UNASSIGN',
+  COMMENT = 'COMMENT',
+  STATUS_CHANGE = 'STATUS_CHANGE',
+}
