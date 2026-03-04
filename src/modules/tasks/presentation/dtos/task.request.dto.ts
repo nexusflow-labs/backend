@@ -28,10 +28,6 @@ export class CreateTaskDto {
   @MaxLength(2000)
   description?: string;
 
-  @IsUUID()
-  @IsNotEmpty()
-  creatorId: string;
-
   @IsEnum(taskEntity.TaskPriority)
   @IsOptional()
   priority?: taskEntity.TaskPriority;

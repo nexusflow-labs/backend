@@ -10,7 +10,7 @@ import { WorkspacesModule } from './modules/workspaces/workspaces.module';
 import { LoggerMiddleware } from './infrastructure/common/middlewares/logger.middleware';
 import { requestTracker } from './infrastructure/common/middlewares/request-tracker.middleware';
 import { ContextMiddleware } from './infrastructure/common/middlewares/context.middleware';
-import { UserModule } from './modules/users/users.module';
+import { AuthModule } from './modules/auth/auth.module';
 import { MemberModule } from './modules/members/members.module';
 import { ProjectsModule } from './modules/projects/projects.module';
 import { TasksModule } from './modules/tasks/tasks.module';
@@ -24,7 +24,7 @@ import { DashboardModule } from './modules/dashboard/dashboard.module';
     ConfigModule,
     CacheModule,
     WorkspacesModule,
-    UserModule,
+    AuthModule,
     MemberModule,
     ProjectsModule,
     TasksModule,

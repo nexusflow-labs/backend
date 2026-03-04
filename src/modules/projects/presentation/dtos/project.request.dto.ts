@@ -24,10 +24,6 @@ export class CreateProjectDto {
   @IsOptional()
   @MaxLength(500)
   description?: string;
-
-  @IsUUID()
-  @IsNotEmpty()
-  ownerId: string;
 }
 
 export class UpdateProjectDto {

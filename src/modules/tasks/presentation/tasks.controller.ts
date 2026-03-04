@@ -28,6 +28,8 @@ import {
 import { TaskResponseDto } from './dtos/task.response.dto';
 import { PaginatedResult } from 'src/infrastructure/common/pagination';
 import { TaskQueryFilters } from '../domain/repositories/task.repository';
+import { CurrentUser } from 'src/modules/auth/presentation/decorators/current-user.decorator';
+import type { JwtUser } from 'src/modules/auth/domain/entities/types/jwt-user.type';
 
 @Controller('projects/:projectId/tasks')
 export class TasksController {
@@ -93,11 +95,12 @@ export class TasksController {
   async create(
     @Param('projectId', new ParseUUIDPipe()) projectId: string,
     @Body() dto: CreateTaskDto,
+    @CurrentUser() user: JwtUser,
   ): Promise<TaskResponseDto> {
     const task = await this.createTaskUseCase.execute(
       dto.title,
       projectId,
-      dto.creatorId,
+      user.id,
       dto.description,
       dto.dueDate ? new Date(dto.dueDate) : undefined,
       dto.priority,

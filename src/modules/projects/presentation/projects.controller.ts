@@ -24,6 +24,8 @@ import {
 import { ProjectResponseDto } from './dtos/project.response.dto';
 import { PaginatedResult } from 'src/infrastructure/common/pagination';
 import { ProjectQueryFilters } from '../domain/repositories/project.repository';
+import { CurrentUser } from 'src/modules/auth/presentation/decorators/current-user.decorator';
+import type { JwtUser } from 'src/modules/auth/domain/entities/types/jwt-user.type';
 
 @Controller('workspaces/:workspaceId/projects')
 export class ProjectsController {
@@ -78,11 +80,12 @@ export class ProjectsController {
   async create(
     @Param('workspaceId', new ParseUUIDPipe()) workspaceId: string,
     @Body() dto: CreateProjectDto,
+    @CurrentUser() user: JwtUser,
   ): Promise<ProjectResponseDto> {
     const project = await this.createProjectUseCase.execute(
       dto.name,
       workspaceId,
-      dto.ownerId,
+      user.id,
       dto.description,
     );
     return ProjectResponseDto.fromEntity(project);

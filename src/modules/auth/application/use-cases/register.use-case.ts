@@ -1,12 +1,15 @@
-import * as bcrypt from 'bcrypt';
 import { Injectable, ConflictException } from '@nestjs/common';
-import { User } from '../../domain/entities/user.entitiy';
+import { User } from '../../domain/entities/user.entity';
 import { IUserRepository } from '../../domain/repositories/user.repository';
-import { CreateUserDto } from '../../presentation/dtos/user.request.dto';
+import { CreateUserDto } from '../../presentation/dtos/auth.request.dto';
+import { PasswordHashingService } from '../services/password-hashing.service';
 
 @Injectable()
 export class RegisterUseCase {
-  constructor(private readonly userRepository: IUserRepository) {}
+  constructor(
+    private readonly userRepository: IUserRepository,
+    private readonly passwordHashingService: PasswordHashingService,
+  ) {}
 
   async execute(dto: CreateUserDto): Promise<void> {
     const existingUser = await this.userRepository.findByEmail(dto.email);
@@ -14,8 +17,7 @@ export class RegisterUseCase {
       throw new ConflictException('Email is already in use');
     }
 
-    const saltRounds = 10;
-    const hashedPassword = await bcrypt.hash(dto.password, saltRounds);
+    const hashedPassword = await this.passwordHashingService.hash(dto.password);
 
     const user = User.create({
       email: dto.email,

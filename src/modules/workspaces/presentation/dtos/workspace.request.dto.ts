@@ -7,10 +7,6 @@ import {
 } from 'class-validator';
 
 export class CreateWorkspaceDto {
-  @IsNotEmpty({ message: 'Workspace ID must not be empty' })
-  @IsString({ message: 'Workspace ID must be a string' })
-  creatorId: string;
-
   @IsNotEmpty({ message: 'workspace must not be empty' })
   @IsString({ message: 'workspace name must be a string' })
   @MinLength(3, {

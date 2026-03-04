@@ -1,5 +1,5 @@
-import { User as PrismaUser } from 'generated/prisma/browser';
-import { User as UserEntity } from '../../domain/entities/user.entitiy';
+import { User as PrismaUser } from 'generated/prisma/client';
+import { User as UserEntity } from '../../domain/entities/user.entity';
 
 export class UserMapper {
   static toDomain(raw: PrismaUser): UserEntity {

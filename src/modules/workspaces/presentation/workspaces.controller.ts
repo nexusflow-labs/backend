@@ -20,6 +20,8 @@ import {
   CreateWorkspaceDto,
   UpdateWorkspaceDto,
 } from './dtos/workspace.request.dto';
+import { CurrentUser } from 'src/modules/auth/presentation/decorators/current-user.decorator';
+import type { JwtUser } from 'src/modules/auth/domain/entities/types/jwt-user.type';
 
 @Controller('workspaces')
 export class WorkspacesController {
@@ -47,10 +49,10 @@ export class WorkspacesController {
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
-  async create(@Body() dto: CreateWorkspaceDto) {
+  async create(@Body() dto: CreateWorkspaceDto, @CurrentUser() user: JwtUser) {
     const workspace = await this.createWorkspaceUseCase.execute(
       dto.name,
-      dto.creatorId,
+      user.id,
     );
     return WorkspaceResponseMapper.entitytoWorkspaceResponse(workspace);
   }

@@ -3,7 +3,6 @@ import {
   IsNotEmpty,
   MinLength,
   MaxLength,
-  IsUUID,
   IsOptional,
   IsInt,
   Min,
@@ -17,10 +16,6 @@ export class CreateCommentDto {
   @MinLength(1)
   @MaxLength(5000)
   content: string;
-
-  @IsUUID()
-  @IsNotEmpty()
-  authorId: string;
 }
 
 export class UpdateCommentDto {

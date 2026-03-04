@@ -85,4 +85,26 @@ export class ActivityLogsController {
       meta: result.meta,
     };
   }
+
+  @Get('workspaces/:workspaceId')
+  async getWorkspaceActivities(
+    @Param('workspaceId', new ParseUUIDPipe()) workspaceId: string,
+    @Query() query: EntityActivityQueryDto,
+  ): Promise<PaginatedResult<ActivityLogResponseDto>> {
+    const pagination = {
+      page: query.page ?? 1,
+      pageSize: query.pageSize ?? 20,
+    };
+
+    const result = await this.listActivitiesUseCase.executeByEntityPaginated(
+      EntityType.WORKSPACE,
+      workspaceId,
+      pagination,
+    );
+
+    return {
+      items: ActivityLogResponseDto.fromEntities(result.items),
+      meta: result.meta,
+    };
+  }
 }

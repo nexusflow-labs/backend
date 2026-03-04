@@ -45,5 +45,6 @@ import { PrismaWorkspaceRepository } from './infrastructure/persistence/prisma-w
         new RemoveWorkspaceUseCase(repo),
     },
   ],
+  exports: [IWorkspaceRepository],
 })
 export class WorkspacesModule {}

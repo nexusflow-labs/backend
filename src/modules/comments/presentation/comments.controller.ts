@@ -25,6 +25,8 @@ import {
   CommentWithUserResponseDto,
 } from './dtos/comment.response.dto';
 import { PaginatedResult } from 'src/infrastructure/common/pagination';
+import { CurrentUser } from 'src/modules/auth/presentation/decorators/current-user.decorator';
+import type { JwtUser } from 'src/modules/auth/domain/entities/types/jwt-user.type';
 
 @Controller('tasks/:taskId/comments')
 export class CommentsController {
@@ -61,11 +63,12 @@ export class CommentsController {
   async create(
     @Param('taskId', new ParseUUIDPipe()) taskId: string,
     @Body() dto: CreateCommentDto,
+    @CurrentUser() user: JwtUser,
   ): Promise<CommentResponseDto> {
     const comment = await this.createCommentUseCase.execute(
       dto.content,
       taskId,
-      dto.authorId,
+      user.id,
     );
     return CommentResponseDto.fromEntity(comment);
   }

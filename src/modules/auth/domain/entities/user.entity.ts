@@ -51,6 +51,10 @@ export class User {
     this.props.name = newName;
   }
 
+  public updatePassword(newPassword: string) {
+    this.props.password = newPassword;
+  }
+
   public toJSON() {
     return { ...this.props };
   }
