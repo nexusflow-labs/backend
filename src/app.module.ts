@@ -4,6 +4,10 @@ import {
   NestModule,
   RequestMethod,
 } from '@nestjs/common';
+import { APP_GUARD } from '@nestjs/core';
+import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
+import { ConfigService } from '@nestjs/config';
+import { JwtAuthGuard } from './modules/auth/infrastructure/guards/jwt-auth.guard';
 import { ConfigModule } from './infrastructure/config/config.module';
 import { CacheModule } from './infrastructure/cache/cache.module';
 import { WorkspacesModule } from './modules/workspaces/workspaces.module';
@@ -22,6 +26,18 @@ import { DashboardModule } from './modules/dashboard/dashboard.module';
 @Module({
   imports: [
     ConfigModule,
+    ThrottlerModule.forRootAsync({
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => ({
+        throttlers: [
+          {
+            name: 'default',
+            ttl: configService.get<number>('THROTTLE_TTL', 60000),
+            limit: configService.get<number>('THROTTLE_LIMIT', 60),
+          },
+        ],
+      }),
+    }),
     CacheModule,
     WorkspacesModule,
     AuthModule,
@@ -32,6 +48,17 @@ import { DashboardModule } from './modules/dashboard/dashboard.module';
     LabelsModule,
     ActivityLogsModule,
     DashboardModule,
+  ],
+  providers: [
+    // Guards execute in order: ThrottlerGuard -> JwtAuthGuard
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: JwtAuthGuard,
+    },
   ],
 })
 export class AppModule implements NestModule {

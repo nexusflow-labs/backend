@@ -1,6 +1,5 @@
 import { Module } from '@nestjs/common';
 import { JwtModule, JwtService } from '@nestjs/jwt';
-import { APP_GUARD } from '@nestjs/core';
 import { RegisterUseCase } from './application/use-cases/register.use-case';
 import { LoginUseCase } from './application/use-cases/login.use-case';
 import { RefreshAccessTokenUseCase } from './application/use-cases/refresh-access-token.use-case';
@@ -11,7 +10,6 @@ import { IRefreshTokenRepository } from './domain/repositories/refresh-token.rep
 import { AuthController } from './presentation/auth.controller';
 import { PrismaUserRepository } from './infrastructure/persistence/prisma-users.repository';
 import { PrismaRefreshTokenRepository } from './infrastructure/persistence/prisma-refresh-token.repository';
-import { JwtAuthGuard } from './infrastructure/guards/jwt-auth.guard';
 import { JwtStrategy } from './strategies/jwt.strategy';
 
 @Module({
@@ -85,10 +83,6 @@ import { JwtStrategy } from './strategies/jwt.strategy';
     },
 
     JwtStrategy,
-    {
-      provide: APP_GUARD,
-      useClass: JwtAuthGuard,
-    },
   ],
 })
 export class AuthModule {}
