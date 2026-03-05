@@ -10,6 +10,7 @@ import { ConfigService } from '@nestjs/config';
 import { JwtAuthGuard } from './modules/auth/infrastructure/guards/jwt-auth.guard';
 import { ConfigModule } from './infrastructure/config/config.module';
 import { CacheModule } from './infrastructure/cache/cache.module';
+import { AuthorizationModule } from './infrastructure/authorization/authorization.module';
 import { WorkspacesModule } from './modules/workspaces/workspaces.module';
 import { LoggerMiddleware } from './infrastructure/common/middlewares/logger.middleware';
 import { requestTracker } from './infrastructure/common/middlewares/request-tracker.middleware';
@@ -39,6 +40,7 @@ import { DashboardModule } from './modules/dashboard/dashboard.module';
       }),
     }),
     CacheModule,
+    AuthorizationModule,
     WorkspacesModule,
     AuthModule,
     MemberModule,

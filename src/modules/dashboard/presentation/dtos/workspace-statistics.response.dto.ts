@@ -30,7 +30,9 @@ export class WorkspaceStatisticsResponseDto {
   tasksCreatedThisWeek: number;
   projectStats: ProjectStatsDto[];
 
-  static fromEntity(entity: WorkspaceStatistics): WorkspaceStatisticsResponseDto {
+  static fromEntity(
+    entity: WorkspaceStatistics,
+  ): WorkspaceStatisticsResponseDto {
     const dto = new WorkspaceStatisticsResponseDto();
     dto.workspaceId = entity.workspaceId;
     dto.totalProjects = entity.totalProjects;

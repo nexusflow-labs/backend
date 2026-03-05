@@ -9,6 +9,7 @@ import {
   HttpCode,
   HttpStatus,
   ParseUUIDPipe,
+  UseGuards,
 } from '@nestjs/common';
 import { CreateLabelUseCase } from '../application/use-cases/create-label.use-case';
 import { ListLabelsUseCase } from '../application/use-cases/list-labels.use-case';
@@ -16,8 +17,13 @@ import { UpdateLabelUseCase } from '../application/use-cases/update-label.use-ca
 import { DeleteLabelUseCase } from '../application/use-cases/delete-label.use-case';
 import { CreateLabelDto, UpdateLabelDto } from './dtos/label.request.dto';
 import { LabelResponseDto } from './dtos/label.response.dto';
+import { WorkspaceMemberGuard } from 'src/infrastructure/authorization/guards/workspace-member.guard';
+import { RolesGuard } from 'src/infrastructure/authorization/guards/roles.guard';
+import { Roles } from 'src/infrastructure/authorization/decorators/roles.decorator';
+import { MemberRole } from 'src/modules/members/domain/entities/member.entity';
 
 @Controller('workspaces/:workspaceId/labels')
+@UseGuards(WorkspaceMemberGuard, RolesGuard)
 export class LabelsController {
   constructor(
     private readonly createLabelUseCase: CreateLabelUseCase,
@@ -36,6 +42,7 @@ export class LabelsController {
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
+  @Roles(MemberRole.OWNER, MemberRole.ADMIN)
   async create(
     @Param('workspaceId', new ParseUUIDPipe()) workspaceId: string,
     @Body() dto: CreateLabelDto,
@@ -49,6 +56,7 @@ export class LabelsController {
   }
 
   @Put(':id')
+  @Roles(MemberRole.OWNER, MemberRole.ADMIN)
   async update(
     @Param('id', new ParseUUIDPipe()) id: string,
     @Body() dto: UpdateLabelDto,
@@ -59,6 +67,7 @@ export class LabelsController {
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
+  @Roles(MemberRole.OWNER, MemberRole.ADMIN)
   async delete(@Param('id', new ParseUUIDPipe()) id: string): Promise<void> {
     await this.deleteLabelUseCase.execute(id);
   }

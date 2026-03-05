@@ -10,6 +10,7 @@ import {
   HttpCode,
   HttpStatus,
   ParseUUIDPipe,
+  UseGuards,
 } from '@nestjs/common';
 import { CreateCommentUseCase } from '../application/use-cases/create-comment.use-case';
 import { ListCommentsUseCase } from '../application/use-cases/list-comments.use-case';
@@ -27,8 +28,13 @@ import {
 import { PaginatedResult } from 'src/infrastructure/common/pagination';
 import { CurrentUser } from 'src/modules/auth/presentation/decorators/current-user.decorator';
 import type { JwtUser } from 'src/modules/auth/domain/entities/types/jwt-user.type';
+import { WorkspaceMemberGuard } from 'src/infrastructure/authorization/guards/workspace-member.guard';
+import { ResourceOwnerGuard } from 'src/infrastructure/authorization/guards/resource-owner.guard';
+import { CheckOwnership } from 'src/infrastructure/authorization/decorators/check-ownership.decorator';
+import { ResourceType } from 'src/infrastructure/authorization/interfaces/authorization.interfaces';
 
 @Controller('tasks/:taskId/comments')
+@UseGuards(WorkspaceMemberGuard)
 export class CommentsController {
   constructor(
     private readonly createCommentUseCase: CreateCommentUseCase,
@@ -74,6 +80,8 @@ export class CommentsController {
   }
 
   @Put(':id')
+  @UseGuards(ResourceOwnerGuard)
+  @CheckOwnership({ resourceType: ResourceType.COMMENT })
   async update(
     @Param('id', new ParseUUIDPipe()) id: string,
     @Body() dto: UpdateCommentDto,
@@ -84,6 +92,8 @@ export class CommentsController {
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
+  @UseGuards(ResourceOwnerGuard)
+  @CheckOwnership({ resourceType: ResourceType.COMMENT })
   async delete(@Param('id', new ParseUUIDPipe()) id: string): Promise<void> {
     await this.deleteCommentUseCase.execute(id);
   }

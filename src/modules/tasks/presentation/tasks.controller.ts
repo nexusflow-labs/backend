@@ -11,6 +11,7 @@ import {
   HttpCode,
   HttpStatus,
   ParseUUIDPipe,
+  UseGuards,
 } from '@nestjs/common';
 import { CreateTaskUseCase } from '../application/use-cases/create-task.use-case';
 import { ListTasksUseCase } from '../application/use-cases/list-tasks.use-case';
@@ -30,8 +31,13 @@ import { PaginatedResult } from 'src/infrastructure/common/pagination';
 import { TaskQueryFilters } from '../domain/repositories/task.repository';
 import { CurrentUser } from 'src/modules/auth/presentation/decorators/current-user.decorator';
 import type { JwtUser } from 'src/modules/auth/domain/entities/types/jwt-user.type';
+import { WorkspaceMemberGuard } from 'src/infrastructure/authorization/guards/workspace-member.guard';
+import { ResourceOwnerGuard } from 'src/infrastructure/authorization/guards/resource-owner.guard';
+import { CheckOwnership } from 'src/infrastructure/authorization/decorators/check-ownership.decorator';
+import { ResourceType } from 'src/infrastructure/authorization/interfaces/authorization.interfaces';
 
 @Controller('projects/:projectId/tasks')
+@UseGuards(WorkspaceMemberGuard)
 export class TasksController {
   constructor(
     private readonly createTaskUseCase: CreateTaskUseCase,
@@ -118,6 +124,8 @@ export class TasksController {
   }
 
   @Put(':id')
+  @UseGuards(ResourceOwnerGuard)
+  @CheckOwnership({ resourceType: ResourceType.TASK })
   async update(
     @Param('id', new ParseUUIDPipe()) id: string,
     @Body() dto: UpdateTaskDto,
@@ -148,6 +156,8 @@ export class TasksController {
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
+  @UseGuards(ResourceOwnerGuard)
+  @CheckOwnership({ resourceType: ResourceType.TASK })
   async delete(@Param('id', new ParseUUIDPipe()) id: string): Promise<void> {
     await this.deleteTaskUseCase.execute(id);
   }

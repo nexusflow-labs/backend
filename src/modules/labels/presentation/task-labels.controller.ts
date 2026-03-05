@@ -7,13 +7,16 @@ import {
   HttpCode,
   HttpStatus,
   ParseUUIDPipe,
+  UseGuards,
 } from '@nestjs/common';
 import { AddLabelToTaskUseCase } from '../application/use-cases/add-label-to-task.use-case';
 import { RemoveLabelFromTaskUseCase } from '../application/use-cases/remove-label-from-task.use-case';
 import { GetTaskLabelsUseCase } from '../application/use-cases/get-task-labels.use-case';
 import { LabelResponseDto } from './dtos/label.response.dto';
+import { WorkspaceMemberGuard } from 'src/infrastructure/authorization/guards/workspace-member.guard';
 
 @Controller('tasks/:taskId/labels')
+@UseGuards(WorkspaceMemberGuard)
 export class TaskLabelsController {
   constructor(
     private readonly addLabelToTaskUseCase: AddLabelToTaskUseCase,

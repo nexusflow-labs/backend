@@ -1,4 +1,11 @@
-import { Controller, Get, Param, Query, ParseUUIDPipe } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Param,
+  Query,
+  ParseUUIDPipe,
+  UseGuards,
+} from '@nestjs/common';
 import { ListActivitiesUseCase } from '../application/use-cases/list-activities.use-case';
 import {
   ActivityLogQueryDto,
@@ -8,6 +15,7 @@ import { ActivityLogResponseDto } from './dtos/activity-log.response.dto';
 import { EntityType } from '../domain/enums/entity-type.enum';
 import { PaginatedResult } from 'src/infrastructure/common/pagination';
 import { ActivityLogFilters } from '../domain/repositories/activity-log.repository';
+import { WorkspaceMemberGuard } from 'src/infrastructure/authorization/guards/workspace-member.guard';
 
 @Controller('activity-logs')
 export class ActivityLogsController {
@@ -43,6 +51,7 @@ export class ActivityLogsController {
   }
 
   @Get('tasks/:taskId')
+  @UseGuards(WorkspaceMemberGuard)
   async getTaskActivities(
     @Param('taskId', new ParseUUIDPipe()) taskId: string,
     @Query() query: EntityActivityQueryDto,
@@ -65,6 +74,7 @@ export class ActivityLogsController {
   }
 
   @Get('projects/:projectId')
+  @UseGuards(WorkspaceMemberGuard)
   async getProjectActivities(
     @Param('projectId', new ParseUUIDPipe()) projectId: string,
     @Query() query: EntityActivityQueryDto,
@@ -87,6 +97,7 @@ export class ActivityLogsController {
   }
 
   @Get('workspaces/:workspaceId')
+  @UseGuards(WorkspaceMemberGuard)
   async getWorkspaceActivities(
     @Param('workspaceId', new ParseUUIDPipe()) workspaceId: string,
     @Query() query: EntityActivityQueryDto,

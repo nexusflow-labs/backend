@@ -1,4 +1,4 @@
-# 📋 CONTEXT PROMPT CHO NEXUSFLOW PROJECT (Updated: Week 6)
+# 📋 CONTEXT PROMPT CHO NEXUSFLOW PROJECT (Updated: Week 8)
 
 ## 🎯 Tổng quan
 - **Project**: NexusFlow - Nền tảng Quản trị Dự án & Vận hành Doanh nghiệp (SaaS)
@@ -24,6 +24,7 @@ src/
 │   └── dashboard/       # Statistics với caching
 │
 ├── infrastructure/
+│   ├── authorization/   # Guards, Decorators, Services cho RBAC
 │   ├── cache/           # Redis + in-memory fallback
 │   ├── common/          # Filters, Interceptors, Middleware, Pagination
 │   ├── config/          # Environment config
@@ -32,7 +33,7 @@ src/
 └── main.ts
 ```
 
-## ✅ Đã hoàn thành (Tuần 1-6)
+## ✅ Đã hoàn thành (Tuần 1-8)
 
 ### Modules (9 modules):
 | Module | Features | Status |
@@ -48,6 +49,7 @@ src/
 | Dashboard | WorkspaceStatistics với Redis cache | ✓ |
 
 ### Infrastructure:
+- **Authorization**: WorkspaceMemberGuard, RolesGuard, ResourceOwnerGuard
 - **Caching**: Redis (ioredis) + MemoryCache fallback, TTL 300s
 - **Pagination**: Offset + Cursor support, max 100 items
 - **Global Pipes**: ValidationPipe, TransformInterceptor, HttpExceptionFilter
@@ -72,6 +74,68 @@ export abstract class IRepository {
   abstract create(data: CreateData): Promise<Entity>;
   abstract save(entity: Entity): Promise<void>;
 }
+```
+
+### Permission Matrix
+
+| Action | OWNER | ADMIN | MEMBER |
+|--------|:-----:|:-----:|:------:|
+| View workspace/members | ✓ | ✓ | ✓ |
+| Update workspace | ✓ | ✓ | ✗ |
+| Delete workspace | ✓ | ✗ | ✗ |
+| Add/Remove member | ✓ | ✓ | ✗ |
+| Update member role | ✓ | ✓* | ✗ |
+| Create project | ✓ | ✓ | ✓ |
+| Update/Delete ANY project | ✓ | ✓ | ✗ |
+| Update/Delete OWN project | ✓ | ✓ | ✓ |
+| Create task | ✓ | ✓ | ✓ |
+| Update/Delete ANY task | ✓ | ✓ | ✗ |
+| Update/Delete OWN task | ✓ | ✓ | ✓ |
+| Create/Update/Delete label | ✓ | ✓ | ✗ |
+| Attach/Detach label to task | ✓ | ✓ | ✓ |
+| Create comment | ✓ | ✓ | ✓ |
+| Update/Delete OWN comment | ✓ | ✓ | ✓ |
+| View dashboard | ✓ | ✓ | ✓ |
+
+*ADMIN cannot change OWNER role
+
+### Usage in Controllers
+```typescript
+// Chỉ cho phép members của workspace
+@Controller('workspaces/:workspaceId/projects')
+@UseGuards(WorkspaceMemberGuard)
+export class ProjectsController {
+
+  // Tất cả members đều tạo được project
+  @Post()
+  async create() { ... }
+
+  // OWNER/ADMIN hoặc owner của project mới được sửa
+  @Put(':id')
+  @UseGuards(ResourceOwnerGuard)
+  @CheckOwnership({ resourceType: ResourceType.PROJECT })
+  async update() { ... }
+}
+
+// Chỉ cho phép OWNER/ADMIN
+@Controller('workspaces/:workspaceId/members')
+@UseGuards(WorkspaceMemberGuard, RolesGuard)
+export class MemberController {
+
+  @Post()
+  @Roles(MemberRole.OWNER, MemberRole.ADMIN)
+  async addMember() { ... }
+}
+```
+
+### Guard Flow
+```
+Request → JwtAuthGuard → WorkspaceMemberGuard → RolesGuard → ResourceOwnerGuard → Controller
+              │                   │                  │                │
+              │                   │                  │                └── Check ownership
+              │                   │                  └── Check role requirements
+              │                   └── Check membership, attach WorkspaceContext
+              └── Verify JWT, attach user to request
 ```
 
 ## 📊 Database Schema (Prisma)
@@ -151,10 +215,10 @@ GET    /workspaces/:workspaceId/dashboard
 
 ## ⚠️ Known Issues / Tech Debt
 
-1. ~~**API public** JwtAuthGuard applied globally
+1. ~~**API public**~~ ✅ JwtAuthGuard applied globally
 2. **ActivityLog** - Service có nhưng chưa auto-log khi CRUD
 3. **Invitation** - Model có nhưng chưa có accept/reject endpoints
-4. **ThrottlerModule** - Chưa configure (auth endpoints có @Throttle decorator nhưng chưa hoạt động)
+4. ~~**ThrottlerModule**~~ ✅ Configured with default 60 requests/minute
 
 ## 📊 SO SÁNH VỚI SAAS CHUẨN
 
@@ -169,8 +233,8 @@ GET    /workspaces/:workspaceId/dashboard
 | 2FA/MFA | ❌ | ✓ | 🟢 Low |
 | **AUTHORIZATION** ||||
 | Auth Guard | ✓ | ✓ | - |
-| Role-based (RBAC) | ⚠️ Roles defined | ✓ | 🔴 Critical |
-| Resource Access Control | ❌ | ✓ | 🔴 Critical |
+| Role-based (RBAC) | ✓ | ✓ | - |
+| Resource Access Control | ✓ | ✓ | - |
 | **CORE FEATURES** ||||
 | Multi-tenancy | ✓ Workspace | ✓ | - |
 | Project Management | ✓ | ✓ | - |
@@ -187,7 +251,7 @@ GET    /workspaces/:workspaceId/dashboard
 | **CACHING & PERFORMANCE** ||||
 | Redis Cache | ✓ | ✓ | - |
 | Cache Invalidation | ✓ | ✓ | - |
-| Rate Limiting | ❌ | ✓ | 🟡 Medium |
+| Rate Limiting | ✓ | ✓ | - |
 | **AUDIT & LOGGING** ||||
 | Activity Logging | ⚠️ Not integrated | ✓ | 🟡 Medium |
 | Request Logging | ✓ | ✓ | - |
@@ -221,21 +285,23 @@ GET    /workspaces/:workspaceId/dashboard
 
 ## 🔄 ROADMAP CẬP NHẬT
 
-### Tuần 7: Authentication & Security (CRITICAL)
+### Tuần 7: Authentication & Security (CRITICAL) ✅
 ```
 [x] JwtAuthGuard + apply globally
 [x] @CurrentUser() decorator
 [x] Refresh Token mechanism (issue, refresh, revoke)
 [x] Argon2 password hashing (replace bcrypt)
-[ ] Rate limiting (@nestjs/throttler) - decorator added, module not configured
+[x] Rate limiting (@nestjs/throttler) - 60 requests/minute default
 ```
 
-### Tuần 8: Authorization (CRITICAL)
+### Tuần 8: Authorization (CRITICAL) ✅
 ```
-[ ] WorkspaceMemberGuard (check membership)
-[ ] @Roles() decorator + RolesGuard
-[ ] Resource ownership validation
-[ ] Project access control
+[x] WorkspaceMemberGuard (check membership)
+[x] @Roles() decorator + RolesGuard
+[x] ResourceOwnerGuard (ownership validation)
+[x] @CheckOwnership() decorator
+[x] ResourceResolverService (resolve workspaceId from projectId/taskId)
+[x] Project/Task/Comment access control
 ```
 
 ### Tuần 9: Activity & Notifications
