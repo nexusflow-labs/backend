@@ -1,6 +1,8 @@
 import { Module } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { ActivityLogsModule } from '../activity-logs/activity-logs.module';
 import { ActivityLogService } from '../activity-logs/application/services/activity-log.service';
+import { IEmailService } from 'src/infrastructure/email/interfaces/email.interface';
 import { IInvitationRepository } from './domain/repositories/invitation.repository';
 import { PrismaInvitationRepository } from './infrastructure/persistence/prisma-invitation.repository';
 import { InvitationController } from './presentation/invitations.controller';
@@ -30,19 +32,28 @@ import { AuthModule } from '../auth/auth.module';
         IMemberRepository,
         IWorkspaceRepository,
         IInvitationRepository,
+        IUserRepository,
         ActivityLogService,
+        IEmailService,
+        ConfigService,
       ],
       useFactory: (
         memberRepo: IMemberRepository,
         workspaceRepo: IWorkspaceRepository,
         invitationRepo: IInvitationRepository,
+        userRepo: IUserRepository,
         activityLogService: ActivityLogService,
+        emailService: IEmailService,
+        configService: ConfigService,
       ) =>
         new CreateInvitationUseCase(
           invitationRepo,
           workspaceRepo,
           memberRepo,
+          userRepo,
           activityLogService,
+          emailService,
+          configService,
         ),
     },
     {
@@ -73,7 +84,12 @@ import { AuthModule } from '../auth/auth.module';
         invitationRepo: IInvitationRepository,
         userRepo: IUserRepository,
         activityLogService: ActivityLogService,
-      ) => new RejectInvitationUseCase(invitationRepo, userRepo, activityLogService),
+      ) =>
+        new RejectInvitationUseCase(
+          invitationRepo,
+          userRepo,
+          activityLogService,
+        ),
     },
     {
       provide: ListInvitationsUseCase,

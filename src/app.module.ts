@@ -9,7 +9,9 @@ import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { ConfigService } from '@nestjs/config';
 import { JwtAuthGuard } from './modules/auth/infrastructure/guards/jwt-auth.guard';
 import { ConfigModule } from './infrastructure/config/config.module';
+import { PrismaModule } from './infrastructure/prisma/prisma.module';
 import { CacheModule } from './infrastructure/cache/cache.module';
+import { EmailModule } from './infrastructure/email/email.module';
 import { AuthorizationModule } from './infrastructure/authorization/authorization.module';
 import { WorkspacesModule } from './modules/workspaces/workspaces.module';
 import { LoggerMiddleware } from './infrastructure/common/middlewares/logger.middleware';
@@ -28,6 +30,8 @@ import { InvitationModule } from './modules/invitations/invitations.module';
 @Module({
   imports: [
     ConfigModule,
+    PrismaModule,
+    EmailModule,
     ThrottlerModule.forRootAsync({
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({
@@ -54,7 +58,6 @@ import { InvitationModule } from './modules/invitations/invitations.module';
     InvitationModule,
   ],
   providers: [
-    // Guards execute in order: ThrottlerGuard -> JwtAuthGuard
     {
       provide: APP_GUARD,
       useClass: ThrottlerGuard,

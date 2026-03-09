@@ -1,25 +1,34 @@
 import {
   Injectable,
+  Logger,
   NotFoundException,
   ForbiddenException,
 } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { randomBytes } from 'crypto';
 import { IInvitationRepository } from '../../domain/repositories/invitation.repository';
 import { IWorkspaceRepository } from 'src/modules/workspaces/domain/repositories/workspaces.repository';
 import { IMemberRepository } from 'src/modules/members/domain/repositories/member.repository';
+import { IUserRepository } from 'src/modules/auth/domain/repositories/user.repository';
 import { MemberRole } from 'src/modules/members/domain/entities/member.entity';
 import { InvitationStatus } from '../../domain/enum/invitation.enum';
 import { ActivityLogService } from 'src/modules/activity-logs/application/services/activity-log.service';
 import { EntityType } from 'src/modules/activity-logs/domain/enums/entity-type.enum';
 import { Invitation } from '../../domain/entities/invitation.entity';
+import { IEmailService } from 'src/infrastructure/email/interfaces/email.interface';
 
 @Injectable()
 export class CreateInvitationUseCase {
+  private readonly logger = new Logger(CreateInvitationUseCase.name);
+
   constructor(
     private readonly invitationRepository: IInvitationRepository,
     private readonly workspaceRepository: IWorkspaceRepository,
     private readonly memberRepository: IMemberRepository,
+    private readonly userRepository: IUserRepository,
     private readonly activityLogService: ActivityLogService,
+    private readonly emailService: IEmailService,
+    private readonly configService: ConfigService,
   ) {}
 
   async execute(
@@ -70,6 +79,46 @@ export class CreateInvitationUseCase {
       },
     );
 
+    // Send invitation email
+    await this.sendInvitationEmail(
+      email,
+      inviterId,
+      workspace.name,
+      invitation.token,
+      invitation.expiresAt,
+    );
+
     return invitation;
+  }
+
+  private async sendInvitationEmail(
+    recipientEmail: string,
+    inviterId: string,
+    workspaceName: string,
+    token: string,
+    expiresAt: Date,
+  ): Promise<void> {
+    try {
+      const inviter = await this.userRepository.findById(inviterId);
+      const inviterName = inviter?.name || 'A team member';
+
+      const frontendUrl = this.configService.get<string>('FRONTEND_URL');
+      const inviteLink = `${frontendUrl}/invitations/accept?token=${token}`;
+
+      await this.emailService.sendInvitation(recipientEmail, {
+        inviterName,
+        workspaceName,
+        inviteLink,
+        expiresAt,
+      });
+
+      this.logger.log(`Invitation email sent to ${recipientEmail}`);
+    } catch (error) {
+      // Log the error but don't fail the invitation creation
+      this.logger.error(
+        `Failed to send invitation email to ${recipientEmail}: ${error.message}`,
+        error.stack,
+      );
+    }
   }
 }
