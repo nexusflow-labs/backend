@@ -129,16 +129,21 @@ export class TasksController {
   async update(
     @Param('id', new ParseUUIDPipe()) id: string,
     @Body() dto: UpdateTaskDto,
+    @CurrentUser() user: JwtUser,
   ): Promise<TaskResponseDto> {
-    const task = await this.updateTaskUseCase.execute(id, {
-      ...dto,
-      dueDate:
-        dto.dueDate === null
-          ? null
-          : dto.dueDate
-            ? new Date(dto.dueDate)
-            : undefined,
-    });
+    const task = await this.updateTaskUseCase.execute(
+      id,
+      {
+        ...dto,
+        dueDate:
+          dto.dueDate === null
+            ? null
+            : dto.dueDate
+              ? new Date(dto.dueDate)
+              : undefined,
+      },
+      user.id,
+    );
     return TaskResponseDto.fromEntity(task);
   }
 
@@ -146,10 +151,12 @@ export class TasksController {
   async assign(
     @Param('id', new ParseUUIDPipe()) id: string,
     @Body() dto: AssignTaskDto,
+    @CurrentUser() user: JwtUser,
   ): Promise<TaskResponseDto> {
     const task = await this.assignTaskUseCase.execute(
       id,
       dto.assigneeId ?? null,
+      user.id,
     );
     return TaskResponseDto.fromEntity(task);
   }
@@ -158,7 +165,10 @@ export class TasksController {
   @HttpCode(HttpStatus.NO_CONTENT)
   @UseGuards(ResourceOwnerGuard)
   @CheckOwnership({ resourceType: ResourceType.TASK })
-  async delete(@Param('id', new ParseUUIDPipe()) id: string): Promise<void> {
-    await this.deleteTaskUseCase.execute(id);
+  async delete(
+    @Param('id', new ParseUUIDPipe()) id: string,
+    @CurrentUser() user: JwtUser,
+  ): Promise<void> {
+    await this.deleteTaskUseCase.execute(id, user.id);
   }
 }

@@ -85,8 +85,13 @@ export class CommentsController {
   async update(
     @Param('id', new ParseUUIDPipe()) id: string,
     @Body() dto: UpdateCommentDto,
+    @CurrentUser() user: JwtUser,
   ): Promise<CommentResponseDto> {
-    const comment = await this.updateCommentUseCase.execute(id, dto.content);
+    const comment = await this.updateCommentUseCase.execute(
+      id,
+      dto.content,
+      user.id,
+    );
     return CommentResponseDto.fromEntity(comment);
   }
 
@@ -94,7 +99,10 @@ export class CommentsController {
   @HttpCode(HttpStatus.NO_CONTENT)
   @UseGuards(ResourceOwnerGuard)
   @CheckOwnership({ resourceType: ResourceType.COMMENT })
-  async delete(@Param('id', new ParseUUIDPipe()) id: string): Promise<void> {
-    await this.deleteCommentUseCase.execute(id);
+  async delete(
+    @Param('id', new ParseUUIDPipe()) id: string,
+    @CurrentUser() user: JwtUser,
+  ): Promise<void> {
+    await this.deleteCommentUseCase.execute(id, user.id);
   }
 }

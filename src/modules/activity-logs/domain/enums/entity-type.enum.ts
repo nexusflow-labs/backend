@@ -4,4 +4,6 @@ export enum EntityType {
   TASK = 'TASK',
   MEMBER = 'MEMBER',
   COMMENT = 'COMMENT',
+  LABEL = 'LABEL',
+  INVITATION = 'INVITATION',
 }

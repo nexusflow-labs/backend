@@ -6,8 +6,11 @@ import { RemoveMemberUseCase } from './application/use-cases/remove-member.use-c
 import { GetWorkspaceMembersUseCase } from './application/use-cases/get-workspace-members.use-case';
 import { IMemberRepository } from './domain/repositories/member.repository';
 import { PrismaMemberRepository } from './infrastructure/persistence/prisma-member.repository';
+import { ActivityLogsModule } from '../activity-logs/activity-logs.module';
+import { ActivityLogService } from '../activity-logs/application/services/activity-log.service';
 
 @Module({
+  imports: [ActivityLogsModule],
   controllers: [MemberController],
   providers: [
     {
@@ -16,19 +19,27 @@ import { PrismaMemberRepository } from './infrastructure/persistence/prisma-memb
     },
     {
       provide: AddMemberUseCase,
-      inject: [IMemberRepository],
-      useFactory: (repo: IMemberRepository) => new AddMemberUseCase(repo),
+      inject: [IMemberRepository, ActivityLogService],
+      useFactory: (
+        repo: IMemberRepository,
+        activityLogService: ActivityLogService,
+      ) => new AddMemberUseCase(repo, activityLogService),
     },
     {
       provide: UpdateMemberRoleUseCase,
-      inject: [IMemberRepository],
-      useFactory: (repo: IMemberRepository) =>
-        new UpdateMemberRoleUseCase(repo),
+      inject: [IMemberRepository, ActivityLogService],
+      useFactory: (
+        repo: IMemberRepository,
+        activityLogService: ActivityLogService,
+      ) => new UpdateMemberRoleUseCase(repo, activityLogService),
     },
     {
       provide: RemoveMemberUseCase,
-      inject: [IMemberRepository],
-      useFactory: (repo: IMemberRepository) => new RemoveMemberUseCase(repo),
+      inject: [IMemberRepository, ActivityLogService],
+      useFactory: (
+        repo: IMemberRepository,
+        activityLogService: ActivityLogService,
+      ) => new RemoveMemberUseCase(repo, activityLogService),
     },
     {
       provide: GetWorkspaceMembersUseCase,
@@ -37,5 +48,6 @@ import { PrismaMemberRepository } from './infrastructure/persistence/prisma-memb
         new GetWorkspaceMembersUseCase(repo),
     },
   ],
+  exports: [IMemberRepository],
 })
 export class MemberModule {}

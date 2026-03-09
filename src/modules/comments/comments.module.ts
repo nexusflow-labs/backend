@@ -7,9 +7,12 @@ import { ListCommentsUseCase } from './application/use-cases/list-comments.use-c
 import { UpdateCommentUseCase } from './application/use-cases/update-comment.use-case';
 import { DeleteCommentUseCase } from './application/use-cases/delete-comment.use-case';
 import { ITaskRepository } from '../tasks/domain/repositories/task.repository';
-import { PrismaTaskRepository } from '../tasks/infrastructure/persistence/prisma-task.repository';
+import { TasksModule } from '../tasks/tasks.module';
+import { ActivityLogsModule } from '../activity-logs/activity-logs.module';
+import { ActivityLogService } from '../activity-logs/application/services/activity-log.service';
 
 @Module({
+  imports: [ActivityLogsModule, TasksModule],
   controllers: [CommentsController],
   providers: [
     {
@@ -17,16 +20,13 @@ import { PrismaTaskRepository } from '../tasks/infrastructure/persistence/prisma
       useClass: PrismaCommentRepository,
     },
     {
-      provide: ITaskRepository,
-      useClass: PrismaTaskRepository,
-    },
-    {
       provide: CreateCommentUseCase,
-      inject: [ICommentRepository, ITaskRepository],
+      inject: [ICommentRepository, ITaskRepository, ActivityLogService],
       useFactory: (
         commentRepo: ICommentRepository,
         taskRepo: ITaskRepository,
-      ) => new CreateCommentUseCase(commentRepo, taskRepo),
+        activityLogService: ActivityLogService,
+      ) => new CreateCommentUseCase(commentRepo, taskRepo, activityLogService),
     },
     {
       provide: ListCommentsUseCase,
@@ -38,13 +38,19 @@ import { PrismaTaskRepository } from '../tasks/infrastructure/persistence/prisma
     },
     {
       provide: UpdateCommentUseCase,
-      inject: [ICommentRepository],
-      useFactory: (repo: ICommentRepository) => new UpdateCommentUseCase(repo),
+      inject: [ICommentRepository, ActivityLogService],
+      useFactory: (
+        repo: ICommentRepository,
+        activityLogService: ActivityLogService,
+      ) => new UpdateCommentUseCase(repo, activityLogService),
     },
     {
       provide: DeleteCommentUseCase,
-      inject: [ICommentRepository],
-      useFactory: (repo: ICommentRepository) => new DeleteCommentUseCase(repo),
+      inject: [ICommentRepository, ActivityLogService],
+      useFactory: (
+        repo: ICommentRepository,
+        activityLogService: ActivityLogService,
+      ) => new DeleteCommentUseCase(repo, activityLogService),
     },
   ],
   exports: [ICommentRepository],

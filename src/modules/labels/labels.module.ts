@@ -11,11 +11,14 @@ import { AddLabelToTaskUseCase } from './application/use-cases/add-label-to-task
 import { RemoveLabelFromTaskUseCase } from './application/use-cases/remove-label-from-task.use-case';
 import { GetTaskLabelsUseCase } from './application/use-cases/get-task-labels.use-case';
 import { ITaskRepository } from '../tasks/domain/repositories/task.repository';
-import { PrismaTaskRepository } from '../tasks/infrastructure/persistence/prisma-task.repository';
+import { TasksModule } from '../tasks/tasks.module';
 import { IProjectRepository } from '../projects/domain/repositories/project.repository';
-import { PrismaProjectRepository } from '../projects/infrastructure/persistence/prisma-project.repository';
+import { ProjectsModule } from '../projects/projects.module';
+import { ActivityLogsModule } from '../activity-logs/activity-logs.module';
+import { ActivityLogService } from '../activity-logs/application/services/activity-log.service';
 
 @Module({
+  imports: [ActivityLogsModule, TasksModule, ProjectsModule],
   controllers: [LabelsController, TaskLabelsController],
   providers: [
     {
@@ -23,17 +26,12 @@ import { PrismaProjectRepository } from '../projects/infrastructure/persistence/
       useClass: PrismaLabelRepository,
     },
     {
-      provide: ITaskRepository,
-      useClass: PrismaTaskRepository,
-    },
-    {
-      provide: IProjectRepository,
-      useClass: PrismaProjectRepository,
-    },
-    {
       provide: CreateLabelUseCase,
-      inject: [ILabelRepository],
-      useFactory: (repo: ILabelRepository) => new CreateLabelUseCase(repo),
+      inject: [ILabelRepository, ActivityLogService],
+      useFactory: (
+        repo: ILabelRepository,
+        activityLogService: ActivityLogService,
+      ) => new CreateLabelUseCase(repo, activityLogService),
     },
     {
       provide: ListLabelsUseCase,
@@ -42,28 +40,50 @@ import { PrismaProjectRepository } from '../projects/infrastructure/persistence/
     },
     {
       provide: UpdateLabelUseCase,
-      inject: [ILabelRepository],
-      useFactory: (repo: ILabelRepository) => new UpdateLabelUseCase(repo),
+      inject: [ILabelRepository, ActivityLogService],
+      useFactory: (
+        repo: ILabelRepository,
+        activityLogService: ActivityLogService,
+      ) => new UpdateLabelUseCase(repo, activityLogService),
     },
     {
       provide: DeleteLabelUseCase,
-      inject: [ILabelRepository],
-      useFactory: (repo: ILabelRepository) => new DeleteLabelUseCase(repo),
+      inject: [ILabelRepository, ActivityLogService],
+      useFactory: (
+        repo: ILabelRepository,
+        activityLogService: ActivityLogService,
+      ) => new DeleteLabelUseCase(repo, activityLogService),
     },
     {
       provide: AddLabelToTaskUseCase,
-      inject: [ILabelRepository, ITaskRepository, IProjectRepository],
+      inject: [
+        ILabelRepository,
+        ITaskRepository,
+        IProjectRepository,
+        ActivityLogService,
+      ],
       useFactory: (
         labelRepo: ILabelRepository,
         taskRepo: ITaskRepository,
         projectRepo: IProjectRepository,
-      ) => new AddLabelToTaskUseCase(labelRepo, taskRepo, projectRepo),
+        activityLogService: ActivityLogService,
+      ) =>
+        new AddLabelToTaskUseCase(
+          labelRepo,
+          taskRepo,
+          projectRepo,
+          activityLogService,
+        ),
     },
     {
       provide: RemoveLabelFromTaskUseCase,
-      inject: [ILabelRepository, ITaskRepository],
-      useFactory: (labelRepo: ILabelRepository, taskRepo: ITaskRepository) =>
-        new RemoveLabelFromTaskUseCase(labelRepo, taskRepo),
+      inject: [ILabelRepository, ITaskRepository, ActivityLogService],
+      useFactory: (
+        labelRepo: ILabelRepository,
+        taskRepo: ITaskRepository,
+        activityLogService: ActivityLogService,
+      ) =>
+        new RemoveLabelFromTaskUseCase(labelRepo, taskRepo, activityLogService),
     },
     {
       provide: GetTaskLabelsUseCase,

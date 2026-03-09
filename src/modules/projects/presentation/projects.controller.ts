@@ -103,8 +103,9 @@ export class ProjectsController {
   async update(
     @Param('id', new ParseUUIDPipe()) id: string,
     @Body() dto: UpdateProjectDto,
+    @CurrentUser() user: JwtUser,
   ): Promise<ProjectResponseDto> {
-    const project = await this.updateProjectUseCase.execute(id, dto);
+    const project = await this.updateProjectUseCase.execute(id, dto, user.id);
     return ProjectResponseDto.fromEntity(project);
   }
 
@@ -112,7 +113,10 @@ export class ProjectsController {
   @HttpCode(HttpStatus.NO_CONTENT)
   @UseGuards(ResourceOwnerGuard)
   @CheckOwnership({ resourceType: ResourceType.PROJECT })
-  async delete(@Param('id', new ParseUUIDPipe()) id: string): Promise<void> {
-    await this.deleteProjectUseCase.execute(id);
+  async delete(
+    @Param('id', new ParseUUIDPipe()) id: string,
+    @CurrentUser() user: JwtUser,
+  ): Promise<void> {
+    await this.deleteProjectUseCase.execute(id, user.id);
   }
 }

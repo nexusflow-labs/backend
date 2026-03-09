@@ -1,6 +1,8 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { Project, ProjectStatus } from '../../domain/entities/project.entity';
 import { IProjectRepository } from '../../domain/repositories/project.repository';
+import { ActivityLogService } from 'src/modules/activity-logs/application/services/activity-log.service';
+import { EntityType } from 'src/modules/activity-logs/domain/enums/entity-type.enum';
 
 export interface UpdateProjectInput {
   name?: string;
@@ -10,28 +12,53 @@ export interface UpdateProjectInput {
 
 @Injectable()
 export class UpdateProjectUseCase {
-  constructor(private readonly projectRepository: IProjectRepository) {}
+  constructor(
+    private readonly projectRepository: IProjectRepository,
+    private readonly activityLogService: ActivityLogService,
+  ) {}
 
-  async execute(id: string, input: UpdateProjectInput): Promise<Project> {
+  async execute(
+    id: string,
+    input: UpdateProjectInput,
+    userId: string,
+  ): Promise<Project> {
     const project = await this.projectRepository.findById(id);
 
     if (!project) {
       throw new NotFoundException('Project not found');
     }
 
-    if (input.name !== undefined) {
+    const changes: Record<string, { old: unknown; new: unknown }> = {};
+
+    if (input.name !== undefined && input.name !== project.name) {
+      changes.name = { old: project.name, new: input.name };
       project.updateName(input.name);
     }
 
-    if (input.description !== undefined) {
+    if (
+      input.description !== undefined &&
+      input.description !== project.description
+    ) {
+      changes.description = {
+        old: project.description,
+        new: input.description,
+      };
       project.updateDescription(input.description);
     }
 
-    if (input.status !== undefined) {
+    if (input.status !== undefined && input.status !== project.status) {
+      changes.status = { old: project.status, new: input.status };
       project.updateStatus(input.status);
     }
 
     await this.projectRepository.save(project);
+
+    if (Object.keys(changes).length > 0) {
+      await this.activityLogService.logUpdate(EntityType.PROJECT, id, userId, {
+        changes,
+      });
+    }
+
     return project;
   }
 }

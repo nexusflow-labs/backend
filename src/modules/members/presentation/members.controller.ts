@@ -20,6 +20,8 @@ import { WorkspaceMemberGuard } from 'src/infrastructure/authorization/guards/wo
 import { RolesGuard } from 'src/infrastructure/authorization/guards/roles.guard';
 import { Roles } from 'src/infrastructure/authorization/decorators/roles.decorator';
 import { MemberRole } from '../domain/entities/member.entity';
+import { CurrentUser } from 'src/modules/auth/presentation/decorators/current-user.decorator';
+import type { JwtUser } from 'src/modules/auth/domain/entities/types/jwt-user.type';
 
 @Controller('workspaces/:workspaceId/members')
 @UseGuards(WorkspaceMemberGuard, RolesGuard)
@@ -42,11 +44,13 @@ export class MemberController {
   async addMember(
     @Param('workspaceId') workspaceId: string,
     @Body() dto: AddMemberDto,
+    @CurrentUser() user: JwtUser,
   ) {
     return await this.addMemberUseCase.execute(
       workspaceId,
       dto.userId,
       dto.role,
+      user.id,
     );
   }
 
@@ -56,11 +60,12 @@ export class MemberController {
     @Param('workspaceId') workspaceId: string,
     @Param('targetId') targetId: string,
     @Body() dto: UpdateMemberRoleDto,
+    @CurrentUser() user: JwtUser,
   ) {
     return await this.updateMemberRoleUseCase.execute(
       workspaceId,
+      user.id,
       targetId,
-      dto.operationId,
       dto.newRole,
     );
   }
@@ -71,11 +76,11 @@ export class MemberController {
   async removeMember(
     @Param('workspaceId') workspaceId: string,
     @Param('targetId') targetId: string,
-    @Body('operationId') operationId: string,
+    @CurrentUser() user: JwtUser,
   ) {
     return await this.removeMemberUseCase.execute(
       workspaceId,
-      operationId,
+      user.id,
       targetId,
     );
   }

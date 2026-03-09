@@ -84,5 +84,6 @@ import { JwtStrategy } from './strategies/jwt.strategy';
 
     JwtStrategy,
   ],
+  exports: [IUserRepository],
 })
 export class AuthModule {}

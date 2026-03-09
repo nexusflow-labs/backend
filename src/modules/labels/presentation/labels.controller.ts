@@ -21,6 +21,8 @@ import { WorkspaceMemberGuard } from 'src/infrastructure/authorization/guards/wo
 import { RolesGuard } from 'src/infrastructure/authorization/guards/roles.guard';
 import { Roles } from 'src/infrastructure/authorization/decorators/roles.decorator';
 import { MemberRole } from 'src/modules/members/domain/entities/member.entity';
+import { CurrentUser } from 'src/modules/auth/presentation/decorators/current-user.decorator';
+import type { JwtUser } from 'src/modules/auth/domain/entities/types/jwt-user.type';
 
 @Controller('workspaces/:workspaceId/labels')
 @UseGuards(WorkspaceMemberGuard, RolesGuard)
@@ -46,10 +48,12 @@ export class LabelsController {
   async create(
     @Param('workspaceId', new ParseUUIDPipe()) workspaceId: string,
     @Body() dto: CreateLabelDto,
+    @CurrentUser() user: JwtUser,
   ): Promise<LabelResponseDto> {
     const label = await this.createLabelUseCase.execute(
       dto.name,
       workspaceId,
+      user.id,
       dto.color,
     );
     return LabelResponseDto.fromEntity(label);
@@ -60,15 +64,19 @@ export class LabelsController {
   async update(
     @Param('id', new ParseUUIDPipe()) id: string,
     @Body() dto: UpdateLabelDto,
+    @CurrentUser() user: JwtUser,
   ): Promise<LabelResponseDto> {
-    const label = await this.updateLabelUseCase.execute(id, dto);
+    const label = await this.updateLabelUseCase.execute(id, dto, user.id);
     return LabelResponseDto.fromEntity(label);
   }
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
   @Roles(MemberRole.OWNER, MemberRole.ADMIN)
-  async delete(@Param('id', new ParseUUIDPipe()) id: string): Promise<void> {
-    await this.deleteLabelUseCase.execute(id);
+  async delete(
+    @Param('id', new ParseUUIDPipe()) id: string,
+    @CurrentUser() user: JwtUser,
+  ): Promise<void> {
+    await this.deleteLabelUseCase.execute(id, user.id);
   }
 }

@@ -45,7 +45,7 @@ src/
 | Tasks | CRUD, Assign, Subtasks, 8+ filters, Sorting | ✓ |
 | Comments | CRUD với author info | ✓ |
 | Labels | CRUD, AddToTask, RemoveFromTask | ✓ |
-| Activity Logs | Service + ListActivities (chưa auto-integrate) | ⚠️ |
+| Activity Logs | Service + ListActivities + Auto-log all CRUD operations | ✓ |
 | Dashboard | WorkspaceStatistics với Redis cache | ✓ |
 
 ### Infrastructure:
@@ -213,13 +213,6 @@ GET    /workspaces/:workspaceId/activities
 GET    /workspaces/:workspaceId/dashboard
 ```
 
-## ⚠️ Known Issues / Tech Debt
-
-1. ~~**API public**~~ ✅ JwtAuthGuard applied globally
-2. **ActivityLog** - Service có nhưng chưa auto-log khi CRUD
-3. **Invitation** - Model có nhưng chưa có accept/reject endpoints
-4. ~~**ThrottlerModule**~~ ✅ Configured with default 60 requests/minute
-
 ## 📊 SO SÁNH VỚI SAAS CHUẨN
 
 | Feature | NexusFlow | SaaS Chuẩn | Priority |
@@ -253,7 +246,7 @@ GET    /workspaces/:workspaceId/dashboard
 | Cache Invalidation | ✓ | ✓ | - |
 | Rate Limiting | ✓ | ✓ | - |
 | **AUDIT & LOGGING** ||||
-| Activity Logging | ⚠️ Not integrated | ✓ | 🟡 Medium |
+| Activity Logging | ✓ | ✓ | - |
 | Request Logging | ✓ | ✓ | - |
 | Error Tracking | ⚠️ Basic | ✓ Sentry | 🟢 Low |
 | **NOTIFICATIONS** ||||
@@ -306,8 +299,8 @@ GET    /workspaces/:workspaceId/dashboard
 
 ### Tuần 9: Activity & Notifications
 ```
-[ ] Integrate ActivityLogService vào tất cả use-cases
-[ ] Invitation accept/reject endpoints
+[x] Integrate ActivityLogService vào tất cả use-cases
+[x] Invitation accept/reject endpoints
 [ ] Email service (nodemailer/SendGrid)
 [ ] Basic email templates (invite, password reset)
 ```

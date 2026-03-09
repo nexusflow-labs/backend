@@ -6,10 +6,15 @@ import {
 } from '@nestjs/common';
 import { IMemberRepository } from '../../domain/repositories/member.repository';
 import { MemberRole } from '../../domain/entities/member.entity';
+import { ActivityLogService } from 'src/modules/activity-logs/application/services/activity-log.service';
+import { EntityType } from 'src/modules/activity-logs/domain/enums/entity-type.enum';
 
 @Injectable()
 export class UpdateMemberRoleUseCase {
-  constructor(private readonly memberRepository: IMemberRepository) {}
+  constructor(
+    private readonly memberRepository: IMemberRepository,
+    private readonly activityLogService: ActivityLogService,
+  ) {}
 
   async execute(
     workspaceId: string,
@@ -52,6 +57,14 @@ export class UpdateMemberRoleUseCase {
       }
     }
 
+    const oldRole = targetMember.role;
     await this.memberRepository.updateRole(targetMember.id, newRole);
+
+    await this.activityLogService.logUpdate(
+      EntityType.MEMBER,
+      targetMember.id,
+      operatorId,
+      { workspaceId, targetUserId, oldRole, newRole },
+    );
   }
 }

@@ -7,8 +7,11 @@ import { GetWorkspaceUseCase } from './application/use-cases/get-workspace.use-c
 import { UpdateWorkspaceUseCase } from './application/use-cases/update-workspace.use-case';
 import { RemoveWorkspaceUseCase } from './application/use-cases/remove-workspace.use-case';
 import { PrismaWorkspaceRepository } from './infrastructure/persistence/prisma-workspace.repository';
+import { ActivityLogsModule } from '../activity-logs/activity-logs.module';
+import { ActivityLogService } from '../activity-logs/application/services/activity-log.service';
 
 @Module({
+  imports: [ActivityLogsModule],
   controllers: [WorkspacesController],
   providers: [
     {
@@ -17,9 +20,11 @@ import { PrismaWorkspaceRepository } from './infrastructure/persistence/prisma-w
     },
     {
       provide: CreateWorkspaceUseCase,
-      inject: [IWorkspaceRepository],
-      useFactory: (repo: IWorkspaceRepository) =>
-        new CreateWorkspaceUseCase(repo),
+      inject: [IWorkspaceRepository, ActivityLogService],
+      useFactory: (
+        repo: IWorkspaceRepository,
+        activityLogService: ActivityLogService,
+      ) => new CreateWorkspaceUseCase(repo, activityLogService),
     },
     {
       provide: ListWorkspacesUseCase,
@@ -34,15 +39,19 @@ import { PrismaWorkspaceRepository } from './infrastructure/persistence/prisma-w
     },
     {
       provide: UpdateWorkspaceUseCase,
-      inject: [IWorkspaceRepository],
-      useFactory: (repo: IWorkspaceRepository) =>
-        new UpdateWorkspaceUseCase(repo),
+      inject: [IWorkspaceRepository, ActivityLogService],
+      useFactory: (
+        repo: IWorkspaceRepository,
+        activityLogService: ActivityLogService,
+      ) => new UpdateWorkspaceUseCase(repo, activityLogService),
     },
     {
       provide: RemoveWorkspaceUseCase,
-      inject: [IWorkspaceRepository],
-      useFactory: (repo: IWorkspaceRepository) =>
-        new RemoveWorkspaceUseCase(repo),
+      inject: [IWorkspaceRepository, ActivityLogService],
+      useFactory: (
+        repo: IWorkspaceRepository,
+        activityLogService: ActivityLogService,
+      ) => new RemoveWorkspaceUseCase(repo, activityLogService),
     },
   ],
   exports: [IWorkspaceRepository],

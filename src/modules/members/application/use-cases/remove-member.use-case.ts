@@ -5,10 +5,15 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { IMemberRepository } from '../../domain/repositories/member.repository';
+import { ActivityLogService } from 'src/modules/activity-logs/application/services/activity-log.service';
+import { EntityType } from 'src/modules/activity-logs/domain/enums/entity-type.enum';
 
 @Injectable()
 export class RemoveMemberUseCase {
-  constructor(private readonly memberRepository: IMemberRepository) {}
+  constructor(
+    private readonly memberRepository: IMemberRepository,
+    private readonly activityLogService: ActivityLogService,
+  ) {}
 
   async execute(
     workspaceId: string,
@@ -51,6 +56,16 @@ export class RemoveMemberUseCase {
       }
     }
 
+    const memberId = target.id;
+    const role = target.role;
+
     await this.memberRepository.removeMember(workspaceId, targetUserId);
+
+    await this.activityLogService.logDelete(
+      EntityType.MEMBER,
+      memberId,
+      operatorId,
+      { workspaceId, targetUserId, role },
+    );
   }
 }

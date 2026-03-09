@@ -2,12 +2,15 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { Project } from '../../domain/entities/project.entity';
 import { IProjectRepository } from '../../domain/repositories/project.repository';
 import { IMemberRepository } from 'src/modules/members/domain/repositories/member.repository';
+import { ActivityLogService } from 'src/modules/activity-logs/application/services/activity-log.service';
+import { EntityType } from 'src/modules/activity-logs/domain/enums/entity-type.enum';
 
 @Injectable()
 export class CreateProjectUseCase {
   constructor(
     private readonly projectRepository: IProjectRepository,
     private readonly memberRepository: IMemberRepository,
+    private readonly activityLogService: ActivityLogService,
   ) {}
 
   async execute(
@@ -31,11 +34,20 @@ export class CreateProjectUseCase {
       throw new NotFoundException('User is not a member of this workspace');
     }
 
-    return this.projectRepository.create({
+    const project = await this.projectRepository.create({
       name,
       description,
       workspaceId,
       ownerId,
     });
+
+    await this.activityLogService.logCreate(
+      EntityType.PROJECT,
+      project.id,
+      ownerId,
+      { name: project.name, workspaceId },
+    );
+
+    return project;
   }
 }

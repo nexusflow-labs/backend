@@ -10,11 +10,14 @@ import { AssignTaskUseCase } from './application/use-cases/assign-task.use-case'
 import { DeleteTaskUseCase } from './application/use-cases/delete-task.use-case';
 import { GetSubtasksUseCase } from './application/use-cases/get-subtasks.use-case';
 import { IProjectRepository } from '../projects/domain/repositories/project.repository';
-import { PrismaProjectRepository } from '../projects/infrastructure/persistence/prisma-project.repository';
+import { ProjectsModule } from '../projects/projects.module';
 import { IMemberRepository } from '../members/domain/repositories/member.repository';
-import { PrismaMemberRepository } from '../members/infrastructure/persistence/prisma-member.repository';
+import { MemberModule } from '../members/members.module';
+import { ActivityLogsModule } from '../activity-logs/activity-logs.module';
+import { ActivityLogService } from '../activity-logs/application/services/activity-log.service';
 
 @Module({
+  imports: [ActivityLogsModule, ProjectsModule, MemberModule],
   controllers: [TasksController],
   providers: [
     {
@@ -22,20 +25,13 @@ import { PrismaMemberRepository } from '../members/infrastructure/persistence/pr
       useClass: PrismaTaskRepository,
     },
     {
-      provide: IProjectRepository,
-      useClass: PrismaProjectRepository,
-    },
-    {
-      provide: IMemberRepository,
-      useClass: PrismaMemberRepository,
-    },
-    {
       provide: CreateTaskUseCase,
-      inject: [ITaskRepository, IProjectRepository],
+      inject: [ITaskRepository, IProjectRepository, ActivityLogService],
       useFactory: (
         taskRepo: ITaskRepository,
         projectRepo: IProjectRepository,
-      ) => new CreateTaskUseCase(taskRepo, projectRepo),
+        activityLogService: ActivityLogService,
+      ) => new CreateTaskUseCase(taskRepo, projectRepo, activityLogService),
     },
     {
       provide: ListTasksUseCase,
@@ -49,22 +45,40 @@ import { PrismaMemberRepository } from '../members/infrastructure/persistence/pr
     },
     {
       provide: UpdateTaskUseCase,
-      inject: [ITaskRepository],
-      useFactory: (repo: ITaskRepository) => new UpdateTaskUseCase(repo),
+      inject: [ITaskRepository, ActivityLogService],
+      useFactory: (
+        repo: ITaskRepository,
+        activityLogService: ActivityLogService,
+      ) => new UpdateTaskUseCase(repo, activityLogService),
     },
     {
       provide: AssignTaskUseCase,
-      inject: [ITaskRepository, IProjectRepository, IMemberRepository],
+      inject: [
+        ITaskRepository,
+        IProjectRepository,
+        IMemberRepository,
+        ActivityLogService,
+      ],
       useFactory: (
         taskRepo: ITaskRepository,
         projectRepo: IProjectRepository,
         memberRepo: IMemberRepository,
-      ) => new AssignTaskUseCase(taskRepo, projectRepo, memberRepo),
+        activityLogService: ActivityLogService,
+      ) =>
+        new AssignTaskUseCase(
+          taskRepo,
+          projectRepo,
+          memberRepo,
+          activityLogService,
+        ),
     },
     {
       provide: DeleteTaskUseCase,
-      inject: [ITaskRepository],
-      useFactory: (repo: ITaskRepository) => new DeleteTaskUseCase(repo),
+      inject: [ITaskRepository, ActivityLogService],
+      useFactory: (
+        repo: ITaskRepository,
+        activityLogService: ActivityLogService,
+      ) => new DeleteTaskUseCase(repo, activityLogService),
     },
     {
       provide: GetSubtasksUseCase,

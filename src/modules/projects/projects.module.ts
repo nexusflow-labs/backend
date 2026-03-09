@@ -8,9 +8,12 @@ import { GetProjectUseCase } from './application/use-cases/get-project.use-case'
 import { UpdateProjectUseCase } from './application/use-cases/update-project.use-case';
 import { DeleteProjectUseCase } from './application/use-cases/delete-project.use-case';
 import { IMemberRepository } from '../members/domain/repositories/member.repository';
-import { PrismaMemberRepository } from '../members/infrastructure/persistence/prisma-member.repository';
+import { MemberModule } from '../members/members.module';
+import { ActivityLogsModule } from '../activity-logs/activity-logs.module';
+import { ActivityLogService } from '../activity-logs/application/services/activity-log.service';
 
 @Module({
+  imports: [ActivityLogsModule, MemberModule],
   controllers: [ProjectsController],
   providers: [
     {
@@ -18,16 +21,14 @@ import { PrismaMemberRepository } from '../members/infrastructure/persistence/pr
       useClass: PrismaProjectRepository,
     },
     {
-      provide: IMemberRepository,
-      useClass: PrismaMemberRepository,
-    },
-    {
       provide: CreateProjectUseCase,
-      inject: [IProjectRepository, IMemberRepository],
+      inject: [IProjectRepository, IMemberRepository, ActivityLogService],
       useFactory: (
         projectRepo: IProjectRepository,
         memberRepo: IMemberRepository,
-      ) => new CreateProjectUseCase(projectRepo, memberRepo),
+        activityLogService: ActivityLogService,
+      ) =>
+        new CreateProjectUseCase(projectRepo, memberRepo, activityLogService),
     },
     {
       provide: ListProjectsUseCase,
@@ -41,13 +42,19 @@ import { PrismaMemberRepository } from '../members/infrastructure/persistence/pr
     },
     {
       provide: UpdateProjectUseCase,
-      inject: [IProjectRepository],
-      useFactory: (repo: IProjectRepository) => new UpdateProjectUseCase(repo),
+      inject: [IProjectRepository, ActivityLogService],
+      useFactory: (
+        repo: IProjectRepository,
+        activityLogService: ActivityLogService,
+      ) => new UpdateProjectUseCase(repo, activityLogService),
     },
     {
       provide: DeleteProjectUseCase,
-      inject: [IProjectRepository],
-      useFactory: (repo: IProjectRepository) => new DeleteProjectUseCase(repo),
+      inject: [IProjectRepository, ActivityLogService],
+      useFactory: (
+        repo: IProjectRepository,
+        activityLogService: ActivityLogService,
+      ) => new DeleteProjectUseCase(repo, activityLogService),
     },
   ],
   exports: [IProjectRepository],

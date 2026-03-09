@@ -14,6 +14,8 @@ import { RemoveLabelFromTaskUseCase } from '../application/use-cases/remove-labe
 import { GetTaskLabelsUseCase } from '../application/use-cases/get-task-labels.use-case';
 import { LabelResponseDto } from './dtos/label.response.dto';
 import { WorkspaceMemberGuard } from 'src/infrastructure/authorization/guards/workspace-member.guard';
+import { CurrentUser } from 'src/modules/auth/presentation/decorators/current-user.decorator';
+import type { JwtUser } from 'src/modules/auth/domain/entities/types/jwt-user.type';
 
 @Controller('tasks/:taskId/labels')
 @UseGuards(WorkspaceMemberGuard)
@@ -37,8 +39,9 @@ export class TaskLabelsController {
   async addLabel(
     @Param('taskId', new ParseUUIDPipe()) taskId: string,
     @Param('labelId', new ParseUUIDPipe()) labelId: string,
+    @CurrentUser() user: JwtUser,
   ): Promise<void> {
-    await this.addLabelToTaskUseCase.execute(taskId, labelId);
+    await this.addLabelToTaskUseCase.execute(taskId, labelId, user.id);
   }
 
   @Delete(':labelId')
@@ -46,7 +49,8 @@ export class TaskLabelsController {
   async removeLabel(
     @Param('taskId', new ParseUUIDPipe()) taskId: string,
     @Param('labelId', new ParseUUIDPipe()) labelId: string,
+    @CurrentUser() user: JwtUser,
   ): Promise<void> {
-    await this.removeLabelFromTaskUseCase.execute(taskId, labelId);
+    await this.removeLabelFromTaskUseCase.execute(taskId, labelId, user.id);
   }
 }

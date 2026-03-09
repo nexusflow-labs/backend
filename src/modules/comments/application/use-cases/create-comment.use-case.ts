@@ -2,12 +2,14 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { Comment } from '../../domain/entities/comment.entity';
 import { ICommentRepository } from '../../domain/repositories/comment.repository';
 import { ITaskRepository } from 'src/modules/tasks/domain/repositories/task.repository';
+import { ActivityLogService } from 'src/modules/activity-logs/application/services/activity-log.service';
 
 @Injectable()
 export class CreateCommentUseCase {
   constructor(
     private readonly commentRepository: ICommentRepository,
     private readonly taskRepository: ITaskRepository,
+    private readonly activityLogService: ActivityLogService,
   ) {}
 
   async execute(
@@ -24,10 +26,14 @@ export class CreateCommentUseCase {
       throw new NotFoundException('Task not found');
     }
 
-    return this.commentRepository.create({
+    const comment = await this.commentRepository.create({
       content,
       taskId,
       authorId,
     });
+
+    await this.activityLogService.logComment(taskId, comment.id, authorId);
+
+    return comment;
   }
 }

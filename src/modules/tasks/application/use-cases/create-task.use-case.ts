@@ -6,12 +6,15 @@ import {
 import { Task, TaskPriority } from '../../domain/entities/task.entity';
 import { ITaskRepository } from '../../domain/repositories/task.repository';
 import { IProjectRepository } from 'src/modules/projects/domain/repositories/project.repository';
+import { ActivityLogService } from 'src/modules/activity-logs/application/services/activity-log.service';
+import { EntityType } from 'src/modules/activity-logs/domain/enums/entity-type.enum';
 
 @Injectable()
 export class CreateTaskUseCase {
   constructor(
     private readonly taskRepository: ITaskRepository,
     private readonly projectRepository: IProjectRepository,
+    private readonly activityLogService: ActivityLogService,
   ) {}
 
   async execute(
@@ -47,7 +50,7 @@ export class CreateTaskUseCase {
       }
     }
 
-    return this.taskRepository.create({
+    const task = await this.taskRepository.create({
       title,
       description,
       projectId,
@@ -56,5 +59,18 @@ export class CreateTaskUseCase {
       priority,
       parentId,
     });
+
+    await this.activityLogService.logCreate(
+      EntityType.TASK,
+      task.id,
+      creatorId,
+      {
+        title: task.title,
+        projectId,
+        parentId,
+      },
+    );
+
+    return task;
   }
 }

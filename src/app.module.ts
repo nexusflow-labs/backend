@@ -23,6 +23,7 @@ import { CommentsModule } from './modules/comments/comments.module';
 import { LabelsModule } from './modules/labels/labels.module';
 import { ActivityLogsModule } from './modules/activity-logs/activity-logs.module';
 import { DashboardModule } from './modules/dashboard/dashboard.module';
+import { InvitationModule } from './modules/invitations/invitations.module';
 
 @Module({
   imports: [
@@ -50,6 +51,7 @@ import { DashboardModule } from './modules/dashboard/dashboard.module';
     LabelsModule,
     ActivityLogsModule,
     DashboardModule,
+    InvitationModule,
   ],
   providers: [
     // Guards execute in order: ThrottlerGuard -> JwtAuthGuard

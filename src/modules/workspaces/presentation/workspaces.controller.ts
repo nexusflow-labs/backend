@@ -69,8 +69,13 @@ export class WorkspacesController {
   async update(
     @Param('id', new ParseUUIDPipe()) id: string,
     @Body() dto: UpdateWorkspaceDto,
+    @CurrentUser() user: JwtUser,
   ) {
-    const workspace = await this.updateWorkspaceUseCase.execute(id, dto.name);
+    const workspace = await this.updateWorkspaceUseCase.execute(
+      id,
+      dto.name,
+      user.id,
+    );
     return WorkspaceResponseMapper.entitytoWorkspaceResponse(workspace);
   }
 
@@ -78,7 +83,10 @@ export class WorkspacesController {
   @HttpCode(HttpStatus.NO_CONTENT)
   @UseGuards(WorkspaceMemberGuard, RolesGuard)
   @Roles(MemberRole.OWNER)
-  async remove(@Param('id', new ParseUUIDPipe()) id: string) {
-    await this.removeWorkspaceUseCase.execute(id);
+  async remove(
+    @Param('id', new ParseUUIDPipe()) id: string,
+    @CurrentUser() user: JwtUser,
+  ) {
+    await this.removeWorkspaceUseCase.execute(id, user.id);
   }
 }
