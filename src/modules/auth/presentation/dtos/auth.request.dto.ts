@@ -61,3 +61,23 @@ export class LogoutDto {
   @IsString({ message: 'Refresh token must be a string' })
   refreshToken: string;
 }
+
+export class ForgotPasswordDto {
+  @IsEmail({}, { message: 'Invalid email format' })
+  email: string;
+}
+
+export class ResetPasswordDto {
+  @IsNotEmpty({ message: 'Reset token is required' })
+  @IsString({ message: 'Reset token must be a string' })
+  token: string;
+
+  @IsStrongPassword({
+    minLength: 8,
+    minLowercase: 1,
+    minNumbers: 1,
+    minSymbols: 1,
+    minUppercase: 1,
+  })
+  newPassword: string;
+}

@@ -140,8 +140,8 @@ Request → JwtAuthGuard → WorkspaceMemberGuard → RolesGuard → ResourceOwn
 
 ## 📊 Database Schema (Prisma)
 
-**14 Models:**
-- User, RefreshToken
+**15 Models:**
+- User, RefreshToken, PasswordResetToken
 - Workspace, Member, Invitation
 - Project, Task, Comment
 - Label, TaskLabel
@@ -159,6 +159,11 @@ Request → JwtAuthGuard → WorkspaceMemberGuard → RolesGuard → ResourceOwn
 # Auth
 POST   /auth/register
 POST   /auth/login
+POST   /auth/refresh
+POST   /auth/logout
+POST   /auth/logout-all
+POST   /auth/forgot-password
+POST   /auth/reset-password
 
 # Workspaces
 GET    /workspaces
@@ -220,7 +225,7 @@ GET    /workspaces/:workspaceId/dashboard
 | **AUTHENTICATION** ||||
 | JWT Login | ✓ | ✓ | - |
 | Refresh Token | ✓ | ✓ | - |
-| Password Reset | ❌ | ✓ | 🟡 Medium |
+| Password Reset | ✓ | ✓ | - |
 | Email Verification | ❌ | ✓ | 🟡 Medium |
 | OAuth/SSO | ❌ | ✓ | 🟢 Low |
 | 2FA/MFA | ❌ | ✓ | 🟢 Low |
@@ -301,8 +306,8 @@ GET    /workspaces/:workspaceId/dashboard
 ```
 [x] Integrate ActivityLogService vào tất cả use-cases
 [x] Invitation accept/reject endpoints
-[ ] Email service (nodemailer/SendGrid)
-[ ] Basic email templates (invite, password reset)
+[x] Email service (nodemailer/SendGrid)
+[x] Basic email templates (invite, password reset)
 ```
 
 ### Tuần 10: Real-time & Files
@@ -346,7 +351,7 @@ GET    /workspaces/:workspaceId/dashboard
 
 | Email | Password | User ID | Notes |
 |-------|----------|---------|-------|
-| `newuser@example.com` | `Test@123456` | `a989163e-3808-4869-b620-8aca0ab26641` | Test user |
+| `test@example.com` | `Test@123456` | `c7b7649c-7390-4494-8fe7-c21df469fc09` | Test user |
 
 ### Test Data Created
 - **Workspace:** `Test Workspace` (ID: `48a30c8b-53ca-4786-9d60-942bd1c2e241`)
@@ -358,7 +363,7 @@ GET    /workspaces/:workspaceId/dashboard
 # Login
 curl -X POST http://localhost:3000/auth/login \
   -H "Content-Type: application/json" \
-  -d '{"email":"newuser@example.com","password":"Test@123456"}'
+  -d '{"email":"test@example.com","password":"Test@123456"}'
 
 # Use token in requests
 TOKEN="<access_token_from_login>"

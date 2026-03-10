@@ -4,11 +4,15 @@ import { RegisterUseCase } from '../application/use-cases/register.use-case';
 import { LoginUseCase } from '../application/use-cases/login.use-case';
 import { RefreshAccessTokenUseCase } from '../application/use-cases/refresh-access-token.use-case';
 import { RevokeRefreshTokenUseCase } from '../application/use-cases/revoke-refresh-token.use-case';
+import { ForgotPasswordUseCase } from '../application/use-cases/forgot-password.use-case';
+import { ResetPasswordUseCase } from '../application/use-cases/reset-password.use-case';
 import {
   CreateUserDto,
   LoginDto,
   RefreshTokenDto,
   LogoutDto,
+  ForgotPasswordDto,
+  ResetPasswordDto,
 } from './dtos/auth.request.dto';
 import { Public } from './decorators/public.decorator';
 import { CurrentUser } from './decorators/current-user.decorator';
@@ -21,6 +25,8 @@ export class AuthController {
     private readonly loginUseCase: LoginUseCase,
     private readonly refreshAccessTokenUseCase: RefreshAccessTokenUseCase,
     private readonly revokeRefreshTokenUseCase: RevokeRefreshTokenUseCase,
+    private readonly forgotPasswordUseCase: ForgotPasswordUseCase,
+    private readonly resetPasswordUseCase: ResetPasswordUseCase,
   ) {}
 
   @Post('register')
@@ -57,5 +63,29 @@ export class AuthController {
   @HttpCode(HttpStatus.NO_CONTENT)
   async logoutAll(@CurrentUser() user: JwtUser) {
     await this.revokeRefreshTokenUseCase.executeAll(user.id);
+  }
+
+  @Post('forgot-password')
+  @HttpCode(HttpStatus.OK)
+  @Public()
+  @Throttle({ default: { limit: 3, ttl: 60000 } }) // 3 requests per minute
+  async forgotPassword(@Body() forgotPasswordDto: ForgotPasswordDto) {
+    await this.forgotPasswordUseCase.execute(forgotPasswordDto.email);
+    return {
+      message:
+        'If an account exists with this email, a password reset link has been sent.',
+    };
+  }
+
+  @Post('reset-password')
+  @HttpCode(HttpStatus.OK)
+  @Public()
+  @Throttle({ default: { limit: 5, ttl: 60000 } }) // 5 requests per minute
+  async resetPassword(@Body() resetPasswordDto: ResetPasswordDto) {
+    await this.resetPasswordUseCase.execute({
+      token: resetPasswordDto.token,
+      newPassword: resetPasswordDto.newPassword,
+    });
+    return { message: 'Password has been reset successfully.' };
   }
 }

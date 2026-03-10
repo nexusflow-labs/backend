@@ -9,6 +9,7 @@ export class UserMapper {
       password: raw.password,
       name: raw.fullName,
       avatar: raw.avatar || undefined,
+      isActive: raw.isActive,
       createdAt: raw.createdAt,
     });
   }

@@ -4,6 +4,7 @@ export interface UserProps {
   password: string;
   name: string;
   avatar?: string;
+  isActive?: boolean;
   createdAt?: Date;
 }
 
@@ -41,6 +42,9 @@ export class User {
   }
   get avatar() {
     return this.props.avatar;
+  }
+  get isActive() {
+    return this.props.isActive ?? true;
   }
   get createdAt() {
     return this.props.createdAt;

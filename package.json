@@ -19,6 +19,7 @@
     "test:debug": "dotenv -e .env.local -- node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "dotenv -e .env.local -- jest --config ./test/jest-e2e.json",
     "db:generate": "dotenv -e .env.local -- prisma generate",
+    "db:reset": "dotenv -e .env.local -- prisma migrate reset",
     "db:migrate:dev": "dotenv -e .env.local -- prisma migrate dev",
     "db:migrate:deploy": "prisma migrate deploy",
     "db:push": "dotenv -e .env.local -- prisma db push",
