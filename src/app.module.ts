@@ -26,12 +26,12 @@ import { LabelsModule } from './modules/labels/labels.module';
 import { ActivityLogsModule } from './modules/activity-logs/activity-logs.module';
 import { DashboardModule } from './modules/dashboard/dashboard.module';
 import { InvitationModule } from './modules/invitations/invitations.module';
+import { QueueModule } from './infrastructure/queue/queue.module';
 
 @Module({
   imports: [
     ConfigModule,
     PrismaModule,
-    EmailModule,
     ThrottlerModule.forRootAsync({
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({
@@ -46,6 +46,11 @@ import { InvitationModule } from './modules/invitations/invitations.module';
     }),
     CacheModule,
     AuthorizationModule,
+    // Modules that register JOB_PROCESSOR must come BEFORE QueueModule
+    EmailModule,
+    ActivityLogsModule,
+    // QueueModule injects JOB_PROCESSOR from EmailModule and ActivityLogsModule
+    QueueModule,
     WorkspacesModule,
     AuthModule,
     MemberModule,
@@ -53,7 +58,6 @@ import { InvitationModule } from './modules/invitations/invitations.module';
     TasksModule,
     CommentsModule,
     LabelsModule,
-    ActivityLogsModule,
     DashboardModule,
     InvitationModule,
   ],

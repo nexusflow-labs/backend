@@ -15,7 +15,8 @@ import { InvitationStatus } from '../../domain/enum/invitation.enum';
 import { ActivityLogService } from 'src/modules/activity-logs/application/services/activity-log.service';
 import { EntityType } from 'src/modules/activity-logs/domain/enums/entity-type.enum';
 import { Invitation } from '../../domain/entities/invitation.entity';
-import { IEmailService } from 'src/infrastructure/email/interfaces/email.interface';
+import { IQueueService } from 'src/infrastructure/queue/interfaces/queue.interface';
+import { JobType, JobPriority } from 'src/infrastructure/queue/types/job.types';
 
 @Injectable()
 export class CreateInvitationUseCase {
@@ -27,7 +28,7 @@ export class CreateInvitationUseCase {
     private readonly memberRepository: IMemberRepository,
     private readonly userRepository: IUserRepository,
     private readonly activityLogService: ActivityLogService,
-    private readonly emailService: IEmailService,
+    private readonly queueService: IQueueService,
     private readonly configService: ConfigService,
   ) {}
 
@@ -104,19 +105,24 @@ export class CreateInvitationUseCase {
 
       const frontendUrl = this.configService.get<string>('FRONTEND_URL');
       const inviteLink = `${frontendUrl}/invitations/accept?token=${token}`;
+      // Queue the email job instead of sending directly
+      await this.queueService.addJob(
+        JobType.EMAIL_INVITATION,
+        {
+          email: recipientEmail,
+          inviterName,
+          workspaceName,
+          inviteLink,
+          expiresAt: expiresAt.toISOString(),
+        },
+        { priority: JobPriority.HIGH },
+      );
 
-      await this.emailService.sendInvitation(recipientEmail, {
-        inviterName,
-        workspaceName,
-        inviteLink,
-        expiresAt,
-      });
-
-      this.logger.log(`Invitation email sent to ${recipientEmail}`);
+      this.logger.log(`Invitation email queued for ${recipientEmail}`);
     } catch (error) {
       // Log the error but don't fail the invitation creation
       this.logger.error(
-        `Failed to send invitation email to ${recipientEmail}: ${error.message}`,
+        `Failed to queue invitation email for ${recipientEmail}: ${error.message}`,
         error.stack,
       );
     }

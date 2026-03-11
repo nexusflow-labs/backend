@@ -3,7 +3,8 @@ import { ConfigService } from '@nestjs/config';
 import { randomBytes } from 'crypto';
 import { IUserRepository } from '../../domain/repositories/user.repository';
 import { IPasswordResetTokenRepository } from '../../domain/repositories/password-reset-token.repository';
-import { IEmailService } from 'src/infrastructure/email/interfaces/email.interface';
+import { IQueueService } from 'src/infrastructure/queue/interfaces/queue.interface';
+import { JobType, JobPriority } from 'src/infrastructure/queue/types/job.types';
 
 export class ForgotPasswordUseCase {
   private readonly logger = new Logger(ForgotPasswordUseCase.name);
@@ -11,7 +12,7 @@ export class ForgotPasswordUseCase {
   constructor(
     private readonly userRepository: IUserRepository,
     private readonly passwordResetTokenRepository: IPasswordResetTokenRepository,
-    private readonly emailService: IEmailService,
+    private readonly queueService: IQueueService,
     private readonly configService: ConfigService,
   ) {}
 
@@ -55,16 +56,22 @@ export class ForgotPasswordUseCase {
     const resetLink = `${frontendUrl}/auth/reset-password?token=${token}`;
 
     try {
-      await this.emailService.sendPasswordReset(email, {
-        userName: user.name,
-        resetLink,
-        expiresAt,
-      });
+      // Queue the email job instead of sending directly
+      await this.queueService.addJob(
+        JobType.EMAIL_PASSWORD_RESET,
+        {
+          email,
+          userName: user.name,
+          resetLink,
+          expiresAt: expiresAt.toISOString(),
+        },
+        { priority: JobPriority.CRITICAL },
+      );
 
-      this.logger.log(`Password reset email sent to ${email}`);
+      this.logger.log(`Password reset email queued for ${email}`);
     } catch (error) {
       this.logger.error(
-        `Failed to send password reset email to ${email}: ${error.message}`,
+        `Failed to queue password reset email for ${email}: ${error.message}`,
         error.stack,
       );
     }

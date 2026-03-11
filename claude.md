@@ -370,3 +370,15 @@ TOKEN="<access_token_from_login>"
 curl -X GET http://localhost:3000/workspaces \
   -H "Authorization: Bearer $TOKEN"
 ```
+
+
+# Refactor Prompt: BullMQ Queue — Decoupled Processor Pattern
+
+## Context
+
+Bạn đang làm việc trên một NestJS project sử dụng BullMQ cho background jobs.
+Codebase hiện tại có vấn đề: `infrastructure/queue` đang import trực tiếp vào
+`modules/activity-logs` và `infrastructure/email`, tạo ra tight coupling sai chiều.
+
+**Mục tiêu:** Áp dụng Processor pattern để đảo ngược dependency —
+queue không biết gì về business logic, các module tự đăng ký processor của mình.

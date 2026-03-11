@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { ActivityLogsModule } from '../activity-logs/activity-logs.module';
 import { ActivityLogService } from '../activity-logs/application/services/activity-log.service';
-import { IEmailService } from 'src/infrastructure/email/interfaces/email.interface';
+import { IQueueService } from 'src/infrastructure/queue/interfaces/queue.interface';
 import { IInvitationRepository } from './domain/repositories/invitation.repository';
 import { PrismaInvitationRepository } from './infrastructure/persistence/prisma-invitation.repository';
 import { InvitationController } from './presentation/invitations.controller';
@@ -34,7 +34,7 @@ import { AuthModule } from '../auth/auth.module';
         IInvitationRepository,
         IUserRepository,
         ActivityLogService,
-        IEmailService,
+        IQueueService,
         ConfigService,
       ],
       useFactory: (
@@ -43,7 +43,7 @@ import { AuthModule } from '../auth/auth.module';
         invitationRepo: IInvitationRepository,
         userRepo: IUserRepository,
         activityLogService: ActivityLogService,
-        emailService: IEmailService,
+        queueService: IQueueService,
         configService: ConfigService,
       ) =>
         new CreateInvitationUseCase(
@@ -52,7 +52,7 @@ import { AuthModule } from '../auth/auth.module';
           memberRepo,
           userRepo,
           activityLogService,
-          emailService,
+          queueService,
           configService,
         ),
     },

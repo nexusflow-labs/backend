@@ -15,7 +15,7 @@ import { AuthController } from './presentation/auth.controller';
 import { PrismaUserRepository } from './infrastructure/persistence/prisma-users.repository';
 import { PrismaRefreshTokenRepository } from './infrastructure/persistence/prisma-refresh-token.repository';
 import { PrismaPasswordResetTokenRepository } from './infrastructure/persistence/prisma-password-reset-token.repository';
-import { IEmailService } from 'src/infrastructure/email/interfaces/email.interface';
+import { IQueueService } from 'src/infrastructure/queue/interfaces/queue.interface';
 import { JwtStrategy } from './strategies/jwt.strategy';
 
 @Module({
@@ -96,19 +96,19 @@ import { JwtStrategy } from './strategies/jwt.strategy';
       inject: [
         IUserRepository,
         IPasswordResetTokenRepository,
-        IEmailService,
+        IQueueService,
         ConfigService,
       ],
       useFactory: (
         userRepo: IUserRepository,
         passwordResetTokenRepo: IPasswordResetTokenRepository,
-        emailService: IEmailService,
+        queueService: IQueueService,
         configService: ConfigService,
       ) =>
         new ForgotPasswordUseCase(
           userRepo,
           passwordResetTokenRepo,
-          emailService,
+          queueService,
           configService,
         ),
     },

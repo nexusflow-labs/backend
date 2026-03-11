@@ -13,7 +13,9 @@ export class PrismaPasswordResetTokenRepository extends IPasswordResetTokenRepos
     super();
   }
 
-  async create(data: CreatePasswordResetTokenData): Promise<PasswordResetToken> {
+  async create(
+    data: CreatePasswordResetTokenData,
+  ): Promise<PasswordResetToken> {
     const record = await this.prisma.passwordResetToken.create({
       data: {
         token: data.token,
