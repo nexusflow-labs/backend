@@ -2,12 +2,17 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { ICommentRepository } from '../../domain/repositories/comment.repository';
 import { ActivityLogService } from 'src/modules/activity-logs/application/services/activity-log.service';
 import { EntityType } from 'src/modules/activity-logs/domain/enums/entity-type.enum';
+import {
+  WebsocketEmitterService,
+  RealtimeEvents,
+} from 'src/infrastructure/realtime';
 
 @Injectable()
 export class DeleteCommentUseCase {
   constructor(
     private readonly commentRepository: ICommentRepository,
     private readonly activityLogService: ActivityLogService,
+    private readonly wsEmitter: WebsocketEmitterService,
   ) {}
 
   async execute(id: string, userId: string): Promise<void> {
@@ -21,6 +26,11 @@ export class DeleteCommentUseCase {
 
     await this.activityLogService.logDelete(EntityType.COMMENT, id, userId, {
       taskId,
+    });
+
+    this.wsEmitter.emitToTask(taskId, RealtimeEvents.COMMENT_DELETED, {
+      commentId: id,
+      deletedBy: userId,
     });
   }
 }

@@ -27,6 +27,7 @@ import { ActivityLogsModule } from './modules/activity-logs/activity-logs.module
 import { DashboardModule } from './modules/dashboard/dashboard.module';
 import { InvitationModule } from './modules/invitations/invitations.module';
 import { QueueModule } from './infrastructure/queue/queue.module';
+import { RealtimeModule } from './infrastructure/realtime/realtime.module';
 
 @Module({
   imports: [
@@ -46,11 +47,11 @@ import { QueueModule } from './infrastructure/queue/queue.module';
     }),
     CacheModule,
     AuthorizationModule,
-    // Modules that register JOB_PROCESSOR must come BEFORE QueueModule
+    // QueueModule must be imported BEFORE modules with processors
+    // so ProcessorRegistry is available for injection
+    QueueModule,
     EmailModule,
     ActivityLogsModule,
-    // QueueModule injects JOB_PROCESSOR from EmailModule and ActivityLogsModule
-    QueueModule,
     WorkspacesModule,
     AuthModule,
     MemberModule,
@@ -60,6 +61,7 @@ import { QueueModule } from './infrastructure/queue/queue.module';
     LabelsModule,
     DashboardModule,
     InvitationModule,
+    RealtimeModule,
   ],
   providers: [
     {

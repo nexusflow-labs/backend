@@ -1,15 +1,16 @@
-import { Global, Logger, Module, OnModuleInit } from '@nestjs/common';
+import { Global, Logger, Module, OnApplicationBootstrap } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import Redis from 'ioredis';
 import { IQueueService } from './interfaces/queue.interface';
-import {
-  IJobProcessor,
-  JOB_PROCESSOR,
-} from './interfaces/job-processor.interface';
 import { BullMQQueueService } from './services/bullmq-queue.service';
 import { SyncQueueService } from './services/sync-queue.service';
+import { ProcessorRegistry } from './services/processor-registry.service';
 
-async function checkRedisConnection(redisUrl: string): Promise<boolean> {
+/**
+ * Quick Redis connectivity check before creating BullMQ service
+ * This prevents creating workers that will spam errors
+ */
+async function isRedisReachable(redisUrl: string): Promise<boolean> {
   const logger = new Logger('QueueModule');
   try {
     const url = new URL(redisUrl);
@@ -17,10 +18,15 @@ async function checkRedisConnection(redisUrl: string): Promise<boolean> {
       host: url.hostname,
       port: parseInt(url.port, 10) || 6379,
       password: url.password || undefined,
-      connectTimeout: 3000,
+      connectTimeout: 2000,
       maxRetriesPerRequest: 1,
+      retryStrategy: () => null, // Don't retry
       lazyConnect: true,
+      enableOfflineQueue: false,
     });
+
+    // Suppress error events during check
+    client.on('error', () => {});
 
     await client.connect();
     const pong = await client.ping();
@@ -29,7 +35,7 @@ async function checkRedisConnection(redisUrl: string): Promise<boolean> {
     return pong === 'PONG';
   } catch (error) {
     logger.warn(
-      `Redis connection check failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      `Redis check failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
     );
     return false;
   }
@@ -38,11 +44,13 @@ async function checkRedisConnection(redisUrl: string): Promise<boolean> {
 @Global()
 @Module({
   providers: [
+    // ProcessorRegistry is the central place for processors to register themselves
+    ProcessorRegistry,
     {
       provide: IQueueService,
       useFactory: async (
         configService: ConfigService,
-        processors: IJobProcessor[],
+        registry: ProcessorRegistry,
       ): Promise<IQueueService> => {
         const logger = new Logger('QueueModule');
         const queueEnabled = configService.get<string>('QUEUE_ENABLED', 'true');
@@ -52,7 +60,7 @@ async function checkRedisConnection(redisUrl: string): Promise<boolean> {
           logger.warn(
             'Queue disabled via QUEUE_ENABLED=false, using synchronous execution',
           );
-          return new SyncQueueService(processors);
+          return new SyncQueueService(registry);
         }
 
         const redisUrl = configService.get<string>('REDIS_URL');
@@ -60,38 +68,49 @@ async function checkRedisConnection(redisUrl: string): Promise<boolean> {
         // If no Redis URL, use sync
         if (!redisUrl) {
           logger.warn('REDIS_URL not configured, using synchronous execution');
-          return new SyncQueueService(processors);
+          return new SyncQueueService(registry);
         }
 
-        const isRedisReachable = await checkRedisConnection(redisUrl);
-        if (isRedisReachable) {
-          logger.log('BullMQ queue initialized successfully');
-          try {
-            const service = new BullMQQueueService(configService, processors);
-            await service.isHealthy(); // Verify thực sự kết nối được
-            return service;
-          } catch {
-            logger.warn('BullMQ init failed, falling back to sync');
-            return new SyncQueueService(processors);
-          }
+        // Check Redis connectivity BEFORE creating BullMQ service
+        // This prevents workers from being created and spamming errors
+        const reachable = await isRedisReachable(redisUrl);
+        if (!reachable) {
+          logger.warn('Redis not reachable, using synchronous execution');
+          return new SyncQueueService(registry);
         }
 
-        logger.warn(
-          'Redis not reachable, falling back to synchronous execution',
-        );
-        return new SyncQueueService(processors);
+        try {
+          const service = new BullMQQueueService(configService, registry);
+          logger.log('BullMQ queue service initialized');
+          return service;
+        } catch (error) {
+          logger.warn(
+            `BullMQ init failed: ${error instanceof Error ? error.message : 'Unknown error'}, falling back to sync`,
+          );
+          return new SyncQueueService(registry);
+        }
       },
-      inject: [ConfigService, JOB_PROCESSOR],
+      inject: [ConfigService, ProcessorRegistry],
     },
   ],
-  exports: [IQueueService],
+  exports: [IQueueService, ProcessorRegistry],
 })
-export class QueueModule implements OnModuleInit {
+export class QueueModule implements OnApplicationBootstrap {
   private readonly logger = new Logger(QueueModule.name);
 
-  constructor(private readonly queueService: IQueueService) {}
+  constructor(
+    private readonly queueService: IQueueService,
+    private readonly registry: ProcessorRegistry,
+  ) {}
 
-  async onModuleInit(): Promise<void> {
+  async onApplicationBootstrap(): Promise<void> {
+    const processorCount = this.registry.count;
+    const registeredTypes = this.registry.getRegisteredTypes();
+
+    this.logger.log(
+      `${processorCount} job processor(s) registered: [${registeredTypes.join(', ')}]`,
+    );
+
     const isHealthy = await this.queueService.isHealthy();
     const serviceType =
       this.queueService instanceof BullMQQueueService

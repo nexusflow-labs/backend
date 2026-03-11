@@ -7,12 +7,17 @@ import {
 import { IMemberRepository } from '../../domain/repositories/member.repository';
 import { ActivityLogService } from 'src/modules/activity-logs/application/services/activity-log.service';
 import { EntityType } from 'src/modules/activity-logs/domain/enums/entity-type.enum';
+import {
+  WebsocketEmitterService,
+  RealtimeEvents,
+} from 'src/infrastructure/realtime';
 
 @Injectable()
 export class RemoveMemberUseCase {
   constructor(
     private readonly memberRepository: IMemberRepository,
     private readonly activityLogService: ActivityLogService,
+    private readonly wsEmitter: WebsocketEmitterService,
   ) {}
 
   async execute(
@@ -67,5 +72,16 @@ export class RemoveMemberUseCase {
       operatorId,
       { workspaceId, targetUserId, role },
     );
+
+    this.wsEmitter.emitToWorkspace(workspaceId, RealtimeEvents.MEMBER_REMOVED, {
+      memberId,
+      userId: targetUserId,
+      removedBy: operatorId,
+    });
+
+    // Notify the removed user
+    this.wsEmitter.emitToUser(targetUserId, RealtimeEvents.MEMBER_REMOVED, {
+      workspaceId,
+    });
   }
 }

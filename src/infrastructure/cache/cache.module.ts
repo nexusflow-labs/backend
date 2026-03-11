@@ -34,14 +34,16 @@ import { MemoryCacheService } from './memory-cache.service';
           );
         }
 
+        // Cleanup Redis connection before falling back
+        redisService.disconnect();
+
         // Fallback to memory cache
         logger.warn('Falling back to in-memory cache');
         return new MemoryCacheService(configService);
       },
       inject: [ConfigService],
     },
-    RedisCacheService,
-    MemoryCacheService,
+    // They are created manually in the factory to avoid orphan connections
   ],
   exports: [ICacheService],
 })

@@ -17,9 +17,19 @@ import { IWorkspaceRepository } from '../workspaces/domain/repositories/workspac
 import { WorkspacesModule } from '../workspaces/workspaces.module';
 import { IUserRepository } from '../auth/domain/repositories/user.repository';
 import { AuthModule } from '../auth/auth.module';
+import {
+  RealtimeModule,
+  WebsocketEmitterService,
+} from 'src/infrastructure/realtime';
 
 @Module({
-  imports: [ActivityLogsModule, WorkspacesModule, MemberModule, AuthModule],
+  imports: [
+    ActivityLogsModule,
+    WorkspacesModule,
+    MemberModule,
+    AuthModule,
+    RealtimeModule,
+  ],
   controllers: [InvitationController],
   providers: [
     {
@@ -36,6 +46,7 @@ import { AuthModule } from '../auth/auth.module';
         ActivityLogService,
         IQueueService,
         ConfigService,
+        WebsocketEmitterService,
       ],
       useFactory: (
         memberRepo: IMemberRepository,
@@ -45,6 +56,7 @@ import { AuthModule } from '../auth/auth.module';
         activityLogService: ActivityLogService,
         queueService: IQueueService,
         configService: ConfigService,
+        wsEmitter: WebsocketEmitterService,
       ) =>
         new CreateInvitationUseCase(
           invitationRepo,
@@ -54,6 +66,7 @@ import { AuthModule } from '../auth/auth.module';
           activityLogService,
           queueService,
           configService,
+          wsEmitter,
         ),
     },
     {
@@ -63,32 +76,42 @@ import { AuthModule } from '../auth/auth.module';
         IMemberRepository,
         IUserRepository,
         ActivityLogService,
+        WebsocketEmitterService,
       ],
       useFactory: (
         invitationRepo: IInvitationRepository,
         memberRepo: IMemberRepository,
         userRepo: IUserRepository,
         activityLogService: ActivityLogService,
+        wsEmitter: WebsocketEmitterService,
       ) =>
         new AcceptInvitationUseCase(
           invitationRepo,
           memberRepo,
           userRepo,
           activityLogService,
+          wsEmitter,
         ),
     },
     {
       provide: RejectInvitationUseCase,
-      inject: [IInvitationRepository, IUserRepository, ActivityLogService],
+      inject: [
+        IInvitationRepository,
+        IUserRepository,
+        ActivityLogService,
+        WebsocketEmitterService,
+      ],
       useFactory: (
         invitationRepo: IInvitationRepository,
         userRepo: IUserRepository,
         activityLogService: ActivityLogService,
+        wsEmitter: WebsocketEmitterService,
       ) =>
         new RejectInvitationUseCase(
           invitationRepo,
           userRepo,
           activityLogService,
+          wsEmitter,
         ),
     },
     {

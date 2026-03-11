@@ -3,15 +3,11 @@ import {
   Logger,
   OnModuleDestroy,
   OnModuleInit,
-  Inject,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Queue, Worker, Job, ConnectionOptions } from 'bullmq';
 import { IQueueService } from '../interfaces/queue.interface';
-import {
-  IJobProcessor,
-  JOB_PROCESSOR,
-} from '../interfaces/job-processor.interface';
+import { ProcessorRegistry } from './processor-registry.service';
 import {
   JobOptions,
   JobResult,
@@ -29,22 +25,12 @@ export class BullMQQueueService
   private readonly connectionOpts: ConnectionOptions;
   private readonly queues: Map<QueueName, Queue> = new Map();
   private readonly workers: Map<QueueName, Worker> = new Map();
-  private readonly processors: Map<JobType, IJobProcessor> = new Map();
   private readonly prefix: string;
 
   constructor(
     private readonly configService: ConfigService,
-    @Inject(JOB_PROCESSOR)
-    private readonly jobProcessors: IJobProcessor[],
+    private readonly registry: ProcessorRegistry,
   ) {
-    // Register all processors
-    for (const processor of jobProcessors) {
-      this.processors.set(processor.jobType, processor);
-      this.logger.log(
-        `Processor registered for job type: ${processor.jobType}`,
-      );
-    }
-
     const redisUrl = this.configService.get<string>(
       'REDIS_URL',
       'redis://localhost:6379',
@@ -128,7 +114,7 @@ export class BullMQQueueService
   }
 
   private async processJob(job: Job): Promise<void> {
-    const processor = this.processors.get(job.name as JobType);
+    const processor = this.registry.get(job.name as JobType);
 
     if (!processor) {
       this.logger.warn(`No processor registered for job type: ${job.name}`);

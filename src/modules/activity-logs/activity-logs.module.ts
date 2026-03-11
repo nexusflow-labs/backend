@@ -4,7 +4,6 @@ import { IActivityLogRepository } from './domain/repositories/activity-log.repos
 import { PrismaActivityLogRepository } from './infrastructure/persistence/prisma-activity-log.repository';
 import { ActivityLogService } from './application/services/activity-log.service';
 import { ListActivitiesUseCase } from './application/use-cases/list-activities.use-case';
-import { JOB_PROCESSOR } from '../../infrastructure/queue/interfaces/job-processor.interface';
 import { ActivityLogProcessor } from './infrastructure/processors/activity-log.processor';
 
 @Module({
@@ -26,13 +25,9 @@ import { ActivityLogProcessor } from './infrastructure/processors/activity-log.p
       useFactory: (repo: IActivityLogRepository) =>
         new ListActivitiesUseCase(repo),
     },
-    // Register processor for queue
+    // Processor registers itself with ProcessorRegistry via OnModuleInit
     ActivityLogProcessor,
-    {
-      provide: JOB_PROCESSOR,
-      useExisting: ActivityLogProcessor,
-    },
   ],
-  exports: [ActivityLogService, IActivityLogRepository, JOB_PROCESSOR],
+  exports: [ActivityLogService, IActivityLogRepository],
 })
 export class ActivityLogsModule {}

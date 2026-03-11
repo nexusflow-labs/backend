@@ -1,4 +1,4 @@
-# 📋 CONTEXT PROMPT CHO NEXUSFLOW PROJECT (Updated: Week 8)
+# 📋 CONTEXT PROMPT CHO NEXUSFLOW PROJECT (Updated: Week 10)
 
 ## 🎯 Tổng quan
 - **Project**: NexusFlow - Nền tảng Quản trị Dự án & Vận hành Doanh nghiệp (SaaS)
@@ -28,6 +28,9 @@ src/
 │   ├── cache/           # Redis + in-memory fallback
 │   ├── common/          # Filters, Interceptors, Middleware, Pagination
 │   ├── config/          # Environment config
+│   ├── email/           # Email service (nodemailer/SendGrid)
+│   ├── queue/           # BullMQ background jobs
+│   ├── realtime/        # Socket.io WebSocket gateway
 │   └── prisma/          # Database service
 │
 └── main.ts
@@ -218,6 +221,107 @@ GET    /workspaces/:workspaceId/activities
 GET    /workspaces/:workspaceId/dashboard
 ```
 
+## 🔌 WebSocket Events (Socket.io)
+
+### Connection
+```typescript
+// Client connects with JWT token
+const socket = io('http://localhost:3000', {
+  auth: { token: 'jwt_access_token' }
+});
+
+// Auto-joins user's personal room on connect
+```
+
+### Client Events (emit từ client)
+| Event | Payload | Description |
+|-------|---------|-------------|
+| `workspace:join` | `{ workspaceId }` | Join workspace room (validates membership) |
+| `workspace:leave` | `{ workspaceId }` | Leave workspace room |
+| `project:join` | `{ projectId }` | Join project room (validates membership) |
+| `project:leave` | `{ projectId }` | Leave project room |
+| `task:join` | `{ taskId, projectId }` | Join task room (validates membership) |
+| `task:leave` | `{ taskId }` | Leave task room |
+| `typing:start` | `{ taskId }` | Broadcast typing indicator |
+| `typing:stop` | `{ taskId }` | Stop typing indicator |
+
+### Server Events (listen từ client)
+
+**Task Events** (emits to project room):
+| Event | Payload | Trigger |
+|-------|---------|---------|
+| `task:created` | `{ task: {...} }` | Task created |
+| `task:updated` | `{ task: {...}, changes, updatedBy }` | Task updated |
+| `task:deleted` | `{ taskId, deletedBy }` | Task deleted |
+| `task:assigned` | `{ taskId, assigneeId, previousAssigneeId, assignedBy }` | Task assigned |
+
+**Comment Events** (emits to task room):
+| Event | Payload | Trigger |
+|-------|---------|---------|
+| `comment:created` | `{ comment: {...} }` | Comment created |
+| `comment:updated` | `{ comment: {...}, updatedBy }` | Comment updated |
+| `comment:deleted` | `{ commentId, deletedBy }` | Comment deleted |
+
+**Project Events** (emits to workspace room):
+| Event | Payload | Trigger |
+|-------|---------|---------|
+| `project:created` | `{ project: {...} }` | Project created |
+| `project:updated` | `{ project: {...}, changes, updatedBy }` | Project updated |
+| `project:deleted` | `{ projectId, deletedBy }` | Project deleted |
+
+**Member Events** (emits to workspace room + affected user):
+| Event | Payload | Trigger |
+|-------|---------|---------|
+| `member:added` | `{ member: {...}, addedBy }` | Member added |
+| `member:removed` | `{ memberId, userId, removedBy }` | Member removed |
+| `member:role_changed` | `{ memberId, userId, oldRole, newRole, changedBy }` | Role changed |
+
+**Invitation Events**:
+| Event | Payload | Emits To | Trigger |
+|-------|---------|----------|---------|
+| `invitation:received` | `{ invitation: {...} }` | User room | Invitation created |
+| `invitation:accepted` | `{ invitation, member }` | Workspace room | Invitation accepted |
+| `invitation:rejected` | `{ invitation }` | Workspace room | Invitation rejected |
+
+**Typing Events** (emits to task room):
+| Event | Payload |
+|-------|---------|
+| `user:typing` | `{ taskId, userId }` |
+| `user:stop_typing` | `{ taskId, userId }` |
+
+### Room Structure
+```
+user:{userId}           - Personal notifications
+workspace:{workspaceId} - Workspace-wide events (projects, members)
+project:{projectId}     - Project events (tasks)
+task:{taskId}           - Task events (comments, typing)
+```
+
+### Example Client Usage
+```typescript
+// Connect
+const socket = io('http://localhost:3000', {
+  auth: { token: accessToken }
+});
+
+// Join workspace
+socket.emit('workspace:join', { workspaceId: '...' }, (response) => {
+  console.log('Joined:', response.room);
+});
+
+// Listen for events
+socket.on('task:created', (data) => {
+  console.log('New task:', data.task);
+});
+
+socket.on('member:added', (data) => {
+  console.log('New member:', data.member);
+});
+
+// Typing indicator
+socket.emit('typing:start', { taskId: '...' });
+```
+
 ## 📊 SO SÁNH VỚI SAAS CHUẨN
 
 | Feature | NexusFlow | SaaS Chuẩn | Priority |
@@ -255,13 +359,13 @@ GET    /workspaces/:workspaceId/dashboard
 | Request Logging | ✓ | ✓ | - |
 | Error Tracking | ⚠️ Basic | ✓ Sentry | 🟢 Low |
 | **NOTIFICATIONS** ||||
-| Email Notifications | ❌ | ✓ | 🟡 Medium |
+| Email Notifications | ✓ | ✓ | - |
 | In-app Notifications | ❌ | ✓ | 🟡 Medium |
-| Real-time (WebSocket) | ❌ | ✓ | 🟡 Medium |
+| Real-time (WebSocket) | ✓ | ✓ | - |
 | Webhooks | ❌ | ✓ | 🟢 Low |
 | **INVITATION & TEAM** ||||
-| Invite by Email | ⚠️ Model only | ✓ | 🟡 Medium |
-| Accept/Reject Invite | ❌ | ✓ | 🟡 Medium |
+| Invite by Email | ✓ | ✓ | - |
+| Accept/Reject Invite | ✓ | ✓ | - |
 | **BILLING** ||||
 | Subscription Plans | ❌ | ✓ | 🟢 Later |
 | Usage Limits | ❌ | ✓ | 🟢 Later |
@@ -310,12 +414,13 @@ GET    /workspaces/:workspaceId/dashboard
 [x] Basic email templates (invite, password reset)
 ```
 
-### Tuần 10: Real-time & Files
+### Tuần 10: Real-time & Files ✅
 ```
-[ ] Socket.io gateway
-[ ] In-app notifications
+[x] Socket.io gateway (JWT auth, room-based, membership validation)
+[x] WebSocket events integrated to use-cases
+[ ] In-app notifications (DB model + API)
 [ ] File upload (S3/local)
-[ ] BullMQ background jobs
+[x] BullMQ background jobs
 ```
 
 ### Tuần 11: Testing & Documentation
@@ -371,14 +476,50 @@ curl -X GET http://localhost:3000/workspaces \
   -H "Authorization: Bearer $TOKEN"
 ```
 
+## 🚀 NEXT STEPS (Priority Order)
 
-# Refactor Prompt: BullMQ Queue — Decoupled Processor Pattern
+### 1. In-app Notifications (Medium Priority)
+```
+[ ] Notification entity & DB model (Prisma schema)
+[ ] NotificationRepository interface & implementation
+[ ] CreateNotificationUseCase
+[ ] MarkAsReadUseCase, MarkAllAsReadUseCase
+[ ] ListNotificationsUseCase (với pagination)
+[ ] NotificationsController endpoints
+[ ] Integrate với WebSocket (emit khi có notification mới)
+[ ] Notification types: task_assigned, comment_added, member_added, etc.
+```
 
-## Context
+### 2. File Upload (Medium Priority)
+```
+[ ] File entity & DB model
+[ ] Storage service interface (abstract)
+[ ] LocalStorageService implementation
+[ ] S3StorageService implementation (optional)
+[ ] UploadFileUseCase
+[ ] DeleteFileUseCase
+[ ] FileController endpoints
+[ ] Integrate với Task (attachments)
+```
 
-Bạn đang làm việc trên một NestJS project sử dụng BullMQ cho background jobs.
-Codebase hiện tại có vấn đề: `infrastructure/queue` đang import trực tiếp vào
-`modules/activity-logs` và `infrastructure/email`, tạo ra tight coupling sai chiều.
+### 3. Redis Adapter for WebSocket (Low - for scaling)
+```
+[ ] @socket.io/redis-adapter
+[ ] Configure Redis pub/sub for horizontal scaling
+[ ] Test với multiple server instances
+```
 
-**Mục tiêu:** Áp dụng Processor pattern để đảo ngược dependency —
-queue không biết gì về business logic, các module tự đăng ký processor của mình.
+### 4. Testing & Documentation
+```
+[ ] Swagger/OpenAPI decorators cho tất cả endpoints
+[ ] Unit tests cho critical use-cases
+[ ] E2E tests cho auth & CRUD flows
+[ ] Postman collection export
+```
+
+### 5. DevOps
+```
+[ ] Docker compose với PostgreSQL, Redis, App
+[ ] GitHub Actions CI/CD
+[ ] Environment configs (staging, prod)
+```

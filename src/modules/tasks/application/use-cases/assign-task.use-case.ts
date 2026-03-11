@@ -8,6 +8,10 @@ import { ITaskRepository } from '../../domain/repositories/task.repository';
 import { IMemberRepository } from 'src/modules/members/domain/repositories/member.repository';
 import { IProjectRepository } from 'src/modules/projects/domain/repositories/project.repository';
 import { ActivityLogService } from 'src/modules/activity-logs/application/services/activity-log.service';
+import {
+  WebsocketEmitterService,
+  RealtimeEvents,
+} from 'src/infrastructure/realtime';
 
 @Injectable()
 export class AssignTaskUseCase {
@@ -16,6 +20,7 @@ export class AssignTaskUseCase {
     private readonly projectRepository: IProjectRepository,
     private readonly memberRepository: IMemberRepository,
     private readonly activityLogService: ActivityLogService,
+    private readonly wsEmitter: WebsocketEmitterService,
   ) {}
 
   async execute(
@@ -64,6 +69,23 @@ export class AssignTaskUseCase {
         userId,
         previousAssigneeId,
       );
+    }
+
+    this.wsEmitter.emitToProject(task.projectId, RealtimeEvents.TASK_ASSIGNED, {
+      taskId,
+      assigneeId,
+      previousAssigneeId,
+      assignedBy: userId,
+    });
+
+    // Also notify the assignee directly
+    if (assigneeId) {
+      this.wsEmitter.emitToUser(assigneeId, RealtimeEvents.TASK_ASSIGNED, {
+        taskId,
+        taskTitle: task.title,
+        projectId: task.projectId,
+        assignedBy: userId,
+      });
     }
 
     return task;

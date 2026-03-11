@@ -5,7 +5,6 @@ import { ConsoleEmailService } from './services/console-email.service';
 import { NodemailerEmailService } from './services/nodemailer-email.service';
 import { SendGridEmailService } from './services/sendgrid-email.service';
 import { TemplateService } from './templates/template.service';
-import { JOB_PROCESSOR } from '../queue/interfaces/job-processor.interface';
 import { EmailInvitationProcessor } from './processors/email-invitation.processor';
 import { EmailPasswordResetProcessor } from './processors/email-password-reset.processor';
 
@@ -52,18 +51,10 @@ import { EmailPasswordResetProcessor } from './processors/email-password-reset.p
       },
       inject: [ConfigService, TemplateService],
     },
-    // Register email processors for queue
+    // Processors register themselves with ProcessorRegistry via OnModuleInit
     EmailInvitationProcessor,
     EmailPasswordResetProcessor,
-    {
-      provide: JOB_PROCESSOR,
-      useExisting: EmailInvitationProcessor,
-    },
-    {
-      provide: JOB_PROCESSOR,
-      useExisting: EmailPasswordResetProcessor,
-    },
   ],
-  exports: [IEmailService, TemplateService, JOB_PROCESSOR],
+  exports: [IEmailService, TemplateService],
 })
 export class EmailModule {}

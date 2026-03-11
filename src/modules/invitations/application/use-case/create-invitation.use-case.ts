@@ -17,6 +17,10 @@ import { EntityType } from 'src/modules/activity-logs/domain/enums/entity-type.e
 import { Invitation } from '../../domain/entities/invitation.entity';
 import { IQueueService } from 'src/infrastructure/queue/interfaces/queue.interface';
 import { JobType, JobPriority } from 'src/infrastructure/queue/types/job.types';
+import {
+  WebsocketEmitterService,
+  RealtimeEvents,
+} from 'src/infrastructure/realtime';
 
 @Injectable()
 export class CreateInvitationUseCase {
@@ -30,6 +34,7 @@ export class CreateInvitationUseCase {
     private readonly activityLogService: ActivityLogService,
     private readonly queueService: IQueueService,
     private readonly configService: ConfigService,
+    private readonly wsEmitter: WebsocketEmitterService,
   ) {}
 
   async execute(
@@ -88,6 +93,24 @@ export class CreateInvitationUseCase {
       invitation.token,
       invitation.expiresAt,
     );
+
+    // Notify existing user if they have an account
+    const existingUser = await this.userRepository.findByEmail(email);
+    if (existingUser?.id) {
+      this.wsEmitter.emitToUser(
+        existingUser.id,
+        RealtimeEvents.INVITATION_RECEIVED,
+        {
+          invitation: {
+            id: invitation.id,
+            workspaceId: invitation.workspaceId,
+            workspaceName: workspace.name,
+            role: invitation.role,
+            expiresAt: invitation.expiresAt,
+          },
+        },
+      );
+    }
 
     return invitation;
   }

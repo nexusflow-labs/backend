@@ -3,6 +3,10 @@ import { Project, ProjectStatus } from '../../domain/entities/project.entity';
 import { IProjectRepository } from '../../domain/repositories/project.repository';
 import { ActivityLogService } from 'src/modules/activity-logs/application/services/activity-log.service';
 import { EntityType } from 'src/modules/activity-logs/domain/enums/entity-type.enum';
+import {
+  WebsocketEmitterService,
+  RealtimeEvents,
+} from 'src/infrastructure/realtime';
 
 export interface UpdateProjectInput {
   name?: string;
@@ -15,6 +19,7 @@ export class UpdateProjectUseCase {
   constructor(
     private readonly projectRepository: IProjectRepository,
     private readonly activityLogService: ActivityLogService,
+    private readonly wsEmitter: WebsocketEmitterService,
   ) {}
 
   async execute(
@@ -57,6 +62,20 @@ export class UpdateProjectUseCase {
       await this.activityLogService.logUpdate(EntityType.PROJECT, id, userId, {
         changes,
       });
+
+      this.wsEmitter.emitToWorkspace(
+        project.workspaceId,
+        RealtimeEvents.PROJECT_UPDATED,
+        {
+          project: {
+            id: project.id,
+            name: project.name,
+            status: project.status,
+          },
+          changes,
+          updatedBy: userId,
+        },
+      );
     }
 
     return project;

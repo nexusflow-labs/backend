@@ -12,6 +12,10 @@ import { InvitationStatus } from '../../domain/enum/invitation.enum';
 import { ActivityLogService } from 'src/modules/activity-logs/application/services/activity-log.service';
 import { EntityType } from 'src/modules/activity-logs/domain/enums/entity-type.enum';
 import { Member } from 'src/modules/members/domain/entities/member.entity';
+import {
+  WebsocketEmitterService,
+  RealtimeEvents,
+} from 'src/infrastructure/realtime';
 
 @Injectable()
 export class AcceptInvitationUseCase {
@@ -20,6 +24,7 @@ export class AcceptInvitationUseCase {
     private readonly memberRepository: IMemberRepository,
     private readonly userRepository: IUserRepository,
     private readonly activityLogService: ActivityLogService,
+    private readonly wsEmitter: WebsocketEmitterService,
   ) {}
 
   async execute(token: string, userId: string): Promise<Member> {
@@ -97,6 +102,23 @@ export class AcceptInvitationUseCase {
         role: invitation.role,
         source: 'invitation',
         invitationId: invitation.id,
+      },
+    );
+
+    // Notify workspace members that invitation was accepted
+    this.wsEmitter.emitToWorkspace(
+      invitation.workspaceId,
+      RealtimeEvents.INVITATION_ACCEPTED,
+      {
+        invitation: {
+          id: invitation.id,
+          email: invitation.email,
+        },
+        member: {
+          id: member.id,
+          userId: member.userId,
+          role: member.role,
+        },
       },
     );
 

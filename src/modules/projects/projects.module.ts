@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { ProjectsController } from './presentation/projects.controller';
 import { IProjectRepository } from './domain/repositories/project.repository';
 import { PrismaProjectRepository } from './infrastructure/persistence/prisma-project.repository';
@@ -11,9 +11,13 @@ import { IMemberRepository } from '../members/domain/repositories/member.reposit
 import { MemberModule } from '../members/members.module';
 import { ActivityLogsModule } from '../activity-logs/activity-logs.module';
 import { ActivityLogService } from '../activity-logs/application/services/activity-log.service';
+import {
+  RealtimeModule,
+  WebsocketEmitterService,
+} from 'src/infrastructure/realtime';
 
 @Module({
-  imports: [ActivityLogsModule, MemberModule],
+  imports: [ActivityLogsModule, MemberModule, forwardRef(() => RealtimeModule)],
   controllers: [ProjectsController],
   providers: [
     {
@@ -22,13 +26,24 @@ import { ActivityLogService } from '../activity-logs/application/services/activi
     },
     {
       provide: CreateProjectUseCase,
-      inject: [IProjectRepository, IMemberRepository, ActivityLogService],
+      inject: [
+        IProjectRepository,
+        IMemberRepository,
+        ActivityLogService,
+        WebsocketEmitterService,
+      ],
       useFactory: (
         projectRepo: IProjectRepository,
         memberRepo: IMemberRepository,
         activityLogService: ActivityLogService,
+        wsEmitter: WebsocketEmitterService,
       ) =>
-        new CreateProjectUseCase(projectRepo, memberRepo, activityLogService),
+        new CreateProjectUseCase(
+          projectRepo,
+          memberRepo,
+          activityLogService,
+          wsEmitter,
+        ),
     },
     {
       provide: ListProjectsUseCase,
@@ -42,19 +57,21 @@ import { ActivityLogService } from '../activity-logs/application/services/activi
     },
     {
       provide: UpdateProjectUseCase,
-      inject: [IProjectRepository, ActivityLogService],
+      inject: [IProjectRepository, ActivityLogService, WebsocketEmitterService],
       useFactory: (
         repo: IProjectRepository,
         activityLogService: ActivityLogService,
-      ) => new UpdateProjectUseCase(repo, activityLogService),
+        wsEmitter: WebsocketEmitterService,
+      ) => new UpdateProjectUseCase(repo, activityLogService, wsEmitter),
     },
     {
       provide: DeleteProjectUseCase,
-      inject: [IProjectRepository, ActivityLogService],
+      inject: [IProjectRepository, ActivityLogService, WebsocketEmitterService],
       useFactory: (
         repo: IProjectRepository,
         activityLogService: ActivityLogService,
-      ) => new DeleteProjectUseCase(repo, activityLogService),
+        wsEmitter: WebsocketEmitterService,
+      ) => new DeleteProjectUseCase(repo, activityLogService, wsEmitter),
     },
   ],
   exports: [IProjectRepository],

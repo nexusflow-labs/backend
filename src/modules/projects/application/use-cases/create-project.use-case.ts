@@ -4,6 +4,10 @@ import { IProjectRepository } from '../../domain/repositories/project.repository
 import { IMemberRepository } from 'src/modules/members/domain/repositories/member.repository';
 import { ActivityLogService } from 'src/modules/activity-logs/application/services/activity-log.service';
 import { EntityType } from 'src/modules/activity-logs/domain/enums/entity-type.enum';
+import {
+  WebsocketEmitterService,
+  RealtimeEvents,
+} from 'src/infrastructure/realtime';
 
 @Injectable()
 export class CreateProjectUseCase {
@@ -11,6 +15,7 @@ export class CreateProjectUseCase {
     private readonly projectRepository: IProjectRepository,
     private readonly memberRepository: IMemberRepository,
     private readonly activityLogService: ActivityLogService,
+    private readonly wsEmitter: WebsocketEmitterService,
   ) {}
 
   async execute(
@@ -46,6 +51,20 @@ export class CreateProjectUseCase {
       project.id,
       ownerId,
       { name: project.name, workspaceId },
+    );
+
+    this.wsEmitter.emitToWorkspace(
+      workspaceId,
+      RealtimeEvents.PROJECT_CREATED,
+      {
+        project: {
+          id: project.id,
+          name: project.name,
+          status: project.status,
+          ownerId: project.ownerId,
+          workspaceId: project.workspaceId,
+        },
+      },
     );
 
     return project;

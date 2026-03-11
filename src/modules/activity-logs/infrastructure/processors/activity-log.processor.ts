@@ -1,5 +1,6 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, OnModuleInit } from '@nestjs/common';
 import { IJobProcessor } from '../../../../infrastructure/queue/interfaces/job-processor.interface';
+import { ProcessorRegistry } from '../../../../infrastructure/queue/services/processor-registry.service';
 import {
   JobType,
   ActivityLogJobPayload,
@@ -9,10 +10,17 @@ import { ActivityAction } from '../../domain/enums/activity-action.enum';
 import { EntityType } from '../../domain/enums/entity-type.enum';
 
 @Injectable()
-export class ActivityLogProcessor implements IJobProcessor {
+export class ActivityLogProcessor implements IJobProcessor, OnModuleInit {
   readonly jobType = JobType.ACTIVITY_LOG;
 
-  constructor(private readonly activityLogService: ActivityLogService) {}
+  constructor(
+    private readonly activityLogService: ActivityLogService,
+    private readonly registry: ProcessorRegistry,
+  ) {}
+
+  onModuleInit(): void {
+    this.registry.register(this);
+  }
 
   async process(payload: ActivityLogJobPayload): Promise<void> {
     const entityType = payload.entityType as EntityType;

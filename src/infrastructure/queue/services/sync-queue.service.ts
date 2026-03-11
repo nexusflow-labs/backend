@@ -1,9 +1,6 @@
-import { Injectable, Logger, Inject } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { IQueueService } from '../interfaces/queue.interface';
-import {
-  IJobProcessor,
-  JOB_PROCESSOR,
-} from '../interfaces/job-processor.interface';
+import { ProcessorRegistry } from './processor-registry.service';
 import { JobOptions, JobResult, JobType } from '../types/job.types';
 
 /**
@@ -13,19 +10,10 @@ import { JobOptions, JobResult, JobType } from '../types/job.types';
 @Injectable()
 export class SyncQueueService implements IQueueService {
   private readonly logger = new Logger(SyncQueueService.name);
-  private readonly processors: Map<JobType, IJobProcessor> = new Map();
   private jobCounter = 0;
   private readonly completedJobs: Map<string, JobResult> = new Map();
 
-  constructor(
-    @Inject(JOB_PROCESSOR)
-    jobProcessors: IJobProcessor[],
-  ) {
-    // Register all processors
-    for (const processor of jobProcessors) {
-      this.processors.set(processor.jobType, processor);
-    }
-
+  constructor(private readonly registry: ProcessorRegistry) {
     this.logger.warn(
       'Using synchronous queue execution. Jobs will be processed immediately.',
     );
@@ -41,7 +29,7 @@ export class SyncQueueService implements IQueueService {
     this.logger.debug(`Processing job ${jobId} synchronously (${type})`);
 
     try {
-      const processor = this.processors.get(type);
+      const processor = this.registry.get(type);
 
       if (!processor) {
         this.logger.warn(`No processor registered for job type: ${type}`);

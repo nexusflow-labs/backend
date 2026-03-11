@@ -7,6 +7,10 @@ import {
 import { ITaskRepository } from '../../domain/repositories/task.repository';
 import { ActivityLogService } from 'src/modules/activity-logs/application/services/activity-log.service';
 import { EntityType } from 'src/modules/activity-logs/domain/enums/entity-type.enum';
+import {
+  WebsocketEmitterService,
+  RealtimeEvents,
+} from 'src/infrastructure/realtime';
 
 export interface UpdateTaskInput {
   title?: string;
@@ -21,6 +25,7 @@ export class UpdateTaskUseCase {
   constructor(
     private readonly taskRepository: ITaskRepository,
     private readonly activityLogService: ActivityLogService,
+    private readonly wsEmitter: WebsocketEmitterService,
   ) {}
 
   async execute(
@@ -84,6 +89,19 @@ export class UpdateTaskUseCase {
         changes,
       });
     }
+
+    this.wsEmitter.emitToProject(task.projectId, RealtimeEvents.TASK_UPDATED, {
+      task: {
+        id: task.id,
+        title: task.title,
+        status: task.status,
+        priority: task.priority,
+        dueDate: task.dueDate,
+        assigneeId: task.assigneeId,
+      },
+      changes,
+      updatedBy: userId,
+    });
 
     return task;
   }

@@ -8,6 +8,10 @@ import { ITaskRepository } from '../../domain/repositories/task.repository';
 import { IProjectRepository } from 'src/modules/projects/domain/repositories/project.repository';
 import { ActivityLogService } from 'src/modules/activity-logs/application/services/activity-log.service';
 import { EntityType } from 'src/modules/activity-logs/domain/enums/entity-type.enum';
+import {
+  WebsocketEmitterService,
+  RealtimeEvents,
+} from 'src/infrastructure/realtime';
 
 @Injectable()
 export class CreateTaskUseCase {
@@ -15,6 +19,7 @@ export class CreateTaskUseCase {
     private readonly taskRepository: ITaskRepository,
     private readonly projectRepository: IProjectRepository,
     private readonly activityLogService: ActivityLogService,
+    private readonly wsEmitter: WebsocketEmitterService,
   ) {}
 
   async execute(
@@ -70,6 +75,18 @@ export class CreateTaskUseCase {
         parentId,
       },
     );
+
+    this.wsEmitter.emitToProject(projectId, RealtimeEvents.TASK_CREATED, {
+      task: {
+        id: task.id,
+        title: task.title,
+        projectId: task.projectId,
+        creatorId: task.creatorId,
+        status: task.status,
+        priority: task.priority,
+        parentId: task.parentId,
+      },
+    });
 
     return task;
   }

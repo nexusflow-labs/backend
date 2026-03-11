@@ -3,6 +3,10 @@ import { Comment } from '../../domain/entities/comment.entity';
 import { ICommentRepository } from '../../domain/repositories/comment.repository';
 import { ITaskRepository } from 'src/modules/tasks/domain/repositories/task.repository';
 import { ActivityLogService } from 'src/modules/activity-logs/application/services/activity-log.service';
+import {
+  WebsocketEmitterService,
+  RealtimeEvents,
+} from 'src/infrastructure/realtime';
 
 @Injectable()
 export class CreateCommentUseCase {
@@ -10,6 +14,7 @@ export class CreateCommentUseCase {
     private readonly commentRepository: ICommentRepository,
     private readonly taskRepository: ITaskRepository,
     private readonly activityLogService: ActivityLogService,
+    private readonly wsEmitter: WebsocketEmitterService,
   ) {}
 
   async execute(
@@ -33,6 +38,16 @@ export class CreateCommentUseCase {
     });
 
     await this.activityLogService.logComment(taskId, comment.id, authorId);
+
+    this.wsEmitter.emitToTask(taskId, RealtimeEvents.COMMENT_CREATED, {
+      comment: {
+        id: comment.id,
+        content: comment.content,
+        taskId: comment.taskId,
+        authorId: comment.authorId,
+        createdAt: comment.createdAt,
+      },
+    });
 
     return comment;
   }

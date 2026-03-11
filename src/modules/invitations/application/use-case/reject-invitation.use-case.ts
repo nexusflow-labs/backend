@@ -9,6 +9,10 @@ import { IUserRepository } from 'src/modules/auth/domain/repositories/user.repos
 import { InvitationStatus } from '../../domain/enum/invitation.enum';
 import { ActivityLogService } from 'src/modules/activity-logs/application/services/activity-log.service';
 import { EntityType } from 'src/modules/activity-logs/domain/enums/entity-type.enum';
+import {
+  WebsocketEmitterService,
+  RealtimeEvents,
+} from 'src/infrastructure/realtime';
 
 @Injectable()
 export class RejectInvitationUseCase {
@@ -16,6 +20,7 @@ export class RejectInvitationUseCase {
     private readonly invitationRepository: IInvitationRepository,
     private readonly userRepository: IUserRepository,
     private readonly activityLogService: ActivityLogService,
+    private readonly wsEmitter: WebsocketEmitterService,
   ) {}
 
   async execute(token: string, userId: string): Promise<void> {
@@ -64,6 +69,18 @@ export class RejectInvitationUseCase {
         previousStatus: InvitationStatus.PENDING,
         newStatus: InvitationStatus.REJECTED,
         workspaceId: invitation.workspaceId,
+      },
+    );
+
+    // Notify workspace admins that invitation was rejected
+    this.wsEmitter.emitToWorkspace(
+      invitation.workspaceId,
+      RealtimeEvents.INVITATION_REJECTED,
+      {
+        invitation: {
+          id: invitation.id,
+          email: invitation.email,
+        },
       },
     );
   }

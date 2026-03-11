@@ -8,12 +8,17 @@ import { IMemberRepository } from '../../domain/repositories/member.repository';
 import { MemberRole } from '../../domain/entities/member.entity';
 import { ActivityLogService } from 'src/modules/activity-logs/application/services/activity-log.service';
 import { EntityType } from 'src/modules/activity-logs/domain/enums/entity-type.enum';
+import {
+  WebsocketEmitterService,
+  RealtimeEvents,
+} from 'src/infrastructure/realtime';
 
 @Injectable()
 export class UpdateMemberRoleUseCase {
   constructor(
     private readonly memberRepository: IMemberRepository,
     private readonly activityLogService: ActivityLogService,
+    private readonly wsEmitter: WebsocketEmitterService,
   ) {}
 
   async execute(
@@ -65,6 +70,29 @@ export class UpdateMemberRoleUseCase {
       targetMember.id,
       operatorId,
       { workspaceId, targetUserId, oldRole, newRole },
+    );
+
+    this.wsEmitter.emitToWorkspace(
+      workspaceId,
+      RealtimeEvents.MEMBER_ROLE_CHANGED,
+      {
+        memberId: targetMember.id,
+        userId: targetUserId,
+        oldRole,
+        newRole,
+        changedBy: operatorId,
+      },
+    );
+
+    // Notify the user whose role was changed
+    this.wsEmitter.emitToUser(
+      targetUserId,
+      RealtimeEvents.MEMBER_ROLE_CHANGED,
+      {
+        workspaceId,
+        oldRole,
+        newRole,
+      },
     );
   }
 }

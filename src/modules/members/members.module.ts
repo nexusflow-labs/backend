@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { MemberController } from './presentation/members.controller';
 import { AddMemberUseCase } from './application/use-cases/add-member.use-case';
 import { UpdateMemberRoleUseCase } from './application/use-cases/update-member-role.use-case';
@@ -8,9 +8,13 @@ import { IMemberRepository } from './domain/repositories/member.repository';
 import { PrismaMemberRepository } from './infrastructure/persistence/prisma-member.repository';
 import { ActivityLogsModule } from '../activity-logs/activity-logs.module';
 import { ActivityLogService } from '../activity-logs/application/services/activity-log.service';
+import {
+  RealtimeModule,
+  WebsocketEmitterService,
+} from 'src/infrastructure/realtime';
 
 @Module({
-  imports: [ActivityLogsModule],
+  imports: [ActivityLogsModule, forwardRef(() => RealtimeModule)],
   controllers: [MemberController],
   providers: [
     {
@@ -19,27 +23,30 @@ import { ActivityLogService } from '../activity-logs/application/services/activi
     },
     {
       provide: AddMemberUseCase,
-      inject: [IMemberRepository, ActivityLogService],
+      inject: [IMemberRepository, ActivityLogService, WebsocketEmitterService],
       useFactory: (
         repo: IMemberRepository,
         activityLogService: ActivityLogService,
-      ) => new AddMemberUseCase(repo, activityLogService),
+        wsEmitter: WebsocketEmitterService,
+      ) => new AddMemberUseCase(repo, activityLogService, wsEmitter),
     },
     {
       provide: UpdateMemberRoleUseCase,
-      inject: [IMemberRepository, ActivityLogService],
+      inject: [IMemberRepository, ActivityLogService, WebsocketEmitterService],
       useFactory: (
         repo: IMemberRepository,
         activityLogService: ActivityLogService,
-      ) => new UpdateMemberRoleUseCase(repo, activityLogService),
+        wsEmitter: WebsocketEmitterService,
+      ) => new UpdateMemberRoleUseCase(repo, activityLogService, wsEmitter),
     },
     {
       provide: RemoveMemberUseCase,
-      inject: [IMemberRepository, ActivityLogService],
+      inject: [IMemberRepository, ActivityLogService, WebsocketEmitterService],
       useFactory: (
         repo: IMemberRepository,
         activityLogService: ActivityLogService,
-      ) => new RemoveMemberUseCase(repo, activityLogService),
+        wsEmitter: WebsocketEmitterService,
+      ) => new RemoveMemberUseCase(repo, activityLogService, wsEmitter),
     },
     {
       provide: GetWorkspaceMembersUseCase,

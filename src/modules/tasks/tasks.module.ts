@@ -15,9 +15,11 @@ import { IMemberRepository } from '../members/domain/repositories/member.reposit
 import { MemberModule } from '../members/members.module';
 import { ActivityLogsModule } from '../activity-logs/activity-logs.module';
 import { ActivityLogService } from '../activity-logs/application/services/activity-log.service';
+import { RealtimeModule } from 'src/infrastructure/realtime';
+import { WebsocketEmitterService } from 'src/infrastructure/realtime';
 
 @Module({
-  imports: [ActivityLogsModule, ProjectsModule, MemberModule],
+  imports: [ActivityLogsModule, ProjectsModule, MemberModule, RealtimeModule],
   controllers: [TasksController],
   providers: [
     {
@@ -26,12 +28,24 @@ import { ActivityLogService } from '../activity-logs/application/services/activi
     },
     {
       provide: CreateTaskUseCase,
-      inject: [ITaskRepository, IProjectRepository, ActivityLogService],
+      inject: [
+        ITaskRepository,
+        IProjectRepository,
+        ActivityLogService,
+        WebsocketEmitterService,
+      ],
       useFactory: (
         taskRepo: ITaskRepository,
         projectRepo: IProjectRepository,
         activityLogService: ActivityLogService,
-      ) => new CreateTaskUseCase(taskRepo, projectRepo, activityLogService),
+        wsEmitter: WebsocketEmitterService,
+      ) =>
+        new CreateTaskUseCase(
+          taskRepo,
+          projectRepo,
+          activityLogService,
+          wsEmitter,
+        ),
     },
     {
       provide: ListTasksUseCase,
@@ -45,11 +59,12 @@ import { ActivityLogService } from '../activity-logs/application/services/activi
     },
     {
       provide: UpdateTaskUseCase,
-      inject: [ITaskRepository, ActivityLogService],
+      inject: [ITaskRepository, ActivityLogService, WebsocketEmitterService],
       useFactory: (
         repo: ITaskRepository,
         activityLogService: ActivityLogService,
-      ) => new UpdateTaskUseCase(repo, activityLogService),
+        wsEmitter: WebsocketEmitterService,
+      ) => new UpdateTaskUseCase(repo, activityLogService, wsEmitter),
     },
     {
       provide: AssignTaskUseCase,
@@ -58,27 +73,31 @@ import { ActivityLogService } from '../activity-logs/application/services/activi
         IProjectRepository,
         IMemberRepository,
         ActivityLogService,
+        WebsocketEmitterService,
       ],
       useFactory: (
         taskRepo: ITaskRepository,
         projectRepo: IProjectRepository,
         memberRepo: IMemberRepository,
         activityLogService: ActivityLogService,
+        wsEmitter: WebsocketEmitterService,
       ) =>
         new AssignTaskUseCase(
           taskRepo,
           projectRepo,
           memberRepo,
           activityLogService,
+          wsEmitter,
         ),
     },
     {
       provide: DeleteTaskUseCase,
-      inject: [ITaskRepository, ActivityLogService],
+      inject: [ITaskRepository, ActivityLogService, WebsocketEmitterService],
       useFactory: (
         repo: ITaskRepository,
         activityLogService: ActivityLogService,
-      ) => new DeleteTaskUseCase(repo, activityLogService),
+        wsEmitter: WebsocketEmitterService,
+      ) => new DeleteTaskUseCase(repo, activityLogService, wsEmitter),
     },
     {
       provide: GetSubtasksUseCase,
