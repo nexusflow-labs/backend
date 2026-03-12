@@ -43,7 +43,6 @@ import { MemoryCacheService } from './memory-cache.service';
       },
       inject: [ConfigService],
     },
-    // They are created manually in the factory to avoid orphan connections
   ],
   exports: [ICacheService],
 })

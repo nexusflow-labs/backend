@@ -2,7 +2,6 @@ import { Module } from '@nestjs/common';
 import { LabelsController } from './presentation/labels.controller';
 import { TaskLabelsController } from './presentation/task-labels.controller';
 import { ILabelRepository } from './domain/repositories/label.repository';
-import { PrismaLabelRepository } from './infrastructure/persistence/prisma-label.repository';
 import { CreateLabelUseCase } from './application/use-cases/create-label.use-case';
 import { ListLabelsUseCase } from './application/use-cases/list-labels.use-case';
 import { UpdateLabelUseCase } from './application/use-cases/update-label.use-case';
@@ -11,20 +10,14 @@ import { AddLabelToTaskUseCase } from './application/use-cases/add-label-to-task
 import { RemoveLabelFromTaskUseCase } from './application/use-cases/remove-label-from-task.use-case';
 import { GetTaskLabelsUseCase } from './application/use-cases/get-task-labels.use-case';
 import { ITaskRepository } from '../tasks/domain/repositories/task.repository';
-import { TasksModule } from '../tasks/tasks.module';
 import { IProjectRepository } from '../projects/domain/repositories/project.repository';
-import { ProjectsModule } from '../projects/projects.module';
 import { ActivityLogsModule } from '../activity-logs/activity-logs.module';
 import { ActivityLogService } from '../activity-logs/application/services/activity-log.service';
 
 @Module({
-  imports: [ActivityLogsModule, TasksModule, ProjectsModule],
+  imports: [ActivityLogsModule],
   controllers: [LabelsController, TaskLabelsController],
   providers: [
-    {
-      provide: ILabelRepository,
-      useClass: PrismaLabelRepository,
-    },
     {
       provide: CreateLabelUseCase,
       inject: [ILabelRepository, ActivityLogService],
@@ -92,6 +85,5 @@ import { ActivityLogService } from '../activity-logs/application/services/activi
         new GetTaskLabelsUseCase(labelRepo, taskRepo),
     },
   ],
-  exports: [ILabelRepository],
 })
 export class LabelsModule {}

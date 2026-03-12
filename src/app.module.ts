@@ -9,7 +9,7 @@ import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { ConfigService } from '@nestjs/config';
 import { JwtAuthGuard } from './modules/auth/infrastructure/guards/jwt-auth.guard';
 import { ConfigModule } from './infrastructure/config/config.module';
-import { PrismaModule } from './infrastructure/prisma/prisma.module';
+import { DatabaseModule } from './infrastructure/database/database.module';
 import { CacheModule } from './infrastructure/cache/cache.module';
 import { EmailModule } from './infrastructure/email/email.module';
 import { AuthorizationModule } from './infrastructure/authorization/authorization.module';
@@ -28,11 +28,14 @@ import { DashboardModule } from './modules/dashboard/dashboard.module';
 import { InvitationModule } from './modules/invitations/invitations.module';
 import { QueueModule } from './infrastructure/queue/queue.module';
 import { RealtimeModule } from './infrastructure/realtime/realtime.module';
+import { NotificationsModule } from './modules/notifications/notifications.module';
+import { PrismaModule } from './infrastructure/prisma/prisma.module';
 
 @Module({
   imports: [
     ConfigModule,
     PrismaModule,
+    DatabaseModule,
     ThrottlerModule.forRootAsync({
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({
@@ -62,6 +65,7 @@ import { RealtimeModule } from './infrastructure/realtime/realtime.module';
     DashboardModule,
     InvitationModule,
     RealtimeModule,
+    NotificationsModule,
   ],
   providers: [
     {

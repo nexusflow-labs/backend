@@ -12,6 +12,9 @@ import {
   WebsocketEmitterService,
   RealtimeEvents,
 } from 'src/infrastructure/realtime';
+import { CreateNotificationUseCase } from 'src/modules/notifications/applications/use-case/create-notification.use-case';
+import { NotificationType } from 'src/modules/notifications/domain/entities/notification.enum';
+import { EntityType } from 'src/modules/activity-logs/domain/enums/entity-type.enum';
 
 @Injectable()
 export class AssignTaskUseCase {
@@ -21,6 +24,7 @@ export class AssignTaskUseCase {
     private readonly memberRepository: IMemberRepository,
     private readonly activityLogService: ActivityLogService,
     private readonly wsEmitter: WebsocketEmitterService,
+    private readonly createNotificationUseCase: CreateNotificationUseCase,
   ) {}
 
   async execute(
@@ -35,6 +39,7 @@ export class AssignTaskUseCase {
     }
 
     const previousAssigneeId = task.assigneeId;
+    let workspaceId: string | undefined;
 
     // If assigning to someone (not unassigning)
     if (assigneeId) {
@@ -44,9 +49,11 @@ export class AssignTaskUseCase {
         throw new NotFoundException('Project not found');
       }
 
+      workspaceId = project.workspaceId;
+
       // Verify assignee is a member of the workspace
       const member = await this.memberRepository.findByWorkspaceAndUser(
-        project.workspaceId,
+        workspaceId,
         assigneeId,
       );
 
@@ -86,6 +93,21 @@ export class AssignTaskUseCase {
         projectId: task.projectId,
         assignedBy: userId,
       });
+
+      // Create in-app notification for assignee (skip if self-assign)
+      if (assigneeId !== userId) {
+        await this.createNotificationUseCase.execute(
+          assigneeId,
+          NotificationType.TASK_ASSIGNED,
+          EntityType.TASK,
+          taskId,
+          `You have been assigned to task: ${task.title}`,
+          userId,
+          workspaceId,
+          undefined,
+          { taskId, projectId: task.projectId },
+        );
+      }
     }
 
     return task;

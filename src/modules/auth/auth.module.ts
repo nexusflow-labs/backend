@@ -12,9 +12,6 @@ import { IUserRepository } from './domain/repositories/user.repository';
 import { IRefreshTokenRepository } from './domain/repositories/refresh-token.repository';
 import { IPasswordResetTokenRepository } from './domain/repositories/password-reset-token.repository';
 import { AuthController } from './presentation/auth.controller';
-import { PrismaUserRepository } from './infrastructure/persistence/prisma-users.repository';
-import { PrismaRefreshTokenRepository } from './infrastructure/persistence/prisma-refresh-token.repository';
-import { PrismaPasswordResetTokenRepository } from './infrastructure/persistence/prisma-password-reset-token.repository';
 import { IQueueService } from 'src/infrastructure/queue/interfaces/queue.interface';
 import { JwtStrategy } from './strategies/jwt.strategy';
 
@@ -30,20 +27,6 @@ import { JwtStrategy } from './strategies/jwt.strategy';
   providers: [
     // Services
     PasswordHashingService,
-
-    // Repositories
-    {
-      provide: IUserRepository,
-      useClass: PrismaUserRepository,
-    },
-    {
-      provide: IRefreshTokenRepository,
-      useClass: PrismaRefreshTokenRepository,
-    },
-    {
-      provide: IPasswordResetTokenRepository,
-      useClass: PrismaPasswordResetTokenRepository,
-    },
 
     // Use Cases
     {
@@ -136,6 +119,5 @@ import { JwtStrategy } from './strategies/jwt.strategy';
 
     JwtStrategy,
   ],
-  exports: [IUserRepository],
 })
 export class AuthModule {}

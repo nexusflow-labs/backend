@@ -49,6 +49,11 @@ export const RealtimeEvents = {
 
   // Presence
   PRESENCE_UPDATE: 'presence:update',
+
+  // Notification events
+  NOTIFICATION_RECEIVED: 'notification:received',
+  NOTIFICATION_READ: 'notification:read',
+  NOTIFICATION_READ_ALL: 'notification:read_all',
 } as const;
 
 export type RealtimeEvent =

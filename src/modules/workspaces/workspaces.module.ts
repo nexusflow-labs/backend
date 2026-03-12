@@ -6,7 +6,6 @@ import { ListWorkspacesUseCase } from './application/use-cases/list-workspaces.u
 import { GetWorkspaceUseCase } from './application/use-cases/get-workspace.use-case';
 import { UpdateWorkspaceUseCase } from './application/use-cases/update-workspace.use-case';
 import { RemoveWorkspaceUseCase } from './application/use-cases/remove-workspace.use-case';
-import { PrismaWorkspaceRepository } from './infrastructure/persistence/prisma-workspace.repository';
 import { ActivityLogsModule } from '../activity-logs/activity-logs.module';
 import { ActivityLogService } from '../activity-logs/application/services/activity-log.service';
 
@@ -14,10 +13,6 @@ import { ActivityLogService } from '../activity-logs/application/services/activi
   imports: [ActivityLogsModule],
   controllers: [WorkspacesController],
   providers: [
-    {
-      provide: IWorkspaceRepository,
-      useClass: PrismaWorkspaceRepository,
-    },
     {
       provide: CreateWorkspaceUseCase,
       inject: [IWorkspaceRepository, ActivityLogService],
@@ -54,6 +49,5 @@ import { ActivityLogService } from '../activity-logs/application/services/activi
       ) => new RemoveWorkspaceUseCase(repo, activityLogService),
     },
   ],
-  exports: [IWorkspaceRepository],
 })
 export class WorkspacesModule {}

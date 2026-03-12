@@ -11,6 +11,8 @@ import {
   WebsocketEmitterService,
   RealtimeEvents,
 } from 'src/infrastructure/realtime';
+import { CreateNotificationUseCase } from 'src/modules/notifications/applications/use-case/create-notification.use-case';
+import { NotificationType } from 'src/modules/notifications/domain/entities/notification.enum';
 
 @Injectable()
 export class RemoveMemberUseCase {
@@ -18,6 +20,7 @@ export class RemoveMemberUseCase {
     private readonly memberRepository: IMemberRepository,
     private readonly activityLogService: ActivityLogService,
     private readonly wsEmitter: WebsocketEmitterService,
+    private readonly createNotificationUseCase: CreateNotificationUseCase,
   ) {}
 
   async execute(
@@ -83,5 +86,20 @@ export class RemoveMemberUseCase {
     this.wsEmitter.emitToUser(targetUserId, RealtimeEvents.MEMBER_REMOVED, {
       workspaceId,
     });
+
+    // Create in-app notification for the removed user (skip if self-remove)
+    if (targetUserId !== operatorId) {
+      await this.createNotificationUseCase.execute(
+        targetUserId,
+        NotificationType.MEMBER_REMOVED,
+        EntityType.MEMBER,
+        memberId,
+        'You have been removed from a workspace',
+        operatorId,
+        workspaceId,
+        undefined,
+        { workspaceId },
+      );
+    }
   }
 }

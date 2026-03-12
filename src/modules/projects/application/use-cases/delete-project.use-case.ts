@@ -31,9 +31,13 @@ export class DeleteProjectUseCase {
       workspaceId,
     });
 
-    this.wsEmitter.emitToWorkspace(workspaceId, RealtimeEvents.PROJECT_DELETED, {
-      projectId: id,
-      deletedBy: userId,
-    });
+    this.wsEmitter.emitToWorkspace(
+      workspaceId,
+      RealtimeEvents.PROJECT_DELETED,
+      {
+        projectId: id,
+        deletedBy: userId,
+      },
+    );
   }
 }

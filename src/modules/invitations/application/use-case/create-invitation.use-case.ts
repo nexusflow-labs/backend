@@ -21,6 +21,8 @@ import {
   WebsocketEmitterService,
   RealtimeEvents,
 } from 'src/infrastructure/realtime';
+import { CreateNotificationUseCase } from 'src/modules/notifications/applications/use-case/create-notification.use-case';
+import { NotificationType } from 'src/modules/notifications/domain/entities/notification.enum';
 
 @Injectable()
 export class CreateInvitationUseCase {
@@ -35,6 +37,7 @@ export class CreateInvitationUseCase {
     private readonly queueService: IQueueService,
     private readonly configService: ConfigService,
     private readonly wsEmitter: WebsocketEmitterService,
+    private readonly createNotificationUseCase: CreateNotificationUseCase,
   ) {}
 
   async execute(
@@ -109,6 +112,19 @@ export class CreateInvitationUseCase {
             expiresAt: invitation.expiresAt,
           },
         },
+      );
+
+      // Store notification in database for existing users
+      await this.createNotificationUseCase.execute(
+        existingUser.id,
+        NotificationType.INVITATION_RECEIVED,
+        EntityType.INVITATION,
+        invitation.id,
+        `You have been invited to join workspace: ${workspace.name}`,
+        inviterId,
+        workspaceId,
+        undefined,
+        { workspaceId, workspaceName: workspace.name, role },
       );
     }
 

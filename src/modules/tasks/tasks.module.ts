@@ -1,7 +1,6 @@
 import { Module } from '@nestjs/common';
 import { TasksController } from './presentation/tasks.controller';
 import { ITaskRepository } from './domain/repositories/task.repository';
-import { PrismaTaskRepository } from './infrastructure/persistence/prisma-task.repository';
 import { CreateTaskUseCase } from './application/use-cases/create-task.use-case';
 import { ListTasksUseCase } from './application/use-cases/list-tasks.use-case';
 import { GetTaskUseCase } from './application/use-cases/get-task.use-case';
@@ -10,22 +9,18 @@ import { AssignTaskUseCase } from './application/use-cases/assign-task.use-case'
 import { DeleteTaskUseCase } from './application/use-cases/delete-task.use-case';
 import { GetSubtasksUseCase } from './application/use-cases/get-subtasks.use-case';
 import { IProjectRepository } from '../projects/domain/repositories/project.repository';
-import { ProjectsModule } from '../projects/projects.module';
 import { IMemberRepository } from '../members/domain/repositories/member.repository';
-import { MemberModule } from '../members/members.module';
 import { ActivityLogsModule } from '../activity-logs/activity-logs.module';
 import { ActivityLogService } from '../activity-logs/application/services/activity-log.service';
 import { RealtimeModule } from 'src/infrastructure/realtime';
 import { WebsocketEmitterService } from 'src/infrastructure/realtime';
+import { NotificationsModule } from '../notifications/notifications.module';
+import { CreateNotificationUseCase } from '../notifications/applications/use-case/create-notification.use-case';
 
 @Module({
-  imports: [ActivityLogsModule, ProjectsModule, MemberModule, RealtimeModule],
+  imports: [ActivityLogsModule, RealtimeModule, NotificationsModule],
   controllers: [TasksController],
   providers: [
-    {
-      provide: ITaskRepository,
-      useClass: PrismaTaskRepository,
-    },
     {
       provide: CreateTaskUseCase,
       inject: [
@@ -74,6 +69,7 @@ import { WebsocketEmitterService } from 'src/infrastructure/realtime';
         IMemberRepository,
         ActivityLogService,
         WebsocketEmitterService,
+        CreateNotificationUseCase,
       ],
       useFactory: (
         taskRepo: ITaskRepository,
@@ -81,6 +77,7 @@ import { WebsocketEmitterService } from 'src/infrastructure/realtime';
         memberRepo: IMemberRepository,
         activityLogService: ActivityLogService,
         wsEmitter: WebsocketEmitterService,
+        createNotificationUseCase: CreateNotificationUseCase,
       ) =>
         new AssignTaskUseCase(
           taskRepo,
@@ -88,6 +85,7 @@ import { WebsocketEmitterService } from 'src/infrastructure/realtime';
           memberRepo,
           activityLogService,
           wsEmitter,
+          createNotificationUseCase,
         ),
     },
     {
@@ -105,6 +103,5 @@ import { WebsocketEmitterService } from 'src/infrastructure/realtime';
       useFactory: (repo: ITaskRepository) => new GetSubtasksUseCase(repo),
     },
   ],
-  exports: [ITaskRepository],
 })
 export class TasksModule {}

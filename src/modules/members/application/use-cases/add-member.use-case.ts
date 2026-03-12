@@ -7,6 +7,8 @@ import {
   WebsocketEmitterService,
   RealtimeEvents,
 } from 'src/infrastructure/realtime';
+import { CreateNotificationUseCase } from 'src/modules/notifications/applications/use-case/create-notification.use-case';
+import { NotificationType } from 'src/modules/notifications/domain/entities/notification.enum';
 
 @Injectable()
 export class AddMemberUseCase {
@@ -14,6 +16,7 @@ export class AddMemberUseCase {
     private readonly memberRepository: IMemberRepository,
     private readonly activityLogService: ActivityLogService,
     private readonly wsEmitter: WebsocketEmitterService,
+    private readonly createNotificationUseCase: CreateNotificationUseCase,
   ) {}
 
   async execute(
@@ -53,6 +56,21 @@ export class AddMemberUseCase {
       },
       addedBy: operatorId,
     });
+
+    // Notify the new member (skip if self-add)
+    if (userId !== operatorId) {
+      await this.createNotificationUseCase.execute(
+        userId,
+        NotificationType.MEMBER_ADDED,
+        EntityType.MEMBER,
+        member.id,
+        'You have been added to a workspace',
+        operatorId,
+        workspaceId,
+        undefined,
+        { workspaceId, role },
+      );
+    }
 
     return member;
   }

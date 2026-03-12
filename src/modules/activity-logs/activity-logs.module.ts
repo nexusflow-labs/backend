@@ -1,7 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ActivityLogsController } from './presentation/activity-logs.controller';
 import { IActivityLogRepository } from './domain/repositories/activity-log.repository';
-import { PrismaActivityLogRepository } from './infrastructure/persistence/prisma-activity-log.repository';
 import { ActivityLogService } from './application/services/activity-log.service';
 import { ListActivitiesUseCase } from './application/use-cases/list-activities.use-case';
 import { ActivityLogProcessor } from './infrastructure/processors/activity-log.processor';
@@ -9,10 +8,6 @@ import { ActivityLogProcessor } from './infrastructure/processors/activity-log.p
 @Module({
   controllers: [ActivityLogsController],
   providers: [
-    {
-      provide: IActivityLogRepository,
-      useClass: PrismaActivityLogRepository,
-    },
     {
       provide: ActivityLogService,
       inject: [IActivityLogRepository],
@@ -25,9 +20,8 @@ import { ActivityLogProcessor } from './infrastructure/processors/activity-log.p
       useFactory: (repo: IActivityLogRepository) =>
         new ListActivitiesUseCase(repo),
     },
-    // Processor registers itself with ProcessorRegistry via OnModuleInit
     ActivityLogProcessor,
   ],
-  exports: [ActivityLogService, IActivityLogRepository],
+  exports: [ActivityLogService],
 })
 export class ActivityLogsModule {}

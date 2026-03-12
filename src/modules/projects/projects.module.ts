@@ -1,14 +1,12 @@
-import { Module, forwardRef } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { ProjectsController } from './presentation/projects.controller';
 import { IProjectRepository } from './domain/repositories/project.repository';
-import { PrismaProjectRepository } from './infrastructure/persistence/prisma-project.repository';
 import { CreateProjectUseCase } from './application/use-cases/create-project.use-case';
 import { ListProjectsUseCase } from './application/use-cases/list-projects.use-case';
 import { GetProjectUseCase } from './application/use-cases/get-project.use-case';
 import { UpdateProjectUseCase } from './application/use-cases/update-project.use-case';
 import { DeleteProjectUseCase } from './application/use-cases/delete-project.use-case';
 import { IMemberRepository } from '../members/domain/repositories/member.repository';
-import { MemberModule } from '../members/members.module';
 import { ActivityLogsModule } from '../activity-logs/activity-logs.module';
 import { ActivityLogService } from '../activity-logs/application/services/activity-log.service';
 import {
@@ -17,13 +15,9 @@ import {
 } from 'src/infrastructure/realtime';
 
 @Module({
-  imports: [ActivityLogsModule, MemberModule, forwardRef(() => RealtimeModule)],
+  imports: [ActivityLogsModule, RealtimeModule],
   controllers: [ProjectsController],
   providers: [
-    {
-      provide: IProjectRepository,
-      useClass: PrismaProjectRepository,
-    },
     {
       provide: CreateProjectUseCase,
       inject: [
@@ -74,6 +68,5 @@ import {
       ) => new DeleteProjectUseCase(repo, activityLogService, wsEmitter),
     },
   ],
-  exports: [IProjectRepository],
 })
 export class ProjectsModule {}

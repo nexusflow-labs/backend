@@ -2,19 +2,25 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { Comment } from '../../domain/entities/comment.entity';
 import { ICommentRepository } from '../../domain/repositories/comment.repository';
 import { ITaskRepository } from 'src/modules/tasks/domain/repositories/task.repository';
+import { IProjectRepository } from 'src/modules/projects/domain/repositories/project.repository';
 import { ActivityLogService } from 'src/modules/activity-logs/application/services/activity-log.service';
 import {
   WebsocketEmitterService,
   RealtimeEvents,
 } from 'src/infrastructure/realtime';
+import { CreateNotificationUseCase } from 'src/modules/notifications/applications/use-case/create-notification.use-case';
+import { NotificationType } from 'src/modules/notifications/domain/entities/notification.enum';
+import { EntityType } from 'src/modules/activity-logs/domain/enums/entity-type.enum';
 
 @Injectable()
 export class CreateCommentUseCase {
   constructor(
     private readonly commentRepository: ICommentRepository,
     private readonly taskRepository: ITaskRepository,
+    private readonly projectRepository: IProjectRepository,
     private readonly activityLogService: ActivityLogService,
     private readonly wsEmitter: WebsocketEmitterService,
+    private readonly createNotificationUseCase: CreateNotificationUseCase,
   ) {}
 
   async execute(
@@ -48,6 +54,22 @@ export class CreateCommentUseCase {
         createdAt: comment.createdAt,
       },
     });
+
+    // Notify task assignee about new comment (skip if author is assignee)
+    if (task.assigneeId && task.assigneeId !== authorId) {
+      const project = await this.projectRepository.findById(task.projectId);
+      await this.createNotificationUseCase.execute(
+        task.assigneeId,
+        NotificationType.COMMENT_ADDED,
+        EntityType.COMMENT,
+        comment.id,
+        `New comment on task: ${task.title}`,
+        authorId,
+        project?.workspaceId,
+        comment.content.substring(0, 100),
+        { taskId, commentId: comment.id },
+      );
+    }
 
     return comment;
   }

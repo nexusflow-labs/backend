@@ -1,47 +1,50 @@
 import { Module } from '@nestjs/common';
 import { CommentsController } from './presentation/comments.controller';
 import { ICommentRepository } from './domain/repositories/comment.repository';
-import { PrismaCommentRepository } from './infrastructure/persistence/prisma-comment.repository';
 import { CreateCommentUseCase } from './application/use-cases/create-comment.use-case';
 import { ListCommentsUseCase } from './application/use-cases/list-comments.use-case';
 import { UpdateCommentUseCase } from './application/use-cases/update-comment.use-case';
 import { DeleteCommentUseCase } from './application/use-cases/delete-comment.use-case';
 import { ITaskRepository } from '../tasks/domain/repositories/task.repository';
-import { TasksModule } from '../tasks/tasks.module';
+import { IProjectRepository } from '../projects/domain/repositories/project.repository';
 import { ActivityLogsModule } from '../activity-logs/activity-logs.module';
 import { ActivityLogService } from '../activity-logs/application/services/activity-log.service';
 import {
   RealtimeModule,
   WebsocketEmitterService,
 } from 'src/infrastructure/realtime';
+import { NotificationsModule } from '../notifications/notifications.module';
+import { CreateNotificationUseCase } from '../notifications/applications/use-case/create-notification.use-case';
 
 @Module({
-  imports: [ActivityLogsModule, TasksModule, RealtimeModule],
+  imports: [ActivityLogsModule, RealtimeModule, NotificationsModule],
   controllers: [CommentsController],
   providers: [
-    {
-      provide: ICommentRepository,
-      useClass: PrismaCommentRepository,
-    },
     {
       provide: CreateCommentUseCase,
       inject: [
         ICommentRepository,
         ITaskRepository,
+        IProjectRepository,
         ActivityLogService,
         WebsocketEmitterService,
+        CreateNotificationUseCase,
       ],
       useFactory: (
         commentRepo: ICommentRepository,
         taskRepo: ITaskRepository,
+        projectRepo: IProjectRepository,
         activityLogService: ActivityLogService,
         wsEmitter: WebsocketEmitterService,
+        createNotificationUseCase: CreateNotificationUseCase,
       ) =>
         new CreateCommentUseCase(
           commentRepo,
           taskRepo,
+          projectRepo,
           activityLogService,
           wsEmitter,
+          createNotificationUseCase,
         ),
     },
     {
@@ -71,6 +74,5 @@ import {
       ) => new DeleteCommentUseCase(repo, activityLogService, wsEmitter),
     },
   ],
-  exports: [ICommentRepository],
 })
 export class CommentsModule {}
