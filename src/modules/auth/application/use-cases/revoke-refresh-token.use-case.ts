@@ -1,9 +1,10 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable, UnauthorizedException, Inject } from '@nestjs/common';
 import { IRefreshTokenRepository } from '../../domain/repositories/refresh-token.repository';
 
 @Injectable()
 export class RevokeRefreshTokenUseCase {
   constructor(
+    @Inject(IRefreshTokenRepository)
     private readonly refreshTokenRepository: IRefreshTokenRepository,
   ) {}
 

@@ -3,6 +3,7 @@ import {
   NotFoundException,
   ForbiddenException,
   BadRequestException,
+  Inject,
 } from '@nestjs/common';
 import { IInvitationRepository } from '../../domain/repositories/invitation.repository';
 import { IUserRepository } from 'src/modules/auth/domain/repositories/user.repository';
@@ -17,7 +18,9 @@ import {
 @Injectable()
 export class RejectInvitationUseCase {
   constructor(
+    @Inject(IInvitationRepository)
     private readonly invitationRepository: IInvitationRepository,
+    @Inject(IUserRepository)
     private readonly userRepository: IUserRepository,
     private readonly activityLogService: ActivityLogService,
     private readonly wsEmitter: WebsocketEmitterService,

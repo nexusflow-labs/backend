@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, Inject } from '@nestjs/common';
 import { CommentWithUser } from '../../domain/entities/comment-with-user.entity';
 import {
   ICommentRepository,
@@ -10,7 +10,9 @@ import { PaginatedResult } from 'src/infrastructure/common/pagination';
 @Injectable()
 export class ListCommentsUseCase {
   constructor(
+    @Inject(ICommentRepository)
     private readonly commentRepository: ICommentRepository,
+    @Inject(ITaskRepository)
     private readonly taskRepository: ITaskRepository,
   ) {}
 

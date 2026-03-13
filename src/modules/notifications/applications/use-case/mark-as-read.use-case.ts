@@ -1,10 +1,11 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, Inject } from '@nestjs/common';
 import { INotificationRepository } from '../../domain/repositories/notification.repository';
 import { Notification } from '../../domain/entities/notification.entity';
 
 @Injectable()
 export class MarkAsReadUseCase {
   constructor(
+    @Inject(INotificationRepository)
     private readonly notificationRepository: INotificationRepository,
   ) {}
 

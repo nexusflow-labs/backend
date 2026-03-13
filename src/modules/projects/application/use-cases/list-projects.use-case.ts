@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Inject } from '@nestjs/common';
 import { Project } from '../../domain/entities/project.entity';
 import {
   IProjectRepository,
@@ -9,7 +9,10 @@ import { PaginatedResult } from 'src/infrastructure/common/pagination';
 
 @Injectable()
 export class ListProjectsUseCase {
-  constructor(private readonly projectRepository: IProjectRepository) {}
+  constructor(
+    @Inject(IProjectRepository)
+    private readonly projectRepository: IProjectRepository,
+  ) {}
 
   async execute(workspaceId: string): Promise<Project[]> {
     return this.projectRepository.findByWorkspace(workspaceId);

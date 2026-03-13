@@ -2,6 +2,7 @@ import {
   Injectable,
   NotFoundException,
   ConflictException,
+  Inject,
 } from '@nestjs/common';
 import { Label } from '../../domain/entities/label.entity';
 import { ILabelRepository } from '../../domain/repositories/label.repository';
@@ -16,6 +17,7 @@ export interface UpdateLabelInput {
 @Injectable()
 export class UpdateLabelUseCase {
   constructor(
+    @Inject(ILabelRepository)
     private readonly labelRepository: ILabelRepository,
     private readonly activityLogService: ActivityLogService,
   ) {}

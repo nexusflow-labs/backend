@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Inject } from '@nestjs/common';
 import { IActivityLogRepository } from '../../domain/repositories/activity-log.repository';
 import { ActivityAction } from '../../domain/enums/activity-action.enum';
 import { EntityType } from '../../domain/enums/entity-type.enum';
@@ -6,7 +6,10 @@ import { ActivityLog } from '../../domain/entities/activity-log.entity';
 
 @Injectable()
 export class ActivityLogService {
-  constructor(private readonly activityLogRepository: IActivityLogRepository) {}
+  constructor(
+    @Inject(IActivityLogRepository)
+    private readonly activityLogRepository: IActivityLogRepository,
+  ) {}
 
   async logCreate(
     entityType: EntityType,

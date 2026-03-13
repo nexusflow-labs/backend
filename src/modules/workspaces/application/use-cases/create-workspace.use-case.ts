@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Inject } from '@nestjs/common';
 import { Workspace } from '../../domain/entities/workspace.entity';
 import { IWorkspaceRepository } from '../../domain/repositories/workspaces.repository';
 import { ActivityLogService } from 'src/modules/activity-logs/application/services/activity-log.service';
@@ -7,6 +7,7 @@ import { EntityType } from 'src/modules/activity-logs/domain/enums/entity-type.e
 @Injectable()
 export class CreateWorkspaceUseCase {
   constructor(
+    @Inject(IWorkspaceRepository)
     private readonly workspaceRepository: IWorkspaceRepository,
     private readonly activityLogService: ActivityLogService,
   ) {}

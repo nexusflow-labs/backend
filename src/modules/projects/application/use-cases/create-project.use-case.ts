@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, Inject } from '@nestjs/common';
 import { Project } from '../../domain/entities/project.entity';
 import { IProjectRepository } from '../../domain/repositories/project.repository';
 import { IMemberRepository } from 'src/modules/members/domain/repositories/member.repository';
@@ -12,7 +12,9 @@ import {
 @Injectable()
 export class CreateProjectUseCase {
   constructor(
+    @Inject(IProjectRepository)
     private readonly projectRepository: IProjectRepository,
+    @Inject(IMemberRepository)
     private readonly memberRepository: IMemberRepository,
     private readonly activityLogService: ActivityLogService,
     private readonly wsEmitter: WebsocketEmitterService,

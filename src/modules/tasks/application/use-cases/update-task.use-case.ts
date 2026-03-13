@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, Inject } from '@nestjs/common';
 import {
   Task,
   TaskStatus,
@@ -23,6 +23,7 @@ export interface UpdateTaskInput {
 @Injectable()
 export class UpdateTaskUseCase {
   constructor(
+    @Inject(ITaskRepository)
     private readonly taskRepository: ITaskRepository,
     private readonly activityLogService: ActivityLogService,
     private readonly wsEmitter: WebsocketEmitterService,

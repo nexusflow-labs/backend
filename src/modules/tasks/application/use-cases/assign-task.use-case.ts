@@ -2,6 +2,7 @@ import {
   Injectable,
   NotFoundException,
   BadRequestException,
+  Inject,
 } from '@nestjs/common';
 import { Task } from '../../domain/entities/task.entity';
 import { ITaskRepository } from '../../domain/repositories/task.repository';
@@ -19,8 +20,11 @@ import { EntityType } from 'src/modules/activity-logs/domain/enums/entity-type.e
 @Injectable()
 export class AssignTaskUseCase {
   constructor(
+    @Inject(ITaskRepository)
     private readonly taskRepository: ITaskRepository,
+    @Inject(IProjectRepository)
     private readonly projectRepository: IProjectRepository,
+    @Inject(IMemberRepository)
     private readonly memberRepository: IMemberRepository,
     private readonly activityLogService: ActivityLogService,
     private readonly wsEmitter: WebsocketEmitterService,

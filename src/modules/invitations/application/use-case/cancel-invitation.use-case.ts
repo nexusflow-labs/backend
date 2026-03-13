@@ -2,6 +2,7 @@ import {
   Injectable,
   NotFoundException,
   BadRequestException,
+  Inject,
 } from '@nestjs/common';
 import { IInvitationRepository } from '../../domain/repositories/invitation.repository';
 import { InvitationStatus } from '../../domain/enum/invitation.enum';
@@ -11,6 +12,7 @@ import { EntityType } from 'src/modules/activity-logs/domain/enums/entity-type.e
 @Injectable()
 export class CancelInvitationUseCase {
   constructor(
+    @Inject(IInvitationRepository)
     private readonly invitationRepository: IInvitationRepository,
     private readonly activityLogService: ActivityLogService,
   ) {}

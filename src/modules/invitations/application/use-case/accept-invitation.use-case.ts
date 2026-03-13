@@ -4,6 +4,7 @@ import {
   ForbiddenException,
   BadRequestException,
   ConflictException,
+  Inject,
 } from '@nestjs/common';
 import { IInvitationRepository } from '../../domain/repositories/invitation.repository';
 import { IMemberRepository } from 'src/modules/members/domain/repositories/member.repository';
@@ -20,8 +21,11 @@ import {
 @Injectable()
 export class AcceptInvitationUseCase {
   constructor(
+    @Inject(IInvitationRepository)
     private readonly invitationRepository: IInvitationRepository,
+    @Inject(IMemberRepository)
     private readonly memberRepository: IMemberRepository,
+    @Inject(IUserRepository)
     private readonly userRepository: IUserRepository,
     private readonly activityLogService: ActivityLogService,
     private readonly wsEmitter: WebsocketEmitterService,

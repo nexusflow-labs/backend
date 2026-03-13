@@ -1,4 +1,4 @@
-import { Injectable, ConflictException } from '@nestjs/common';
+import { Injectable, ConflictException, Inject } from '@nestjs/common';
 import { Member, MemberRole } from '../../domain/entities/member.entity';
 import { IMemberRepository } from '../../domain/repositories/member.repository';
 import { ActivityLogService } from 'src/modules/activity-logs/application/services/activity-log.service';
@@ -13,6 +13,7 @@ import { NotificationType } from 'src/modules/notifications/domain/entities/noti
 @Injectable()
 export class AddMemberUseCase {
   constructor(
+    @Inject(IMemberRepository)
     private readonly memberRepository: IMemberRepository,
     private readonly activityLogService: ActivityLogService,
     private readonly wsEmitter: WebsocketEmitterService,

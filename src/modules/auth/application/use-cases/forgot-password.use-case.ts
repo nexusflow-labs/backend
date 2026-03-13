@@ -1,4 +1,4 @@
-import { Logger } from '@nestjs/common';
+import { Logger, Injectable, Inject } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { randomBytes } from 'crypto';
 import { IUserRepository } from '../../domain/repositories/user.repository';
@@ -6,12 +6,16 @@ import { IPasswordResetTokenRepository } from '../../domain/repositories/passwor
 import { IQueueService } from 'src/infrastructure/queue/interfaces/queue.interface';
 import { JobType, JobPriority } from 'src/infrastructure/queue/types/job.types';
 
+@Injectable()
 export class ForgotPasswordUseCase {
   private readonly logger = new Logger(ForgotPasswordUseCase.name);
 
   constructor(
+    @Inject(IUserRepository)
     private readonly userRepository: IUserRepository,
+    @Inject(IPasswordResetTokenRepository)
     private readonly passwordResetTokenRepository: IPasswordResetTokenRepository,
+    @Inject(IQueueService)
     private readonly queueService: IQueueService,
     private readonly configService: ConfigService,
   ) {}

@@ -3,6 +3,7 @@ import {
   NotFoundException,
   ConflictException,
   BadRequestException,
+  Inject,
 } from '@nestjs/common';
 import { ILabelRepository } from '../../domain/repositories/label.repository';
 import { ITaskRepository } from 'src/modules/tasks/domain/repositories/task.repository';
@@ -13,8 +14,11 @@ import { EntityType } from 'src/modules/activity-logs/domain/enums/entity-type.e
 @Injectable()
 export class AddLabelToTaskUseCase {
   constructor(
+    @Inject(ILabelRepository)
     private readonly labelRepository: ILabelRepository,
+    @Inject(ITaskRepository)
     private readonly taskRepository: ITaskRepository,
+    @Inject(IProjectRepository)
     private readonly projectRepository: IProjectRepository,
     private readonly activityLogService: ActivityLogService,
   ) {}

@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, Inject } from '@nestjs/common';
 import { Comment } from '../../domain/entities/comment.entity';
 import { ICommentRepository } from '../../domain/repositories/comment.repository';
 import { ActivityLogService } from 'src/modules/activity-logs/application/services/activity-log.service';
@@ -11,6 +11,7 @@ import {
 @Injectable()
 export class UpdateCommentUseCase {
   constructor(
+    @Inject(ICommentRepository)
     private readonly commentRepository: ICommentRepository,
     private readonly activityLogService: ActivityLogService,
     private readonly wsEmitter: WebsocketEmitterService,

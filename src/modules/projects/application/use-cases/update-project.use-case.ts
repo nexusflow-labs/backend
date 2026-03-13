@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, Inject } from '@nestjs/common';
 import { Project, ProjectStatus } from '../../domain/entities/project.entity';
 import { IProjectRepository } from '../../domain/repositories/project.repository';
 import { ActivityLogService } from 'src/modules/activity-logs/application/services/activity-log.service';
@@ -17,6 +17,7 @@ export interface UpdateProjectInput {
 @Injectable()
 export class UpdateProjectUseCase {
   constructor(
+    @Inject(IProjectRepository)
     private readonly projectRepository: IProjectRepository,
     private readonly activityLogService: ActivityLogService,
     private readonly wsEmitter: WebsocketEmitterService,

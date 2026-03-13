@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, Inject } from '@nestjs/common';
 import { Comment } from '../../domain/entities/comment.entity';
 import { ICommentRepository } from '../../domain/repositories/comment.repository';
 import { ITaskRepository } from 'src/modules/tasks/domain/repositories/task.repository';
@@ -15,8 +15,11 @@ import { EntityType } from 'src/modules/activity-logs/domain/enums/entity-type.e
 @Injectable()
 export class CreateCommentUseCase {
   constructor(
+    @Inject(ICommentRepository)
     private readonly commentRepository: ICommentRepository,
+    @Inject(ITaskRepository)
     private readonly taskRepository: ITaskRepository,
+    @Inject(IProjectRepository)
     private readonly projectRepository: IProjectRepository,
     private readonly activityLogService: ActivityLogService,
     private readonly wsEmitter: WebsocketEmitterService,

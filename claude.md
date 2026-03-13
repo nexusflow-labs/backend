@@ -480,14 +480,14 @@ curl -X GET http://localhost:3000/workspaces \
 
 ### 1. In-app Notifications (Medium Priority)
 ```
-[ ] Notification entity & DB model (Prisma schema)
-[ ] NotificationRepository interface & implementation
-[ ] CreateNotificationUseCase
-[ ] MarkAsReadUseCase, MarkAllAsReadUseCase
-[ ] ListNotificationsUseCase (với pagination)
-[ ] NotificationsController endpoints
-[ ] Integrate với WebSocket (emit khi có notification mới)
-[ ] Notification types: task_assigned, comment_added, member_added, etc.
+[x] Notification entity & DB model (Prisma schema)
+[x] NotificationRepository interface & implementation
+[x] CreateNotificationUseCase
+[x] MarkAsReadUseCase, MarkAllAsReadUseCase
+[x] ListNotificationsUseCase (với pagination)
+[x] NotificationsController endpoints
+[x] Integrate với WebSocket (emit khi có notification mới)
+[x] Notification types: task_assigned, comment_added, member_added, etc.
 ```
 
 ### 2. File Upload (Medium Priority)

@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, Inject } from '@nestjs/common';
 import { ITaskRepository } from '../../domain/repositories/task.repository';
 import { ActivityLogService } from 'src/modules/activity-logs/application/services/activity-log.service';
 import { EntityType } from 'src/modules/activity-logs/domain/enums/entity-type.enum';
@@ -10,6 +10,7 @@ import {
 @Injectable()
 export class DeleteTaskUseCase {
   constructor(
+    @Inject(ITaskRepository)
     private readonly taskRepository: ITaskRepository,
     private readonly activityLogService: ActivityLogService,
     private readonly wsEmitter: WebsocketEmitterService,

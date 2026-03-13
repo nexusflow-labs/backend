@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, Inject } from '@nestjs/common';
 import { ILabelRepository } from '../../domain/repositories/label.repository';
 import { ActivityLogService } from 'src/modules/activity-logs/application/services/activity-log.service';
 import { EntityType } from 'src/modules/activity-logs/domain/enums/entity-type.enum';
@@ -6,6 +6,7 @@ import { EntityType } from 'src/modules/activity-logs/domain/enums/entity-type.e
 @Injectable()
 export class DeleteLabelUseCase {
   constructor(
+    @Inject(ILabelRepository)
     private readonly labelRepository: ILabelRepository,
     private readonly activityLogService: ActivityLogService,
   ) {}

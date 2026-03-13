@@ -3,6 +3,7 @@ import {
   ForbiddenException,
   NotFoundException,
   BadRequestException,
+  Inject,
 } from '@nestjs/common';
 import { IMemberRepository } from '../../domain/repositories/member.repository';
 import { MemberRole } from '../../domain/entities/member.entity';
@@ -16,6 +17,7 @@ import {
 @Injectable()
 export class UpdateMemberRoleUseCase {
   constructor(
+    @Inject(IMemberRepository)
     private readonly memberRepository: IMemberRepository,
     private readonly activityLogService: ActivityLogService,
     private readonly wsEmitter: WebsocketEmitterService,

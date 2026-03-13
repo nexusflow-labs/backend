@@ -3,6 +3,7 @@ import {
   ForbiddenException,
   Injectable,
   NotFoundException,
+  Inject,
 } from '@nestjs/common';
 import { IMemberRepository } from '../../domain/repositories/member.repository';
 import { ActivityLogService } from 'src/modules/activity-logs/application/services/activity-log.service';
@@ -17,6 +18,7 @@ import { NotificationType } from 'src/modules/notifications/domain/entities/noti
 @Injectable()
 export class RemoveMemberUseCase {
   constructor(
+    @Inject(IMemberRepository)
     private readonly memberRepository: IMemberRepository,
     private readonly activityLogService: ActivityLogService,
     private readonly wsEmitter: WebsocketEmitterService,

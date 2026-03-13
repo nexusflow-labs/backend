@@ -1,4 +1,4 @@
-import { BadRequestException, Logger } from '@nestjs/common';
+import { BadRequestException, Logger, Injectable, Inject } from '@nestjs/common';
 import { IUserRepository } from '../../domain/repositories/user.repository';
 import { IPasswordResetTokenRepository } from '../../domain/repositories/password-reset-token.repository';
 import { IRefreshTokenRepository } from '../../domain/repositories/refresh-token.repository';
@@ -9,12 +9,16 @@ export interface ResetPasswordInput {
   newPassword: string;
 }
 
+@Injectable()
 export class ResetPasswordUseCase {
   private readonly logger = new Logger(ResetPasswordUseCase.name);
 
   constructor(
+    @Inject(IUserRepository)
     private readonly userRepository: IUserRepository,
+    @Inject(IPasswordResetTokenRepository)
     private readonly passwordResetTokenRepository: IPasswordResetTokenRepository,
+    @Inject(IRefreshTokenRepository)
     private readonly refreshTokenRepository: IRefreshTokenRepository,
     private readonly passwordHashingService: PasswordHashingService,
   ) {}

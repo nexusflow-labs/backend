@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Inject } from '@nestjs/common';
 import {
   INotificationRepository,
   FilterType,
@@ -12,6 +12,7 @@ import {
 @Injectable()
 export class ListNotificationsUseCase {
   constructor(
+    @Inject(INotificationRepository)
     private readonly notificationRepository: INotificationRepository,
   ) {}
 

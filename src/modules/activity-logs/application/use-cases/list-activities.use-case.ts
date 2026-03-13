@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Inject } from '@nestjs/common';
 import { ActivityLog } from '../../domain/entities/activity-log.entity';
 import {
   IActivityLogRepository,
@@ -10,7 +10,10 @@ import { PaginatedResult } from 'src/infrastructure/common/pagination';
 
 @Injectable()
 export class ListActivitiesUseCase {
-  constructor(private readonly activityLogRepository: IActivityLogRepository) {}
+  constructor(
+    @Inject(IActivityLogRepository)
+    private readonly activityLogRepository: IActivityLogRepository,
+  ) {}
 
   async execute(filters: ActivityLogFilters): Promise<ActivityLog[]> {
     return this.activityLogRepository.findByFilters(filters);

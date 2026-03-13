@@ -1,7 +1,7 @@
 import { EntityType } from 'src/modules/activity-logs/domain/enums/entity-type.enum';
 import { NotificationType } from '../../domain/entities/notification.enum';
 import { INotificationRepository } from '../../domain/repositories/notification.repository';
-import { Injectable } from '@nestjs/common';
+import { Injectable, Inject, Optional } from '@nestjs/common';
 import { Notification } from '../../domain/entities/notification.entity';
 import {
   WebsocketEmitterService,
@@ -11,7 +11,9 @@ import {
 @Injectable()
 export class CreateNotificationUseCase {
   constructor(
+    @Inject(INotificationRepository)
     private readonly notificationRepository: INotificationRepository,
+    @Optional()
     private readonly wsEmitter?: WebsocketEmitterService,
   ) {}
 

@@ -1,4 +1,4 @@
-import { Injectable, ConflictException } from '@nestjs/common';
+import { Injectable, ConflictException, Inject } from '@nestjs/common';
 import { Label } from '../../domain/entities/label.entity';
 import { ILabelRepository } from '../../domain/repositories/label.repository';
 import { ActivityLogService } from 'src/modules/activity-logs/application/services/activity-log.service';
@@ -7,6 +7,7 @@ import { EntityType } from 'src/modules/activity-logs/domain/enums/entity-type.e
 @Injectable()
 export class CreateLabelUseCase {
   constructor(
+    @Inject(ILabelRepository)
     private readonly labelRepository: ILabelRepository,
     private readonly activityLogService: ActivityLogService,
   ) {}

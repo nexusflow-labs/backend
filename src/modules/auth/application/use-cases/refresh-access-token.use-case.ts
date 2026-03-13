@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable, UnauthorizedException, Inject } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { randomBytes } from 'crypto';
 import { IRefreshTokenRepository } from '../../domain/repositories/refresh-token.repository';
@@ -9,7 +9,9 @@ const REFRESH_TOKEN_EXPIRY_DAYS = 7;
 @Injectable()
 export class RefreshAccessTokenUseCase {
   constructor(
+    @Inject(IRefreshTokenRepository)
     private readonly refreshTokenRepository: IRefreshTokenRepository,
+    @Inject(IUserRepository)
     private readonly userRepository: IUserRepository,
     private readonly jwtService: JwtService,
   ) {}

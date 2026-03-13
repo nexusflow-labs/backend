@@ -1,4 +1,4 @@
-import { Injectable, ConflictException } from '@nestjs/common';
+import { Injectable, ConflictException, Inject } from '@nestjs/common';
 import { User } from '../../domain/entities/user.entity';
 import { IUserRepository } from '../../domain/repositories/user.repository';
 import { CreateUserDto } from '../../presentation/dtos/auth.request.dto';
@@ -7,6 +7,7 @@ import { PasswordHashingService } from '../services/password-hashing.service';
 @Injectable()
 export class RegisterUseCase {
   constructor(
+    @Inject(IUserRepository)
     private readonly userRepository: IUserRepository,
     private readonly passwordHashingService: PasswordHashingService,
   ) {}

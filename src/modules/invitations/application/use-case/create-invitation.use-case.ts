@@ -3,6 +3,7 @@ import {
   Logger,
   NotFoundException,
   ForbiddenException,
+  Inject,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { randomBytes } from 'crypto';
@@ -29,11 +30,16 @@ export class CreateInvitationUseCase {
   private readonly logger = new Logger(CreateInvitationUseCase.name);
 
   constructor(
+    @Inject(IInvitationRepository)
     private readonly invitationRepository: IInvitationRepository,
+    @Inject(IWorkspaceRepository)
     private readonly workspaceRepository: IWorkspaceRepository,
+    @Inject(IMemberRepository)
     private readonly memberRepository: IMemberRepository,
+    @Inject(IUserRepository)
     private readonly userRepository: IUserRepository,
     private readonly activityLogService: ActivityLogService,
+    @Inject(IQueueService)
     private readonly queueService: IQueueService,
     private readonly configService: ConfigService,
     private readonly wsEmitter: WebsocketEmitterService,
