@@ -143,12 +143,13 @@ Request → JwtAuthGuard → WorkspaceMemberGuard → RolesGuard → ResourceOwn
 
 ## 📊 Database Schema (Prisma)
 
-**15 Models:**
+**16 Models:**
 - User, RefreshToken, PasswordResetToken
 - Workspace, Member, Invitation
 - Project, Task, Comment
 - Label, TaskLabel
-- ActivityLog
+- ActivityLog, Notification
+- FileUpload
 
 **Features:**
 - Soft deletes (deletedAt)
@@ -219,6 +220,17 @@ GET    /workspaces/:workspaceId/activities
 
 # Dashboard
 GET    /workspaces/:workspaceId/dashboard
+
+# File Upload (pre-signed URL flow)
+POST   /files/register              # Step 1: Get upload URL and file ID
+POST   /files/upload                # Local dev only: upload endpoint
+GET    /files/download              # Local dev only: download endpoint
+GET    /files/:fileId/download      # Get pre-signed download URL
+DELETE /files/:fileId               # Delete a file
+
+# Task Attachments
+POST   /tasks/:taskId/attachments   # Step 2: Attach uploaded file to task
+GET    /tasks/:taskId/attachments   # List task attachments
 ```
 
 ## 🔌 WebSocket Events (Socket.io)
@@ -418,9 +430,10 @@ socket.emit('typing:start', { taskId: '...' });
 ```
 [x] Socket.io gateway (JWT auth, room-based, membership validation)
 [x] WebSocket events integrated to use-cases
-[ ] In-app notifications (DB model + API)
-[ ] File upload (S3/local)
+[x] In-app notifications (DB model + API)
+[x] File upload (pre-signed URL + attach flow, S3/local)
 [x] BullMQ background jobs
+[x] File cleanup background job
 ```
 
 ### Tuần 11: Testing & Documentation
@@ -490,16 +503,19 @@ curl -X GET http://localhost:3000/workspaces \
 [x] Notification types: task_assigned, comment_added, member_added, etc.
 ```
 
-### 2. File Upload (Medium Priority)
+### 2. File Upload (Medium Priority) ✅
 ```
-[ ] File entity & DB model
-[ ] Storage service interface (abstract)
-[ ] LocalStorageService implementation
-[ ] S3StorageService implementation (optional)
-[ ] UploadFileUseCase
-[ ] DeleteFileUseCase
-[ ] FileController endpoints
-[ ] Integrate với Task (attachments)
+[x] FileUpload entity & DB model (Prisma schema)
+[x] IStorageService interface (abstract)
+[x] LocalStorageService implementation (pre-signed URL simulation)
+[x] S3StorageService implementation (optional - requires @aws-sdk)
+[x] RegisterUploadUseCase (get pre-signed URL)
+[x] ConfirmUploadUseCase (validate file uploaded)
+[x] AttachFileUseCase (attach to resource)
+[x] DeleteFileUseCase
+[x] FilesController endpoints
+[x] Task attachments (POST/GET /tasks/:taskId/attachments)
+[x] Background job for cleanup expired/orphaned files
 ```
 
 ### 3. Redis Adapter for WebSocket (Low - for scaling)

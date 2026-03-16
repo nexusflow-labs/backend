@@ -7,6 +7,7 @@ export enum JobType {
   EMAIL_INVITATION = 'email:invitation',
   EMAIL_PASSWORD_RESET = 'email:password-reset',
   ACTIVITY_LOG = 'activity:log',
+  FILE_CLEANUP = 'file:cleanup',
 }
 
 // Job Priority Levels
@@ -21,6 +22,7 @@ export enum JobPriority {
 export enum QueueName {
   EMAIL = 'email',
   ACTIVITY = 'activity',
+  FILES = 'files',
 }
 
 // Map job types to their queues
@@ -28,6 +30,7 @@ export const JOB_TYPE_TO_QUEUE: Record<JobType, QueueName> = {
   [JobType.EMAIL_INVITATION]: QueueName.EMAIL,
   [JobType.EMAIL_PASSWORD_RESET]: QueueName.EMAIL,
   [JobType.ACTIVITY_LOG]: QueueName.ACTIVITY,
+  [JobType.FILE_CLEANUP]: QueueName.FILES,
 };
 
 // Job Options Interface
@@ -41,6 +44,11 @@ export interface JobOptions {
   delay?: number; // milliseconds
   removeOnComplete?: boolean | number;
   removeOnFail?: boolean | number;
+  repeat?: {
+    cron?: string;
+    every?: number; // milliseconds
+    limit?: number;
+  };
 }
 
 // Default job options per job type
@@ -65,6 +73,13 @@ export const DEFAULT_JOB_OPTIONS: Record<JobType, JobOptions> = {
     backoff: { type: 'fixed', delay: 500 },
     removeOnComplete: 100,
     removeOnFail: 50,
+  },
+  [JobType.FILE_CLEANUP]: {
+    priority: JobPriority.LOW,
+    attempts: 3,
+    backoff: { type: 'fixed', delay: 5000 },
+    removeOnComplete: 10,
+    removeOnFail: 10,
   },
 };
 
@@ -93,11 +108,17 @@ export interface ActivityLogJobPayload {
   metadata?: Record<string, any> | null;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
+export interface FileCleanupJobPayload {
+  // Empty payload - cleanup runs with default settings
+}
+
 // Union type for all job payloads
 export type JobPayload =
   | EmailInvitationJobPayload
   | EmailPasswordResetJobPayload
-  | ActivityLogJobPayload;
+  | ActivityLogJobPayload
+  | FileCleanupJobPayload;
 
 // Job Result Interface
 export interface JobResult {

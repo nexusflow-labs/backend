@@ -14,6 +14,7 @@ import { IActivityLogRepository } from 'src/modules/activity-logs/domain/reposit
 import { IStatisticsRepository } from 'src/modules/dashboard/domain/repositories/statistics.repository';
 import { IInvitationRepository } from 'src/modules/invitations/domain/repositories/invitation.repository';
 import { INotificationRepository } from 'src/modules/notifications/domain/repositories/notification.repository';
+import { IFileUploadRepository } from 'src/modules/files/domain/repositories/file-upload.repository';
 
 // Repository implementations
 import { PrismaMemberRepository } from 'src/modules/members/infrastructure/persistence/prisma-member.repository';
@@ -29,6 +30,7 @@ import { PrismaActivityLogRepository } from 'src/modules/activity-logs/infrastru
 import { PrismaStatisticsRepository } from 'src/modules/dashboard/infrastructure/persistence/prisma-statistics.repository';
 import { PrismaInvitationRepository } from 'src/modules/invitations/infrastructure/persistence/prisma-invitation.repository';
 import { PrismaNotificationRepository } from 'src/modules/notifications/infrastructure/persistence/prisma-notification.repository';
+import { PrismaFileUploadRepository } from 'src/modules/files/infrastructure/persistence/prisma-file-upload.repository';
 import { PrismaModule } from '../prisma/prisma.module';
 
 /**
@@ -66,6 +68,7 @@ import { PrismaModule } from '../prisma/prisma.module';
       provide: INotificationRepository,
       useClass: PrismaNotificationRepository,
     },
+    { provide: IFileUploadRepository, useClass: PrismaFileUploadRepository },
   ],
   exports: [
     IUserRepository,
@@ -81,6 +84,7 @@ import { PrismaModule } from '../prisma/prisma.module';
     IActivityLogRepository,
     IStatisticsRepository,
     INotificationRepository,
+    IFileUploadRepository,
   ],
 })
 export class DatabaseModule {}

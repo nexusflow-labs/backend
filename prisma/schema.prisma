@@ -81,6 +81,7 @@ model User {
   passwordResetTokens PasswordResetToken[]
   notifications       Notification[]       @relation("NotificationRecipient")
   actorNotifications  Notification[]       @relation("NotificationActor")
+  fileUploads         FileUpload[]
   createdAt           DateTime             @default(now())
   updatedAt           DateTime             @updatedAt
 }
@@ -257,4 +258,44 @@ model Notification {
 
   @@index([userId, readAt])
   @@index([userId, createdAt])
+}
+
+// ============================================
+// FILE UPLOAD
+// ============================================
+
+model FileUpload {
+  id          String   @id @default(uuid())
+
+  // File metadata
+  filename    String   // Original filename from client
+  contentType String   // MIME type
+  size        Int?     // File size in bytes (set after upload confirmed)
+  storageKey  String   @unique // Path/key in storage
+
+  // Status tracking
+  status      String   @default("PENDING") // PENDING, UPLOADED, ATTACHED, EXPIRED
+
+  // Resource attachment (optional - set when attached)
+  resourceType String?  // 'task', 'comment', etc.
+  resourceId   String?
+
+  // Ownership & workspace context
+  uploaderId   String
+  uploader     User     @relation(fields: [uploaderId], references: [id])
+  workspaceId  String?
+
+  // Timestamps
+  expiresAt    DateTime // When the pre-signed URL expires
+  uploadedAt   DateTime? // When file upload was confirmed
+  attachedAt   DateTime? // When file was attached to a resource
+
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([uploaderId])
+  @@index([status])
+  @@index([resourceType, resourceId])
+  @@index([expiresAt])
+  @@index([workspaceId])
 }

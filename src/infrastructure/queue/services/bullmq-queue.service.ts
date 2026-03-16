@@ -111,6 +111,9 @@ export class BullMQQueueService
       this.createWorker(QueueName.ACTIVITY, 10),
     );
     this.logger.log('Activity worker initialized');
+
+    this.workers.set(QueueName.FILES, this.createWorker(QueueName.FILES, 2));
+    this.logger.log('Files worker initialized');
   }
 
   private async processJob(job: Job): Promise<void> {
@@ -145,6 +148,7 @@ export class BullMQQueueService
       delay: mergedOptions.delay,
       removeOnComplete: mergedOptions.removeOnComplete,
       removeOnFail: mergedOptions.removeOnFail,
+      repeat: mergedOptions.repeat,
     });
 
     this.logger.debug(`Job ${job.id} added to queue "${queueName}"`);

@@ -29,6 +29,7 @@ import { InvitationModule } from './modules/invitations/invitations.module';
 import { QueueModule } from './infrastructure/queue/queue.module';
 import { RealtimeModule } from './infrastructure/realtime/realtime.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
+import { FilesModule } from './modules/files/files.module';
 import { PrismaModule } from './infrastructure/prisma/prisma.module';
 
 @Module({
@@ -66,6 +67,7 @@ import { PrismaModule } from './infrastructure/prisma/prisma.module';
     InvitationModule,
     RealtimeModule,
     NotificationsModule,
+    FilesModule,
   ],
   providers: [
     {
