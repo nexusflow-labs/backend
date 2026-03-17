@@ -520,8 +520,8 @@ curl -X GET http://localhost:3000/workspaces \
 
 ### 3. Redis Adapter for WebSocket (Low - for scaling)
 ```
-[ ] @socket.io/redis-adapter
-[ ] Configure Redis pub/sub for horizontal scaling
+[x] @socket.io/redis-adapter
+[x] Configure Redis pub/sub for horizontal scaling
 [ ] Test với multiple server instances
 ```
 

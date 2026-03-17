@@ -2,6 +2,7 @@ import { Global, Module, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { IStorageService } from './interfaces/storage.interface';
 import { LocalStorageService } from './services/local-storage.service';
+import { S3StorageService } from './services/s3-storage.service';
 
 /**
  * Storage Module
@@ -18,7 +19,7 @@ import { LocalStorageService } from './services/local-storage.service';
     LocalStorageService, // Always provide for local upload endpoint
     {
       provide: IStorageService,
-      useFactory: async (
+      useFactory: (
         configService: ConfigService,
         localStorageService: LocalStorageService,
       ) => {
@@ -28,11 +29,7 @@ import { LocalStorageService } from './services/local-storage.service';
 
         if (storageType === 's3') {
           try {
-            // Dynamically import S3 service to avoid requiring AWS SDK in local dev
-            const { S3StorageService } =
-              await import('./services/s3-storage.service');
-            logger.log('Using S3 storage');
-            return new S3StorageService(configService) as IStorageService;
+            return new S3StorageService(configService);
           } catch {
             logger.warn(
               'Failed to load S3 storage, falling back to local storage',
