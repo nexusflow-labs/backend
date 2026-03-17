@@ -45,6 +45,7 @@
     "@prisma/adapter-pg": "^7.4.2",
     "@prisma/client": "^7.4.1",
     "@sendgrid/mail": "^8.1.6",
+    "@socket.io/redis-adapter": "^8.3.0",
     "argon2": "^0.44.0",
     "bcrypt": "^6.0.0",
     "bullmq": "^5.70.4",
