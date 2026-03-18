@@ -15,6 +15,16 @@ import {
   Res,
   BadRequestException,
 } from '@nestjs/common';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBearerAuth,
+  ApiParam,
+  ApiQuery,
+  ApiConsumes,
+  ApiBody,
+} from '@nestjs/swagger';
 import { FileInterceptor } from '@nestjs/platform-express';
 import type { Response } from 'express';
 import * as fs from 'fs';
@@ -42,18 +52,8 @@ import { WorkspaceMemberGuard } from '../../../infrastructure/authorization/guar
 import { AttachableResourceType } from '../domain/enums/resource-type.enum';
 import { LocalStorageService } from '../../../infrastructure/storage/services/local-storage.service';
 
-/**
- * Files Controller
- *
- * Handles file upload flow:
- * 1. POST /files/register - Register upload, get pre-signed URL
- * 2. User uploads directly to URL (local endpoint or S3)
- * 3. POST /tasks/:taskId/attachments - Attach file to task
- *
- * For local development, also handles:
- * - PUT /files/upload - Local upload endpoint (simulates S3)
- * - GET /files/download - Local download endpoint (simulates S3)
- */
+@ApiTags('Files')
+@ApiBearerAuth('JWT-auth')
 @Controller()
 export class FilesController {
   constructor(
@@ -65,11 +65,16 @@ export class FilesController {
     private readonly localStorageService: LocalStorageService,
   ) {}
 
-  /**
-   * Register a new file upload and get a pre-signed URL
-   */
   @Post('files/register')
   @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({ summary: 'Register a file upload and get pre-signed URL' })
+  @ApiResponse({
+    status: 201,
+    description: 'Upload registered',
+    type: RegisterUploadResponseDto,
+  })
+  @ApiResponse({ status: 400, description: 'Validation error' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
   async registerUpload(
     @Body() dto: RegisterUploadDto,
     @CurrentUser() user: JwtUser,
@@ -90,13 +95,36 @@ export class FilesController {
     };
   }
 
-  /**
-   * Local upload endpoint (for local development)
-   * In production, files are uploaded directly to S3 using pre-signed URLs
-   */
   @Post('files/upload')
   @HttpCode(HttpStatus.OK)
   @UseInterceptors(FileInterceptor('file'))
+  @ApiOperation({ summary: 'Local upload endpoint (development only)' })
+  @ApiConsumes('multipart/form-data')
+  @ApiQuery({ name: 'key', description: 'File key', type: 'string' })
+  @ApiQuery({
+    name: 'contentType',
+    description: 'Content type',
+    type: 'string',
+  })
+  @ApiQuery({
+    name: 'expires',
+    description: 'Expiration timestamp',
+    type: 'string',
+  })
+  @ApiQuery({ name: 'token', description: 'Upload token', type: 'string' })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        file: {
+          type: 'string',
+          format: 'binary',
+        },
+      },
+    },
+  })
+  @ApiResponse({ status: 200, description: 'File uploaded successfully' })
+  @ApiResponse({ status: 400, description: 'Invalid or expired upload URL' })
   async localUpload(
     @Query('key') key: string,
     @Query('contentType') contentType: string,
@@ -104,7 +132,6 @@ export class FilesController {
     @Query('token') token: string,
     @UploadedFile() file: UploadedFileData,
   ): Promise<{ success: boolean }> {
-    // Validate the upload token
     const expiresAt = parseInt(expires, 10);
     const isValid = this.localStorageService.validateUploadToken(
       key,
@@ -121,23 +148,29 @@ export class FilesController {
       throw new BadRequestException('No file provided');
     }
 
-    // Save the file
     await this.localStorageService.saveFile(key, file.buffer);
 
     return { success: true };
   }
 
-  /**
-   * Local download endpoint (for local development)
-   */
   @Get('files/download')
+  @ApiOperation({ summary: 'Local download endpoint (development only)' })
+  @ApiQuery({ name: 'key', description: 'File key', type: 'string' })
+  @ApiQuery({
+    name: 'expires',
+    description: 'Expiration timestamp',
+    type: 'string',
+  })
+  @ApiQuery({ name: 'token', description: 'Download token', type: 'string' })
+  @ApiResponse({ status: 200, description: 'File content' })
+  @ApiResponse({ status: 400, description: 'Invalid or expired download URL' })
+  @ApiResponse({ status: 404, description: 'File not found' })
   localDownload(
     @Query('key') key: string,
     @Query('expires') expires: string,
     @Query('token') token: string,
     @Res() res: Response,
   ): void {
-    // Validate the download token
     const expiresAt = parseInt(expires, 10);
     const isValid = this.localStorageService.validateUploadToken(
       key,
@@ -150,7 +183,6 @@ export class FilesController {
       throw new BadRequestException('Invalid or expired download URL');
     }
 
-    // Stream the file
     const filePath = this.localStorageService.getFilePath(key);
     const stream = fs.createReadStream(filePath);
 
@@ -161,12 +193,27 @@ export class FilesController {
     stream.pipe(res);
   }
 
-  /**
-   * Attach a file to a task
-   */
   @Post('tasks/:taskId/attachments')
   @UseGuards(WorkspaceMemberGuard)
   @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({ summary: 'Attach a file to a task' })
+  @ApiParam({
+    name: 'taskId',
+    description: 'Task ID',
+    type: 'string',
+    format: 'uuid',
+  })
+  @ApiResponse({
+    status: 201,
+    description: 'File attached',
+    type: FileUploadResponseDto,
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'File not uploaded or already attached',
+  })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 404, description: 'Task or file not found' })
   async attachToTask(
     @Param('taskId', new ParseUUIDPipe()) taskId: string,
     @Body() dto: AttachFileDto,
@@ -184,11 +231,22 @@ export class FilesController {
     return FileUploadResponseDto.fromEntity(fileUpload);
   }
 
-  /**
-   * List attachments for a task
-   */
   @Get('tasks/:taskId/attachments')
   @UseGuards(WorkspaceMemberGuard)
+  @ApiOperation({ summary: 'List attachments for a task' })
+  @ApiParam({
+    name: 'taskId',
+    description: 'Task ID',
+    type: 'string',
+    format: 'uuid',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'List of attachments',
+    type: [FileUploadResponseDto],
+  })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 404, description: 'Task not found' })
   async listTaskAttachments(
     @Param('taskId', new ParseUUIDPipe()) taskId: string,
   ): Promise<FileUploadResponseDto[]> {
@@ -200,21 +258,40 @@ export class FilesController {
     return FileUploadResponseDto.fromEntities(files);
   }
 
-  /**
-   * Get download URL for a file
-   */
   @Get('files/:fileId/download')
+  @ApiOperation({ summary: 'Get pre-signed download URL for a file' })
+  @ApiParam({
+    name: 'fileId',
+    description: 'File ID',
+    type: 'string',
+    format: 'uuid',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Download URL',
+    type: DownloadUrlResponseDto,
+  })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 404, description: 'File not found' })
   async getDownloadUrl(
     @Param('fileId', new ParseUUIDPipe()) fileId: string,
   ): Promise<DownloadUrlResponseDto> {
     return this.getDownloadUrlUseCase.execute(fileId);
   }
 
-  /**
-   * Delete a file
-   */
   @Delete('files/:fileId')
   @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({ summary: 'Delete a file' })
+  @ApiParam({
+    name: 'fileId',
+    description: 'File ID',
+    type: 'string',
+    format: 'uuid',
+  })
+  @ApiResponse({ status: 204, description: 'File deleted' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 403, description: 'Not the file owner' })
+  @ApiResponse({ status: 404, description: 'File not found' })
   async deleteFile(
     @Param('fileId', new ParseUUIDPipe()) fileId: string,
     @CurrentUser() user: JwtUser,

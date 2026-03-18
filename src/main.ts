@@ -1,5 +1,6 @@
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 import { TransformInterceptor } from './infrastructure/common/interceptors/transform.interceptor';
 import { HttpExceptionFilter } from './infrastructure/common/filters/http-exception.filter';
@@ -12,6 +13,39 @@ async function bootstrap() {
   const redisIoAdapter = new RedisIoAdapter(app, configService);
   redisIoAdapter.connectToRedis();
   app.useWebSocketAdapter(redisIoAdapter);
+
+  // Swagger configuration
+  const config = new DocumentBuilder()
+    .setTitle('NexusFlow API')
+    .setDescription('NexusFlow - Project Management & Enterprise Operations Platform API')
+    .setVersion('0.0.1')
+    .addBearerAuth(
+      {
+        type: 'http',
+        scheme: 'bearer',
+        bearerFormat: 'JWT',
+        name: 'Authorization',
+        description: 'Enter JWT token',
+        in: 'header',
+      },
+      'JWT-auth',
+    )
+    .addTag('Auth', 'Authentication endpoints')
+    .addTag('Workspaces', 'Workspace management')
+    .addTag('Members', 'Workspace membership management')
+    .addTag('Invitations', 'Workspace invitation management')
+    .addTag('Projects', 'Project management')
+    .addTag('Tasks', 'Task management')
+    .addTag('Comments', 'Task comments')
+    .addTag('Labels', 'Label management')
+    .addTag('Task Labels', 'Task-label associations')
+    .addTag('Files', 'File upload and management')
+    .addTag('Notifications', 'In-app notifications')
+    .addTag('Activity Logs', 'Audit logging')
+    .addTag('Dashboard', 'Workspace statistics')
+    .build();
+  const document = SwaggerModule.createDocument(app, config);
+  SwaggerModule.setup('api/docs', app, document);
 
   app.enableShutdownHooks();
 

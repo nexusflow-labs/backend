@@ -1,5 +1,11 @@
 import { Body, Post, HttpCode, HttpStatus, Controller } from '@nestjs/common';
 import { Throttle } from '@nestjs/throttler';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBearerAuth,
+} from '@nestjs/swagger';
 import { RegisterUseCase } from '../application/use-cases/register.use-case';
 import { LoginUseCase } from '../application/use-cases/login.use-case';
 import { RefreshAccessTokenUseCase } from '../application/use-cases/refresh-access-token.use-case';
@@ -13,11 +19,14 @@ import {
   LogoutDto,
   ForgotPasswordDto,
   ResetPasswordDto,
+  MessageResponseDto,
+  AuthResponseDto,
 } from './dtos/auth.request.dto';
 import { Public } from './decorators/public.decorator';
 import { CurrentUser } from './decorators/current-user.decorator';
 import type { JwtUser } from '../domain/entities/types/jwt-user.type';
 
+@ApiTags('Auth')
 @Controller('auth')
 export class AuthController {
   constructor(
@@ -32,44 +41,82 @@ export class AuthController {
   @Post('register')
   @HttpCode(HttpStatus.CREATED)
   @Public()
-  @Throttle({ default: { limit: 5, ttl: 60000 } }) // 5 requests per minute
-  async register(@Body() createUserDto: CreateUserDto) {
-    return this.registerUseCase.execute(createUserDto);
+  @Throttle({ default: { limit: 5, ttl: 60000 } })
+  @ApiOperation({ summary: 'Register a new user' })
+  @ApiResponse({ status: 201, description: 'User registered successfully' })
+  @ApiResponse({ status: 400, description: 'Validation error' })
+  @ApiResponse({ status: 409, description: 'Email already exists' })
+  async register(@Body() createUserDto: CreateUserDto): Promise<void> {
+    await this.registerUseCase.execute(createUserDto);
   }
 
   @Post('login')
   @HttpCode(HttpStatus.OK)
   @Public()
-  @Throttle({ default: { limit: 10, ttl: 60000 } }) // 10 requests per minute
-  async login(@Body() loginDto: LoginDto) {
+  @Throttle({ default: { limit: 10, ttl: 60000 } })
+  @ApiOperation({ summary: 'Login with email and password' })
+  @ApiResponse({
+    status: 200,
+    description: 'Login successful',
+    type: AuthResponseDto,
+  })
+  @ApiResponse({ status: 401, description: 'Invalid credentials' })
+  async login(
+    @Body() loginDto: LoginDto,
+  ): Promise<{ accessToken: string; refreshToken: string }> {
     return this.loginUseCase.execute(loginDto);
   }
 
   @Post('refresh')
   @HttpCode(HttpStatus.OK)
   @Public()
-  @Throttle({ default: { limit: 10, ttl: 60000 } }) // 10 requests per minute
-  async refresh(@Body() refreshTokenDto: RefreshTokenDto) {
+  @Throttle({ default: { limit: 10, ttl: 60000 } })
+  @ApiOperation({ summary: 'Refresh access token using refresh token' })
+  @ApiResponse({
+    status: 200,
+    description: 'Token refreshed successfully',
+    type: AuthResponseDto,
+  })
+  @ApiResponse({ status: 401, description: 'Invalid or expired refresh token' })
+  async refresh(
+    @Body() refreshTokenDto: RefreshTokenDto,
+  ): Promise<{ accessToken: string; refreshToken: string }> {
     return this.refreshAccessTokenUseCase.execute(refreshTokenDto.refreshToken);
   }
 
   @Post('logout')
   @HttpCode(HttpStatus.NO_CONTENT)
-  async logout(@Body() logoutDto: LogoutDto) {
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({ summary: 'Logout and revoke refresh token' })
+  @ApiResponse({ status: 204, description: 'Logged out successfully' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  async logout(@Body() logoutDto: LogoutDto): Promise<void> {
     await this.revokeRefreshTokenUseCase.execute(logoutDto.refreshToken);
   }
 
   @Post('logout-all')
   @HttpCode(HttpStatus.NO_CONTENT)
-  async logoutAll(@CurrentUser() user: JwtUser) {
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({ summary: 'Logout from all devices' })
+  @ApiResponse({ status: 204, description: 'Logged out from all devices' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  async logoutAll(@CurrentUser() user: JwtUser): Promise<void> {
     await this.revokeRefreshTokenUseCase.executeAll(user.id);
   }
 
   @Post('forgot-password')
   @HttpCode(HttpStatus.OK)
   @Public()
-  @Throttle({ default: { limit: 3, ttl: 60000 } }) // 3 requests per minute
-  async forgotPassword(@Body() forgotPasswordDto: ForgotPasswordDto) {
+  @Throttle({ default: { limit: 3, ttl: 60000 } })
+  @ApiOperation({ summary: 'Request password reset email' })
+  @ApiResponse({
+    status: 200,
+    description: 'Password reset email sent',
+    type: MessageResponseDto,
+  })
+  async forgotPassword(
+    @Body() forgotPasswordDto: ForgotPasswordDto,
+  ): Promise<MessageResponseDto> {
     await this.forgotPasswordUseCase.execute(forgotPasswordDto.email);
     return {
       message:
@@ -80,8 +127,17 @@ export class AuthController {
   @Post('reset-password')
   @HttpCode(HttpStatus.OK)
   @Public()
-  @Throttle({ default: { limit: 5, ttl: 60000 } }) // 5 requests per minute
-  async resetPassword(@Body() resetPasswordDto: ResetPasswordDto) {
+  @Throttle({ default: { limit: 5, ttl: 60000 } })
+  @ApiOperation({ summary: 'Reset password using token' })
+  @ApiResponse({
+    status: 200,
+    description: 'Password reset successfully',
+    type: MessageResponseDto,
+  })
+  @ApiResponse({ status: 400, description: 'Invalid or expired token' })
+  async resetPassword(
+    @Body() resetPasswordDto: ResetPasswordDto,
+  ): Promise<MessageResponseDto> {
     await this.resetPasswordUseCase.execute({
       token: resetPasswordDto.token,
       newPassword: resetPasswordDto.newPassword,

@@ -13,6 +13,13 @@ import {
   ParseUUIDPipe,
   UseGuards,
 } from '@nestjs/common';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBearerAuth,
+  ApiParam,
+} from '@nestjs/swagger';
 import { CreateTaskUseCase } from '../application/use-cases/create-task.use-case';
 import { ListTasksUseCase } from '../application/use-cases/list-tasks.use-case';
 import { GetTaskUseCase } from '../application/use-cases/get-task.use-case';
@@ -26,7 +33,7 @@ import {
   AssignTaskDto,
   TaskQueryDto,
 } from './dtos/task.request.dto';
-import { TaskResponseDto } from './dtos/task.response.dto';
+import { TaskResponseDto, PaginatedTaskResponseDto } from './dtos/task.response.dto';
 import { PaginatedResult } from 'src/infrastructure/common/pagination';
 import { TaskQueryFilters } from '../domain/repositories/task.repository';
 import { CurrentUser } from 'src/modules/auth/presentation/decorators/current-user.decorator';
@@ -36,6 +43,8 @@ import { ResourceOwnerGuard } from 'src/infrastructure/authorization/guards/reso
 import { CheckOwnership } from 'src/infrastructure/authorization/decorators/check-ownership.decorator';
 import { ResourceType } from 'src/infrastructure/authorization/interfaces/authorization.interfaces';
 
+@ApiTags('Tasks')
+@ApiBearerAuth('JWT-auth')
 @Controller('projects/:projectId/tasks')
 @UseGuards(WorkspaceMemberGuard)
 export class TasksController {
@@ -50,6 +59,11 @@ export class TasksController {
   ) {}
 
   @Get()
+  @ApiOperation({ summary: 'List tasks with pagination and filters' })
+  @ApiParam({ name: 'projectId', description: 'Project ID', type: 'string', format: 'uuid' })
+  @ApiResponse({ status: 200, description: 'Paginated list of tasks', type: PaginatedTaskResponseDto })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 403, description: 'Not a workspace member' })
   async list(
     @Param('projectId', new ParseUUIDPipe()) projectId: string,
     @Query() query: TaskQueryDto,
@@ -89,6 +103,12 @@ export class TasksController {
   }
 
   @Get(':id')
+  @ApiOperation({ summary: 'Get task by ID' })
+  @ApiParam({ name: 'projectId', description: 'Project ID', type: 'string', format: 'uuid' })
+  @ApiParam({ name: 'id', description: 'Task ID', type: 'string', format: 'uuid' })
+  @ApiResponse({ status: 200, description: 'Task details', type: TaskResponseDto })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 404, description: 'Task not found' })
   async get(
     @Param('id', new ParseUUIDPipe()) id: string,
   ): Promise<TaskResponseDto> {
@@ -98,6 +118,12 @@ export class TasksController {
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({ summary: 'Create a new task' })
+  @ApiParam({ name: 'projectId', description: 'Project ID', type: 'string', format: 'uuid' })
+  @ApiResponse({ status: 201, description: 'Task created', type: TaskResponseDto })
+  @ApiResponse({ status: 400, description: 'Validation error' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 403, description: 'Not a workspace member' })
   async create(
     @Param('projectId', new ParseUUIDPipe()) projectId: string,
     @Body() dto: CreateTaskDto,
@@ -116,6 +142,12 @@ export class TasksController {
   }
 
   @Get(':id/subtasks')
+  @ApiOperation({ summary: 'Get subtasks of a task' })
+  @ApiParam({ name: 'projectId', description: 'Project ID', type: 'string', format: 'uuid' })
+  @ApiParam({ name: 'id', description: 'Parent task ID', type: 'string', format: 'uuid' })
+  @ApiResponse({ status: 200, description: 'List of subtasks', type: [TaskResponseDto] })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 404, description: 'Task not found' })
   async getSubtasks(
     @Param('id', new ParseUUIDPipe()) id: string,
   ): Promise<TaskResponseDto[]> {
@@ -126,6 +158,14 @@ export class TasksController {
   @Put(':id')
   @UseGuards(ResourceOwnerGuard)
   @CheckOwnership({ resourceType: ResourceType.TASK })
+  @ApiOperation({ summary: 'Update task (owner or ADMIN/OWNER role)' })
+  @ApiParam({ name: 'projectId', description: 'Project ID', type: 'string', format: 'uuid' })
+  @ApiParam({ name: 'id', description: 'Task ID', type: 'string', format: 'uuid' })
+  @ApiResponse({ status: 200, description: 'Task updated', type: TaskResponseDto })
+  @ApiResponse({ status: 400, description: 'Validation error' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 403, description: 'Insufficient permissions' })
+  @ApiResponse({ status: 404, description: 'Task not found' })
   async update(
     @Param('id', new ParseUUIDPipe()) id: string,
     @Body() dto: UpdateTaskDto,
@@ -148,6 +188,12 @@ export class TasksController {
   }
 
   @Patch(':id/assign')
+  @ApiOperation({ summary: 'Assign task to a user' })
+  @ApiParam({ name: 'projectId', description: 'Project ID', type: 'string', format: 'uuid' })
+  @ApiParam({ name: 'id', description: 'Task ID', type: 'string', format: 'uuid' })
+  @ApiResponse({ status: 200, description: 'Task assigned', type: TaskResponseDto })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 404, description: 'Task or user not found' })
   async assign(
     @Param('id', new ParseUUIDPipe()) id: string,
     @Body() dto: AssignTaskDto,
@@ -165,6 +211,13 @@ export class TasksController {
   @HttpCode(HttpStatus.NO_CONTENT)
   @UseGuards(ResourceOwnerGuard)
   @CheckOwnership({ resourceType: ResourceType.TASK })
+  @ApiOperation({ summary: 'Delete task (owner or ADMIN/OWNER role)' })
+  @ApiParam({ name: 'projectId', description: 'Project ID', type: 'string', format: 'uuid' })
+  @ApiParam({ name: 'id', description: 'Task ID', type: 'string', format: 'uuid' })
+  @ApiResponse({ status: 204, description: 'Task deleted' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 403, description: 'Insufficient permissions' })
+  @ApiResponse({ status: 404, description: 'Task not found' })
   async delete(
     @Param('id', new ParseUUIDPipe()) id: string,
     @CurrentUser() user: JwtUser,

@@ -12,6 +12,15 @@ import {
   ParseUUIDPipe,
   UseGuards,
 } from '@nestjs/common';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBearerAuth,
+  ApiParam,
+  ApiExtraModels,
+  getSchemaPath,
+} from '@nestjs/swagger';
 import { CreateProjectUseCase } from '../application/use-cases/create-project.use-case';
 import { ListProjectsUseCase } from '../application/use-cases/list-projects.use-case';
 import { GetProjectUseCase } from '../application/use-cases/get-project.use-case';
@@ -22,7 +31,7 @@ import {
   UpdateProjectDto,
   ProjectQueryDto,
 } from './dtos/project.request.dto';
-import { ProjectResponseDto } from './dtos/project.response.dto';
+import { ProjectResponseDto, PaginatedProjectResponseDto } from './dtos/project.response.dto';
 import { PaginatedResult } from 'src/infrastructure/common/pagination';
 import { ProjectQueryFilters } from '../domain/repositories/project.repository';
 import { CurrentUser } from 'src/modules/auth/presentation/decorators/current-user.decorator';
@@ -32,6 +41,8 @@ import { ResourceOwnerGuard } from 'src/infrastructure/authorization/guards/reso
 import { CheckOwnership } from 'src/infrastructure/authorization/decorators/check-ownership.decorator';
 import { ResourceType } from 'src/infrastructure/authorization/interfaces/authorization.interfaces';
 
+@ApiTags('Projects')
+@ApiBearerAuth('JWT-auth')
 @Controller('workspaces/:workspaceId/projects')
 @UseGuards(WorkspaceMemberGuard)
 export class ProjectsController {
@@ -44,6 +55,11 @@ export class ProjectsController {
   ) {}
 
   @Get()
+  @ApiOperation({ summary: 'List projects with pagination and filters' })
+  @ApiParam({ name: 'workspaceId', description: 'Workspace ID', type: 'string', format: 'uuid' })
+  @ApiResponse({ status: 200, description: 'Paginated list of projects', type: PaginatedProjectResponseDto })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 403, description: 'Not a workspace member' })
   async list(
     @Param('workspaceId', new ParseUUIDPipe()) workspaceId: string,
     @Query() query: ProjectQueryDto,
@@ -74,6 +90,13 @@ export class ProjectsController {
   }
 
   @Get(':id')
+  @ApiOperation({ summary: 'Get project by ID' })
+  @ApiParam({ name: 'workspaceId', description: 'Workspace ID', type: 'string', format: 'uuid' })
+  @ApiParam({ name: 'id', description: 'Project ID', type: 'string', format: 'uuid' })
+  @ApiResponse({ status: 200, description: 'Project details', type: ProjectResponseDto })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 403, description: 'Not a workspace member' })
+  @ApiResponse({ status: 404, description: 'Project not found' })
   async get(
     @Param('id', new ParseUUIDPipe()) id: string,
   ): Promise<ProjectResponseDto> {
@@ -83,6 +106,12 @@ export class ProjectsController {
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({ summary: 'Create a new project' })
+  @ApiParam({ name: 'workspaceId', description: 'Workspace ID', type: 'string', format: 'uuid' })
+  @ApiResponse({ status: 201, description: 'Project created', type: ProjectResponseDto })
+  @ApiResponse({ status: 400, description: 'Validation error' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 403, description: 'Not a workspace member' })
   async create(
     @Param('workspaceId', new ParseUUIDPipe()) workspaceId: string,
     @Body() dto: CreateProjectDto,
@@ -100,6 +129,14 @@ export class ProjectsController {
   @Put(':id')
   @UseGuards(ResourceOwnerGuard)
   @CheckOwnership({ resourceType: ResourceType.PROJECT })
+  @ApiOperation({ summary: 'Update project (owner or ADMIN/OWNER role)' })
+  @ApiParam({ name: 'workspaceId', description: 'Workspace ID', type: 'string', format: 'uuid' })
+  @ApiParam({ name: 'id', description: 'Project ID', type: 'string', format: 'uuid' })
+  @ApiResponse({ status: 200, description: 'Project updated', type: ProjectResponseDto })
+  @ApiResponse({ status: 400, description: 'Validation error' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 403, description: 'Insufficient permissions' })
+  @ApiResponse({ status: 404, description: 'Project not found' })
   async update(
     @Param('id', new ParseUUIDPipe()) id: string,
     @Body() dto: UpdateProjectDto,
@@ -113,6 +150,13 @@ export class ProjectsController {
   @HttpCode(HttpStatus.NO_CONTENT)
   @UseGuards(ResourceOwnerGuard)
   @CheckOwnership({ resourceType: ResourceType.PROJECT })
+  @ApiOperation({ summary: 'Delete project (owner or ADMIN/OWNER role)' })
+  @ApiParam({ name: 'workspaceId', description: 'Workspace ID', type: 'string', format: 'uuid' })
+  @ApiParam({ name: 'id', description: 'Project ID', type: 'string', format: 'uuid' })
+  @ApiResponse({ status: 204, description: 'Project deleted' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 403, description: 'Insufficient permissions' })
+  @ApiResponse({ status: 404, description: 'Project not found' })
   async delete(
     @Param('id', new ParseUUIDPipe()) id: string,
     @CurrentUser() user: JwtUser,

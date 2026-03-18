@@ -11,6 +11,13 @@ import {
   ParseUUIDPipe,
   UseGuards,
 } from '@nestjs/common';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBearerAuth,
+  ApiParam,
+} from '@nestjs/swagger';
 import { CreateLabelUseCase } from '../application/use-cases/create-label.use-case';
 import { ListLabelsUseCase } from '../application/use-cases/list-labels.use-case';
 import { UpdateLabelUseCase } from '../application/use-cases/update-label.use-case';
@@ -24,6 +31,8 @@ import { MemberRole } from 'src/modules/members/domain/entities/member.entity';
 import { CurrentUser } from 'src/modules/auth/presentation/decorators/current-user.decorator';
 import type { JwtUser } from 'src/modules/auth/domain/entities/types/jwt-user.type';
 
+@ApiTags('Labels')
+@ApiBearerAuth('JWT-auth')
 @Controller('workspaces/:workspaceId/labels')
 @UseGuards(WorkspaceMemberGuard, RolesGuard)
 export class LabelsController {
@@ -35,6 +44,11 @@ export class LabelsController {
   ) {}
 
   @Get()
+  @ApiOperation({ summary: 'List all labels in workspace' })
+  @ApiParam({ name: 'workspaceId', description: 'Workspace ID', type: 'string', format: 'uuid' })
+  @ApiResponse({ status: 200, description: 'List of labels', type: [LabelResponseDto] })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 403, description: 'Not a workspace member' })
   async list(
     @Param('workspaceId', new ParseUUIDPipe()) workspaceId: string,
   ): Promise<LabelResponseDto[]> {
@@ -45,6 +59,12 @@ export class LabelsController {
   @Post()
   @HttpCode(HttpStatus.CREATED)
   @Roles(MemberRole.OWNER, MemberRole.ADMIN)
+  @ApiOperation({ summary: 'Create a new label (OWNER/ADMIN only)' })
+  @ApiParam({ name: 'workspaceId', description: 'Workspace ID', type: 'string', format: 'uuid' })
+  @ApiResponse({ status: 201, description: 'Label created', type: LabelResponseDto })
+  @ApiResponse({ status: 400, description: 'Validation error' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 403, description: 'Insufficient permissions' })
   async create(
     @Param('workspaceId', new ParseUUIDPipe()) workspaceId: string,
     @Body() dto: CreateLabelDto,
@@ -61,6 +81,14 @@ export class LabelsController {
 
   @Put(':id')
   @Roles(MemberRole.OWNER, MemberRole.ADMIN)
+  @ApiOperation({ summary: 'Update label (OWNER/ADMIN only)' })
+  @ApiParam({ name: 'workspaceId', description: 'Workspace ID', type: 'string', format: 'uuid' })
+  @ApiParam({ name: 'id', description: 'Label ID', type: 'string', format: 'uuid' })
+  @ApiResponse({ status: 200, description: 'Label updated', type: LabelResponseDto })
+  @ApiResponse({ status: 400, description: 'Validation error' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 403, description: 'Insufficient permissions' })
+  @ApiResponse({ status: 404, description: 'Label not found' })
   async update(
     @Param('id', new ParseUUIDPipe()) id: string,
     @Body() dto: UpdateLabelDto,
@@ -73,6 +101,13 @@ export class LabelsController {
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
   @Roles(MemberRole.OWNER, MemberRole.ADMIN)
+  @ApiOperation({ summary: 'Delete label (OWNER/ADMIN only)' })
+  @ApiParam({ name: 'workspaceId', description: 'Workspace ID', type: 'string', format: 'uuid' })
+  @ApiParam({ name: 'id', description: 'Label ID', type: 'string', format: 'uuid' })
+  @ApiResponse({ status: 204, description: 'Label deleted' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 403, description: 'Insufficient permissions' })
+  @ApiResponse({ status: 404, description: 'Label not found' })
   async delete(
     @Param('id', new ParseUUIDPipe()) id: string,
     @CurrentUser() user: JwtUser,
