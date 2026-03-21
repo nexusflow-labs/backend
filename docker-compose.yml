@@ -70,27 +70,65 @@ services:
       "
 
   # ===========================================
-  # NexusFlow API (Production only)
+  # NexusFlow API
   # ===========================================
-  # api:
-  #   build:
-  #     context: .
-  #     dockerfile: Dockerfile
-  #   container_name: nexusflow-api
-  #   restart: unless-stopped
-  #   environment:
-  #     NODE_ENV: production
-  #     DATABASE_URL: postgresql://${DB_USER}:${DB_PASSWORD}@db:5432/${DB_NAME}?schema=public
-  #     REDIS_URL: redis://redis:6379
-  #     JWT_SECRET: ${JWT_SECRET}
-  #     PORT: 3000
-  #   ports:
-  #     - "${PORT:-3000}:3000"
-  #   depends_on:
-  #     db:
-  #       condition: service_healthy
-  #     redis:
-  #       condition: service_healthy
+  # Uncomment to run API in Docker (production/staging)
+  # For local development, run `npm run start:dev` instead
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: runner
+    container_name: nexusflow-api
+    restart: unless-stopped
+    profiles:
+      - api  # Only starts with: docker-compose --profile api up
+    environment:
+      NODE_ENV: ${NODE_ENV:-production}
+      PORT: 3000
+      # Database
+      DATABASE_URL: postgresql://${DB_USER}:${DB_PASSWORD}@db:5432/${DB_NAME}?schema=public
+      # Redis
+      REDIS_URL: redis://redis:6379
+      # JWT
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-15m}
+      JWT_REFRESH_EXPIRES_IN: ${JWT_REFRESH_EXPIRES_IN:-7d}
+      # Cache
+      CACHE_TTL_DEFAULT: ${CACHE_TTL_DEFAULT:-300}
+      CACHE_TTL_DASHBOARD: ${CACHE_TTL_DASHBOARD:-300}
+      # Storage (MinIO)
+      STORAGE_TYPE: s3
+      S3_ENDPOINT: http://minio:9000
+      S3_BUCKET: ${S3_BUCKET:-nexusflow-uploads}
+      AWS_ACCESS_KEY_ID: ${MINIO_ROOT_USER:-minioadmin}
+      AWS_SECRET_ACCESS_KEY: ${MINIO_ROOT_PASSWORD:-minioadmin}
+      AWS_REGION: ${AWS_REGION:-us-east-1}
+      # Queue
+      QUEUE_ENABLED: "true"
+      QUEUE_PREFIX: ${QUEUE_PREFIX:-nexusflow}
+      # Rate Limiting
+      THROTTLE_TTL: ${THROTTLE_TTL:-60000}
+      THROTTLE_LIMIT: ${THROTTLE_LIMIT:-60}
+      # Frontend URL (for CORS, emails)
+      FRONTEND_URL: ${FRONTEND_URL:-http://localhost:3001}
+      # Email (optional)
+      EMAIL_PROVIDER: ${EMAIL_PROVIDER:-console}
+    ports:
+      - "${PORT:-3000}:3000"
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      start_period: 30s
+      retries: 3
 
 volumes:
   postgres_data:

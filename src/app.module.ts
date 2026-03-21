@@ -31,6 +31,7 @@ import { RealtimeModule } from './infrastructure/realtime/realtime.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
 import { FilesModule } from './modules/files/files.module';
 import { PrismaModule } from './infrastructure/prisma/prisma.module';
+import { HealthModule } from './modules/health/health.module';
 
 @Module({
   imports: [
@@ -50,6 +51,7 @@ import { PrismaModule } from './infrastructure/prisma/prisma.module';
       }),
     }),
     CacheModule,
+    HealthModule,
     AuthorizationModule,
     // QueueModule must be imported BEFORE modules with processors
     // so ProcessorRegistry is available for injection

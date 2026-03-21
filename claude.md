@@ -527,10 +527,10 @@ curl -X GET http://localhost:3000/workspaces \
 
 ### 4. Testing & Documentation
 ```
-[ ] Swagger/OpenAPI decorators cho tất cả endpoints
+[x] Swagger/OpenAPI decorators cho tất cả endpoints
 [ ] Unit tests cho critical use-cases
 [ ] E2E tests cho auth & CRUD flows
-[ ] Postman collection export
+[x] Postman collection export
 ```
 
 ### 5. DevOps
@@ -538,4 +538,5 @@ curl -X GET http://localhost:3000/workspaces \
 [ ] Docker compose với PostgreSQL, Redis, App
 [ ] GitHub Actions CI/CD
 [ ] Environment configs (staging, prod)
+[ ] Error tracking (Sentry integration)
 ```

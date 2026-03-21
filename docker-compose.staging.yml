@@ -1,0 +1,72 @@
+# ===========================================
+# Docker Compose - Staging Environment
+# ===========================================
+# Usage:
+#   docker-compose -f docker-compose.staging.yml up -d
+#
+# This file is for staging deployment.
+# Database and Redis should be managed services.
+
+services:
+  api:
+    image: ${DOCKER_REGISTRY:-}nexusflow-api:${IMAGE_TAG:-staging}
+    container_name: nexusflow-api-staging
+    restart: unless-stopped
+    environment:
+      NODE_ENV: staging
+      PORT: 3000
+      # Database (managed service)
+      DATABASE_URL: ${DATABASE_URL}
+      # Redis (managed service)
+      REDIS_URL: ${REDIS_URL}
+      # JWT
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-15m}
+      JWT_REFRESH_EXPIRES_IN: ${JWT_REFRESH_EXPIRES_IN:-7d}
+      # Cache
+      CACHE_TTL_DEFAULT: ${CACHE_TTL_DEFAULT:-300}
+      CACHE_TTL_DASHBOARD: ${CACHE_TTL_DASHBOARD:-300}
+      # Storage (S3)
+      STORAGE_TYPE: s3
+      AWS_REGION: ${AWS_REGION:-us-east-1}
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+      S3_BUCKET: ${S3_BUCKET:-nexusflow-staging-uploads}
+      S3_ENDPOINT: ${S3_ENDPOINT}
+      # Queue
+      QUEUE_ENABLED: "true"
+      QUEUE_PREFIX: nexusflow-staging
+      # Rate Limiting
+      THROTTLE_TTL: ${THROTTLE_TTL:-60000}
+      THROTTLE_LIMIT: ${THROTTLE_LIMIT:-120}
+      # Email
+      EMAIL_PROVIDER: ${EMAIL_PROVIDER:-sendgrid}
+      SENDGRID_API_KEY: ${SENDGRID_API_KEY}
+      EMAIL_FROM_NAME: "NexusFlow Staging"
+      EMAIL_FROM_ADDRESS: ${EMAIL_FROM_ADDRESS:-staging@nexusflow.com}
+      # Frontend
+      FRONTEND_URL: ${FRONTEND_URL:-https://staging.nexusflow.com}
+      # Monitoring
+      SENTRY_DSN: ${SENTRY_DSN}
+      LOG_LEVEL: debug
+    ports:
+      - "${PORT:-3000}:3000"
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      start_period: 30s
+      retries: 3
+    logging:
+      driver: json-file
+      options:
+        max-size: "50m"
+        max-file: "5"
+    deploy:
+      resources:
+        limits:
+          cpus: "1"
+          memory: 512M
+        reservations:
+          cpus: "0.5"
+          memory: 256M

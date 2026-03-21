@@ -1,0 +1,58 @@
+# Dependencies
+node_modules
+npm-debug.log
+yarn-error.log
+
+# Build output
+dist
+coverage
+.nyc_output
+
+# Environment files (use Docker env vars instead)
+.env
+.env.*
+!.env.example
+
+# IDE and editor
+.idea
+.vscode
+*.swp
+*.swo
+.DS_Store
+
+# Git
+.git
+.gitignore
+
+# Docker
+Dockerfile*
+docker-compose*.yml
+.dockerignore
+
+# Documentation
+*.md
+!README.md
+docs
+
+# Tests
+test
+**/*.spec.ts
+**/*.test.ts
+jest.config.js
+
+# Misc (keep tsconfig and nest-cli for build)
+.eslintrc.js
+.prettierrc
+
+# Prisma (keep schema and migrations, exclude studio)
+prisma/*.db
+prisma/*.db-journal
+
+# Generated files (will be regenerated in build)
+generated
+
+# Uploads (should use external storage)
+uploads
+
+# Postman
+postman

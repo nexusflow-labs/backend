@@ -1,0 +1,1630 @@
+{
+  "info": {
+    "_postman_id": "nexusflow-api-collection",
+    "name": "NexusFlow API",
+    "description": "NexusFlow - Project Management & Enterprise Operations Platform API\n\n## Authentication\nMost endpoints require JWT authentication. Use the `Login` endpoint to get an access token, then it will be automatically set in the collection variables.\n\n## Test Account\n- Email: `test@example.com`\n- Password: `Test@123456`\n\n## Rate Limits\n- Register/Reset Password: 5 req/min\n- Login/Refresh: 10 req/min\n- General: 60 req/min",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{accessToken}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000"
+    },
+    {
+      "key": "accessToken",
+      "value": ""
+    },
+    {
+      "key": "refreshToken",
+      "value": ""
+    },
+    {
+      "key": "workspaceId",
+      "value": "48a30c8b-53ca-4786-9d60-942bd1c2e241"
+    },
+    {
+      "key": "projectId",
+      "value": "c6e39e84-a1b0-4a13-b268-a271295ee378"
+    },
+    {
+      "key": "taskId",
+      "value": "98afcc31-ce1e-4573-a477-2ea2ce659515"
+    },
+    {
+      "key": "userId",
+      "value": "c7b7649c-7390-4494-8fe7-c21df469fc09"
+    }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "description": "Authentication endpoints for user registration, login, and token management",
+      "item": [
+        {
+          "name": "Register",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"John Doe\",\n  \"email\": \"john@example.com\",\n  \"password\": \"SecurePass@123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/register",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "register"]
+            },
+            "description": "Register a new user account.\n\n**Password Requirements:**\n- Min 8 characters\n- At least 1 uppercase letter\n- At least 1 lowercase letter\n- At least 1 number\n- At least 1 special character"
+          },
+          "response": []
+        },
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    pm.collectionVariables.set('accessToken', response.accessToken);",
+                  "    pm.collectionVariables.set('refreshToken', response.refreshToken);",
+                  "    console.log('Tokens saved to collection variables');",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"test@example.com\",\n  \"password\": \"Test@123456\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "login"]
+            },
+            "description": "Login with email and password. Returns access and refresh tokens.\n\nTokens are automatically saved to collection variables."
+          },
+          "response": []
+        },
+        {
+          "name": "Refresh Token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    pm.collectionVariables.set('accessToken', response.accessToken);",
+                  "    pm.collectionVariables.set('refreshToken', response.refreshToken);",
+                  "    console.log('Tokens refreshed and saved');",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"{{refreshToken}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/refresh",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "refresh"]
+            },
+            "description": "Refresh access token using a valid refresh token."
+          },
+          "response": []
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"{{refreshToken}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/logout",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "logout"]
+            },
+            "description": "Logout and revoke the provided refresh token."
+          },
+          "response": []
+        },
+        {
+          "name": "Logout All Devices",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/auth/logout-all",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "logout-all"]
+            },
+            "description": "Logout from all devices by revoking all refresh tokens for the current user."
+          },
+          "response": []
+        },
+        {
+          "name": "Forgot Password",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"test@example.com\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/forgot-password",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "forgot-password"]
+            },
+            "description": "Request a password reset email. Rate limited to 3 requests per minute."
+          },
+          "response": []
+        },
+        {
+          "name": "Reset Password",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"token\": \"<reset_token_from_email>\",\n  \"newPassword\": \"NewSecurePass@456\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/reset-password",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "reset-password"]
+            },
+            "description": "Reset password using the token received via email."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Workspaces",
+      "description": "Workspace management endpoints",
+      "item": [
+        {
+          "name": "List My Workspaces",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/workspaces",
+              "host": ["{{baseUrl}}"],
+              "path": ["workspaces"]
+            },
+            "description": "Get all workspaces the current user is a member of."
+          },
+          "response": []
+        },
+        {
+          "name": "Create Workspace",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const response = pm.response.json();",
+                  "    pm.collectionVariables.set('workspaceId', response.id);",
+                  "    console.log('Workspace ID saved:', response.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"My Workspace\",\n  \"description\": \"A workspace for my team\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/workspaces",
+              "host": ["{{baseUrl}}"],
+              "path": ["workspaces"]
+            },
+            "description": "Create a new workspace. The creator automatically becomes the OWNER."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Workspace",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/workspaces/{{workspaceId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["workspaces", "{{workspaceId}}"]
+            },
+            "description": "Get workspace details by ID. Requires workspace membership."
+          },
+          "response": []
+        },
+        {
+          "name": "Update Workspace",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Updated Workspace Name\",\n  \"description\": \"Updated description\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/workspaces/{{workspaceId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["workspaces", "{{workspaceId}}"]
+            },
+            "description": "Update workspace details. Requires OWNER or ADMIN role."
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Workspace",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/workspaces/{{workspaceId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["workspaces", "{{workspaceId}}"]
+            },
+            "description": "Delete a workspace. Requires OWNER role only."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Members",
+      "description": "Workspace membership management",
+      "item": [
+        {
+          "name": "List Members",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/workspaces/{{workspaceId}}/members",
+              "host": ["{{baseUrl}}"],
+              "path": ["workspaces", "{{workspaceId}}", "members"]
+            },
+            "description": "List all members of a workspace with their user information."
+          },
+          "response": []
+        },
+        {
+          "name": "Add Member",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": \"<user_id>\",\n  \"role\": \"MEMBER\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/workspaces/{{workspaceId}}/members",
+              "host": ["{{baseUrl}}"],
+              "path": ["workspaces", "{{workspaceId}}", "members"]
+            },
+            "description": "Add a user as a member to the workspace. Requires OWNER or ADMIN role.\n\n**Roles:** OWNER, ADMIN, MEMBER"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Member Role",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"operationId\": \"<unique_operation_id>\",\n  \"newRole\": \"ADMIN\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/workspaces/{{workspaceId}}/members/:targetId/role",
+              "host": ["{{baseUrl}}"],
+              "path": ["workspaces", "{{workspaceId}}", "members", ":targetId", "role"],
+              "variable": [
+                {
+                  "key": "targetId",
+                  "value": "<member_id>"
+                }
+              ]
+            },
+            "description": "Update a member's role. Requires OWNER or ADMIN role.\n\n**Note:** ADMIN cannot change OWNER role."
+          },
+          "response": []
+        },
+        {
+          "name": "Remove Member",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/workspaces/{{workspaceId}}/members/:targetId",
+              "host": ["{{baseUrl}}"],
+              "path": ["workspaces", "{{workspaceId}}", "members", ":targetId"],
+              "variable": [
+                {
+                  "key": "targetId",
+                  "value": "<member_id>"
+                }
+              ]
+            },
+            "description": "Remove a member from the workspace. Requires OWNER or ADMIN role."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Invitations",
+      "description": "Workspace invitation management",
+      "item": [
+        {
+          "name": "Create Invitation",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"invite@example.com\",\n  \"role\": \"MEMBER\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/workspaces/{{workspaceId}}/invitations",
+              "host": ["{{baseUrl}}"],
+              "path": ["workspaces", "{{workspaceId}}", "invitations"]
+            },
+            "description": "Send an invitation to join the workspace. Requires OWNER or ADMIN role.\n\n**Roles:** OWNER, ADMIN, MEMBER"
+          },
+          "response": []
+        },
+        {
+          "name": "List Pending Invitations",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/workspaces/{{workspaceId}}/invitations",
+              "host": ["{{baseUrl}}"],
+              "path": ["workspaces", "{{workspaceId}}", "invitations"]
+            },
+            "description": "List all pending invitations for the workspace. Requires OWNER or ADMIN role."
+          },
+          "response": []
+        },
+        {
+          "name": "Cancel Invitation",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/workspaces/{{workspaceId}}/invitations/:invitationId",
+              "host": ["{{baseUrl}}"],
+              "path": ["workspaces", "{{workspaceId}}", "invitations", ":invitationId"],
+              "variable": [
+                {
+                  "key": "invitationId",
+                  "value": "<invitation_id>"
+                }
+              ]
+            },
+            "description": "Cancel a pending invitation. Requires OWNER or ADMIN role."
+          },
+          "response": []
+        },
+        {
+          "name": "Accept Invitation",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"token\": \"<invitation_token>\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/invitations/accept",
+              "host": ["{{baseUrl}}"],
+              "path": ["invitations", "accept"]
+            },
+            "description": "Accept a workspace invitation using the token from the invitation email."
+          },
+          "response": []
+        },
+        {
+          "name": "Reject Invitation",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"token\": \"<invitation_token>\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/invitations/reject",
+              "host": ["{{baseUrl}}"],
+              "path": ["invitations", "reject"]
+            },
+            "description": "Reject a workspace invitation."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Projects",
+      "description": "Project management endpoints with pagination and filtering",
+      "item": [
+        {
+          "name": "List Projects",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/workspaces/{{workspaceId}}/projects?page=1&pageSize=20",
+              "host": ["{{baseUrl}}"],
+              "path": ["workspaces", "{{workspaceId}}", "projects"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "description": "Page number (default: 1)"
+                },
+                {
+                  "key": "pageSize",
+                  "value": "20",
+                  "description": "Items per page (1-100, default: 20)"
+                },
+                {
+                  "key": "search",
+                  "value": "",
+                  "description": "Search in project name",
+                  "disabled": true
+                },
+                {
+                  "key": "status",
+                  "value": "ACTIVE",
+                  "description": "Filter by status: ACTIVE, COMPLETED, ARCHIVED",
+                  "disabled": true
+                },
+                {
+                  "key": "ownerId",
+                  "value": "",
+                  "description": "Filter by owner ID",
+                  "disabled": true
+                },
+                {
+                  "key": "sortBy",
+                  "value": "createdAt",
+                  "description": "Sort by: createdAt, name, updatedAt",
+                  "disabled": true
+                },
+                {
+                  "key": "sortDirection",
+                  "value": "desc",
+                  "description": "Sort direction: asc, desc",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "List all projects in a workspace with pagination and filtering."
+          },
+          "response": []
+        },
+        {
+          "name": "Create Project",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const response = pm.response.json();",
+                  "    pm.collectionVariables.set('projectId', response.id);",
+                  "    console.log('Project ID saved:', response.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"New Project\",\n  \"description\": \"Project description\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/workspaces/{{workspaceId}}/projects",
+              "host": ["{{baseUrl}}"],
+              "path": ["workspaces", "{{workspaceId}}", "projects"]
+            },
+            "description": "Create a new project in the workspace. All workspace members can create projects."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Project",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/workspaces/{{workspaceId}}/projects/{{projectId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["workspaces", "{{workspaceId}}", "projects", "{{projectId}}"]
+            },
+            "description": "Get project details by ID."
+          },
+          "response": []
+        },
+        {
+          "name": "Update Project",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Updated Project Name\",\n  \"description\": \"Updated description\",\n  \"status\": \"ACTIVE\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/workspaces/{{workspaceId}}/projects/{{projectId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["workspaces", "{{workspaceId}}", "projects", "{{projectId}}"]
+            },
+            "description": "Update project details. Requires project ownership, OWNER, or ADMIN role.\n\n**Status values:** ACTIVE, COMPLETED, ARCHIVED"
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Project",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/workspaces/{{workspaceId}}/projects/{{projectId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["workspaces", "{{workspaceId}}", "projects", "{{projectId}}"]
+            },
+            "description": "Delete a project. Requires project ownership, OWNER, or ADMIN role."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Tasks",
+      "description": "Task management with advanced filtering and sorting",
+      "item": [
+        {
+          "name": "List Tasks",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/projects/{{projectId}}/tasks?page=1&pageSize=20",
+              "host": ["{{baseUrl}}"],
+              "path": ["projects", "{{projectId}}", "tasks"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "description": "Page number (default: 1)"
+                },
+                {
+                  "key": "pageSize",
+                  "value": "20",
+                  "description": "Items per page (1-100, default: 20)"
+                },
+                {
+                  "key": "status",
+                  "value": "TODO",
+                  "description": "Filter by status: TODO, IN_PROGRESS, IN_REVIEW, DONE",
+                  "disabled": true
+                },
+                {
+                  "key": "priority",
+                  "value": "HIGH",
+                  "description": "Filter by priority: LOW, MEDIUM, HIGH, URGENT",
+                  "disabled": true
+                },
+                {
+                  "key": "assigneeId",
+                  "value": "",
+                  "description": "Filter by assignee ID",
+                  "disabled": true
+                },
+                {
+                  "key": "creatorId",
+                  "value": "",
+                  "description": "Filter by creator ID",
+                  "disabled": true
+                },
+                {
+                  "key": "search",
+                  "value": "",
+                  "description": "Search in task title",
+                  "disabled": true
+                },
+                {
+                  "key": "rootOnly",
+                  "value": "false",
+                  "description": "Only return root tasks (no parent)",
+                  "disabled": true
+                },
+                {
+                  "key": "dueDateFrom",
+                  "value": "2024-01-01",
+                  "description": "Filter tasks with due date from (ISO 8601)",
+                  "disabled": true
+                },
+                {
+                  "key": "dueDateTo",
+                  "value": "2024-12-31",
+                  "description": "Filter tasks with due date to (ISO 8601)",
+                  "disabled": true
+                },
+                {
+                  "key": "createdFrom",
+                  "value": "",
+                  "description": "Filter by creation date from",
+                  "disabled": true
+                },
+                {
+                  "key": "createdTo",
+                  "value": "",
+                  "description": "Filter by creation date to",
+                  "disabled": true
+                },
+                {
+                  "key": "labelIds",
+                  "value": "",
+                  "description": "Filter by label IDs (comma-separated)",
+                  "disabled": true
+                },
+                {
+                  "key": "overdue",
+                  "value": "false",
+                  "description": "Filter overdue tasks only",
+                  "disabled": true
+                },
+                {
+                  "key": "sortBy",
+                  "value": "createdAt",
+                  "description": "Sort by: createdAt, dueDate, priority, status, title",
+                  "disabled": true
+                },
+                {
+                  "key": "sortDirection",
+                  "value": "desc",
+                  "description": "Sort direction: asc, desc",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "List all tasks in a project with advanced filtering and sorting options."
+          },
+          "response": []
+        },
+        {
+          "name": "Create Task",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const response = pm.response.json();",
+                  "    pm.collectionVariables.set('taskId', response.id);",
+                  "    console.log('Task ID saved:', response.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"New Task\",\n  \"description\": \"Task description\",\n  \"priority\": \"MEDIUM\",\n  \"dueDate\": \"2024-12-31T23:59:59.000Z\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/projects/{{projectId}}/tasks",
+              "host": ["{{baseUrl}}"],
+              "path": ["projects", "{{projectId}}", "tasks"]
+            },
+            "description": "Create a new task in the project.\n\n**Priority values:** LOW, MEDIUM, HIGH, URGENT"
+          },
+          "response": []
+        },
+        {
+          "name": "Create Subtask",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Subtask Title\",\n  \"description\": \"Subtask description\",\n  \"parentId\": \"{{taskId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/projects/{{projectId}}/tasks",
+              "host": ["{{baseUrl}}"],
+              "path": ["projects", "{{projectId}}", "tasks"]
+            },
+            "description": "Create a subtask by providing a parentId."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Task",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/projects/{{projectId}}/tasks/{{taskId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["projects", "{{projectId}}", "tasks", "{{taskId}}"]
+            },
+            "description": "Get task details by ID."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Subtasks",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/projects/{{projectId}}/tasks/{{taskId}}/subtasks",
+              "host": ["{{baseUrl}}"],
+              "path": ["projects", "{{projectId}}", "tasks", "{{taskId}}", "subtasks"]
+            },
+            "description": "Get all subtasks of a task."
+          },
+          "response": []
+        },
+        {
+          "name": "Update Task",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Updated Task Title\",\n  \"description\": \"Updated description\",\n  \"status\": \"IN_PROGRESS\",\n  \"priority\": \"HIGH\",\n  \"dueDate\": \"2024-12-31T23:59:59.000Z\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/projects/{{projectId}}/tasks/{{taskId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["projects", "{{projectId}}", "tasks", "{{taskId}}"]
+            },
+            "description": "Update task details. Requires task ownership, OWNER, or ADMIN role.\n\n**Status values:** TODO, IN_PROGRESS, IN_REVIEW, DONE\n**Priority values:** LOW, MEDIUM, HIGH, URGENT\n\nSet `dueDate` to `null` to remove the due date."
+          },
+          "response": []
+        },
+        {
+          "name": "Assign Task",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"assigneeId\": \"{{userId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/projects/{{projectId}}/tasks/{{taskId}}/assign",
+              "host": ["{{baseUrl}}"],
+              "path": ["projects", "{{projectId}}", "tasks", "{{taskId}}", "assign"]
+            },
+            "description": "Assign a task to a user. Set `assigneeId` to `null` to unassign."
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Task",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/projects/{{projectId}}/tasks/{{taskId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["projects", "{{projectId}}", "tasks", "{{taskId}}"]
+            },
+            "description": "Delete a task. Requires task ownership, OWNER, or ADMIN role."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Comments",
+      "description": "Task comment management",
+      "item": [
+        {
+          "name": "List Comments",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/tasks/{{taskId}}/comments?page=1&pageSize=20",
+              "host": ["{{baseUrl}}"],
+              "path": ["tasks", "{{taskId}}", "comments"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "description": "Page number (default: 1)"
+                },
+                {
+                  "key": "pageSize",
+                  "value": "20",
+                  "description": "Items per page (1-100, default: 20)"
+                }
+              ]
+            },
+            "description": "List all comments on a task with pagination."
+          },
+          "response": []
+        },
+        {
+          "name": "Create Comment",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"content\": \"This is a comment on the task.\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/tasks/{{taskId}}/comments",
+              "host": ["{{baseUrl}}"],
+              "path": ["tasks", "{{taskId}}", "comments"]
+            },
+            "description": "Add a comment to a task."
+          },
+          "response": []
+        },
+        {
+          "name": "Update Comment",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"content\": \"Updated comment content.\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/tasks/{{taskId}}/comments/:commentId",
+              "host": ["{{baseUrl}}"],
+              "path": ["tasks", "{{taskId}}", "comments", ":commentId"],
+              "variable": [
+                {
+                  "key": "commentId",
+                  "value": "<comment_id>"
+                }
+              ]
+            },
+            "description": "Update a comment. Only the comment author can update."
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Comment",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/tasks/{{taskId}}/comments/:commentId",
+              "host": ["{{baseUrl}}"],
+              "path": ["tasks", "{{taskId}}", "comments", ":commentId"],
+              "variable": [
+                {
+                  "key": "commentId",
+                  "value": "<comment_id>"
+                }
+              ]
+            },
+            "description": "Delete a comment. Only the comment author can delete."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Labels",
+      "description": "Label management for workspaces",
+      "item": [
+        {
+          "name": "List Labels",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/workspaces/{{workspaceId}}/labels",
+              "host": ["{{baseUrl}}"],
+              "path": ["workspaces", "{{workspaceId}}", "labels"]
+            },
+            "description": "List all labels in a workspace."
+          },
+          "response": []
+        },
+        {
+          "name": "Create Label",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Bug\",\n  \"color\": \"#FF0000\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/workspaces/{{workspaceId}}/labels",
+              "host": ["{{baseUrl}}"],
+              "path": ["workspaces", "{{workspaceId}}", "labels"]
+            },
+            "description": "Create a new label in the workspace. Requires OWNER or ADMIN role.\n\n**Color format:** Hex color code (#RRGGBB)"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Label",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Critical Bug\",\n  \"color\": \"#CC0000\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/workspaces/{{workspaceId}}/labels/:labelId",
+              "host": ["{{baseUrl}}"],
+              "path": ["workspaces", "{{workspaceId}}", "labels", ":labelId"],
+              "variable": [
+                {
+                  "key": "labelId",
+                  "value": "<label_id>"
+                }
+              ]
+            },
+            "description": "Update a label. Requires OWNER or ADMIN role."
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Label",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/workspaces/{{workspaceId}}/labels/:labelId",
+              "host": ["{{baseUrl}}"],
+              "path": ["workspaces", "{{workspaceId}}", "labels", ":labelId"],
+              "variable": [
+                {
+                  "key": "labelId",
+                  "value": "<label_id>"
+                }
+              ]
+            },
+            "description": "Delete a label. Requires OWNER or ADMIN role."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Task Labels",
+      "description": "Attach/detach labels to tasks",
+      "item": [
+        {
+          "name": "Get Task Labels",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/tasks/{{taskId}}/labels",
+              "host": ["{{baseUrl}}"],
+              "path": ["tasks", "{{taskId}}", "labels"]
+            },
+            "description": "Get all labels attached to a task."
+          },
+          "response": []
+        },
+        {
+          "name": "Add Label to Task",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/tasks/{{taskId}}/labels/:labelId",
+              "host": ["{{baseUrl}}"],
+              "path": ["tasks", "{{taskId}}", "labels", ":labelId"],
+              "variable": [
+                {
+                  "key": "labelId",
+                  "value": "<label_id>"
+                }
+              ]
+            },
+            "description": "Add a label to a task."
+          },
+          "response": []
+        },
+        {
+          "name": "Remove Label from Task",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/tasks/{{taskId}}/labels/:labelId",
+              "host": ["{{baseUrl}}"],
+              "path": ["tasks", "{{taskId}}", "labels", ":labelId"],
+              "variable": [
+                {
+                  "key": "labelId",
+                  "value": "<label_id>"
+                }
+              ]
+            },
+            "description": "Remove a label from a task."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Files",
+      "description": "File upload and management with pre-signed URLs",
+      "item": [
+        {
+          "name": "Register Upload",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const response = pm.response.json();",
+                  "    pm.collectionVariables.set('fileId', response.id);",
+                  "    pm.collectionVariables.set('uploadUrl', response.uploadUrl);",
+                  "    console.log('File ID saved:', response.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"filename\": \"document.pdf\",\n  \"contentType\": \"application/pdf\",\n  \"workspaceId\": \"{{workspaceId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/files/register",
+              "host": ["{{baseUrl}}"],
+              "path": ["files", "register"]
+            },
+            "description": "Register a file upload and get a pre-signed URL for uploading.\n\n**Returns:**\n- `id`: File ID to use when attaching\n- `uploadUrl`: Pre-signed URL for uploading the file\n- `expiresAt`: URL expiration time"
+          },
+          "response": []
+        },
+        {
+          "name": "Upload File (Local Dev)",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": ""
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{uploadUrl}}",
+              "host": ["{{uploadUrl}}"]
+            },
+            "description": "Upload file to the pre-signed URL. For local development only.\n\nUse the `uploadUrl` from the Register Upload response."
+          },
+          "response": []
+        },
+        {
+          "name": "Attach File to Task",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fileId\": \"{{fileId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/tasks/{{taskId}}/attachments",
+              "host": ["{{baseUrl}}"],
+              "path": ["tasks", "{{taskId}}", "attachments"]
+            },
+            "description": "Attach an uploaded file to a task."
+          },
+          "response": []
+        },
+        {
+          "name": "List Task Attachments",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/tasks/{{taskId}}/attachments",
+              "host": ["{{baseUrl}}"],
+              "path": ["tasks", "{{taskId}}", "attachments"]
+            },
+            "description": "List all file attachments for a task."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Download URL",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/files/:fileId/download",
+              "host": ["{{baseUrl}}"],
+              "path": ["files", ":fileId", "download"],
+              "variable": [
+                {
+                  "key": "fileId",
+                  "value": "{{fileId}}"
+                }
+              ]
+            },
+            "description": "Get a pre-signed download URL for a file."
+          },
+          "response": []
+        },
+        {
+          "name": "Delete File",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/files/:fileId",
+              "host": ["{{baseUrl}}"],
+              "path": ["files", ":fileId"],
+              "variable": [
+                {
+                  "key": "fileId",
+                  "value": "{{fileId}}"
+                }
+              ]
+            },
+            "description": "Delete a file."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Activity Logs",
+      "description": "Audit logging endpoints",
+      "item": [
+        {
+          "name": "List All Activity Logs",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/activity-logs?page=1&pageSize=20",
+              "host": ["{{baseUrl}}"],
+              "path": ["activity-logs"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "pageSize",
+                  "value": "20"
+                },
+                {
+                  "key": "entityType",
+                  "value": "TASK",
+                  "description": "USER, WORKSPACE, PROJECT, TASK, COMMENT, LABEL, MEMBER",
+                  "disabled": true
+                },
+                {
+                  "key": "entityId",
+                  "value": "",
+                  "description": "Filter by specific entity ID",
+                  "disabled": true
+                },
+                {
+                  "key": "userId",
+                  "value": "",
+                  "description": "Filter by user who performed action",
+                  "disabled": true
+                },
+                {
+                  "key": "action",
+                  "value": "CREATE",
+                  "description": "CREATE, UPDATE, DELETE, ASSIGN, ATTACH, DETACH",
+                  "disabled": true
+                },
+                {
+                  "key": "fromDate",
+                  "value": "",
+                  "description": "Filter from date (ISO 8601)",
+                  "disabled": true
+                },
+                {
+                  "key": "toDate",
+                  "value": "",
+                  "description": "Filter to date (ISO 8601)",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "List all activity logs with filtering options."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Task Activity Logs",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/activity-logs/tasks/{{taskId}}?page=1&pageSize=20",
+              "host": ["{{baseUrl}}"],
+              "path": ["activity-logs", "tasks", "{{taskId}}"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "pageSize",
+                  "value": "20"
+                }
+              ]
+            },
+            "description": "Get activity logs for a specific task."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Project Activity Logs",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/activity-logs/projects/{{projectId}}?page=1&pageSize=20",
+              "host": ["{{baseUrl}}"],
+              "path": ["activity-logs", "projects", "{{projectId}}"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "pageSize",
+                  "value": "20"
+                }
+              ]
+            },
+            "description": "Get activity logs for a specific project."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Workspace Activity Logs",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/activity-logs/workspaces/{{workspaceId}}?page=1&pageSize=20",
+              "host": ["{{baseUrl}}"],
+              "path": ["activity-logs", "workspaces", "{{workspaceId}}"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "pageSize",
+                  "value": "20"
+                }
+              ]
+            },
+            "description": "Get activity logs for a specific workspace."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Dashboard",
+      "description": "Workspace statistics and analytics",
+      "item": [
+        {
+          "name": "Get Workspace Statistics",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/workspaces/{{workspaceId}}/dashboard",
+              "host": ["{{baseUrl}}"],
+              "path": ["workspaces", "{{workspaceId}}", "dashboard"]
+            },
+            "description": "Get workspace statistics including project counts, task counts, completion rates, etc.\n\n**Note:** Results are cached in Redis for 5 minutes."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Notifications",
+      "description": "In-app notification management",
+      "item": [
+        {
+          "name": "List Notifications",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/notifications?limit=20",
+              "host": ["{{baseUrl}}"],
+              "path": ["notifications"],
+              "query": [
+                {
+                  "key": "filter",
+                  "value": "all",
+                  "description": "Filter: all, read, unread (default: all)",
+                  "disabled": true
+                },
+                {
+                  "key": "cursor",
+                  "value": "",
+                  "description": "Cursor for pagination",
+                  "disabled": true
+                },
+                {
+                  "key": "limit",
+                  "value": "20",
+                  "description": "Items per page (1-100, default: 20)"
+                }
+              ]
+            },
+            "description": "List notifications with cursor-based pagination."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Unread Count",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/notifications/unread-count",
+              "host": ["{{baseUrl}}"],
+              "path": ["notifications", "unread-count"]
+            },
+            "description": "Get the count of unread notifications."
+          },
+          "response": []
+        },
+        {
+          "name": "Mark as Read",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/notifications/:notificationId/read",
+              "host": ["{{baseUrl}}"],
+              "path": ["notifications", ":notificationId", "read"],
+              "variable": [
+                {
+                  "key": "notificationId",
+                  "value": "<notification_id>"
+                }
+              ]
+            },
+            "description": "Mark a single notification as read."
+          },
+          "response": []
+        },
+        {
+          "name": "Mark All as Read",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/notifications/read-all",
+              "host": ["{{baseUrl}}"],
+              "path": ["notifications", "read-all"]
+            },
+            "description": "Mark all notifications as read."
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}

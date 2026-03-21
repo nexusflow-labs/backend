@@ -5,6 +5,9 @@
   "author": "",
   "private": true,
   "license": "UNLICENSED",
+  "prisma": {
+    "engineType": "client"
+  },
   "scripts": {
     "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
@@ -27,7 +30,14 @@
     "db:seed": "dotenv -e .env.local -- ts-node prisma/seed.ts",
     "docker:up": "docker-compose -p nexusflow --env-file .env.local up -d",
     "docker:down": "docker-compose -p nexusflow --env-file .env.local down",
-    "docker:logs": "docker-compose --env-file .env.local logs -f"
+    "docker:logs": "docker-compose --env-file .env.local logs -f",
+    "docker:up:all": "docker-compose -p nexusflow --env-file .env.local --profile api up -d",
+    "docker:build": "docker build -t nexusflow-api .",
+    "docker:build:prod": "docker build -t nexusflow-api:latest --target runner .",
+    "start:staging": "NODE_ENV=staging node dist/main",
+    "start:production": "NODE_ENV=production node dist/main",
+    "deploy:staging": "docker-compose -f docker-compose.staging.yml up -d",
+    "deploy:production": "docker-compose -f docker-compose.production.yml up -d"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1009.0",
@@ -40,7 +50,6 @@
     "@nestjs/passport": "^11.0.5",
     "@nestjs/platform-express": "^11.0.1",
     "@nestjs/platform-socket.io": "^11.1.16",
-    "@nestjs/swagger": "^11.2.6",
     "@nestjs/throttler": "^6.5.0",
     "@nestjs/websockets": "^11.1.16",
     "@prisma/adapter-pg": "^7.4.2",
@@ -74,9 +83,9 @@
     "@types/node": "^22.10.7",
     "@types/nodemailer": "^7.0.11",
     "@types/passport-jwt": "^4.0.1",
-    "@types/pg": "^8.15.2",
     "@types/socket.io": "^3.0.1",
     "@types/supertest": "^6.0.2",
+    "@nestjs/swagger": "^11.2.6",
     "dotenv": "^16.4.7",
     "dotenv-cli": "^8.0.0",
     "eslint": "^9.18.0",

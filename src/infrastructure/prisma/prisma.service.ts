@@ -11,7 +11,7 @@ export class PrismaService
   private pool: Pool;
 
   constructor() {
-    const pool = new Pool({
+    const pool: Pool = new Pool({
       connectionString: process.env.DATABASE_URL,
     });
     const adapter = new PrismaPg(pool);
@@ -26,7 +26,6 @@ export class PrismaService
 
   async onModuleDestroy() {
     await this.$disconnect();
-    await this.pool.end();
   }
 
   // Soft delete a record by setting deletedAt
