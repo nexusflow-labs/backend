@@ -1,7 +1,7 @@
 # ============================================
 # Stage 1: Dependencies
 # ============================================
-FROM node:20-alpine AS deps
+FROM node:25-alpine AS deps
 
 # Install build dependencies for native modules (argon2, bcrypt)
 RUN apk add --no-cache python3 make g++ libc6-compat
@@ -17,7 +17,7 @@ RUN npm ci
 # ============================================
 # Stage 2: Builder
 # ============================================
-FROM node:20-alpine AS builder
+FROM node:25-alpine AS builder
 
 WORKDIR /app
 
@@ -34,7 +34,7 @@ RUN npm run build
 # ============================================
 # Stage 3: Production dependencies
 # ============================================
-FROM node:20-alpine AS prod-deps
+FROM node:25-alpine AS prod-deps
 
 # Install build dependencies for native modules
 RUN apk add --no-cache python3 make g++ libc6-compat
@@ -49,7 +49,7 @@ RUN npm ci --omit=dev --omit=optional
 # ============================================
 # Stage 4: Production runner
 # ============================================
-FROM node:20-alpine AS runner
+FROM node:25-alpine AS runner
 
 # Install runtime dependencies for native modules
 RUN apk add --no-cache libc6-compat
