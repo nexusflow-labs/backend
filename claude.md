@@ -446,9 +446,9 @@ socket.emit('typing:start', { taskId: '...' });
 
 ### Tuần 12: DevOps & Production
 ```
-[ ] Docker compose full stack
-[ ] CI/CD pipeline (GitHub Actions)
-[ ] Environment configs (staging, prod)
+[x] Docker compose full stack
+[x] CI/CD pipeline (GitHub Actions)
+[x] Environment configs (staging, prod)
 [ ] Error tracking (Sentry)
 ```
 
@@ -535,8 +535,8 @@ curl -X GET http://localhost:3000/workspaces \
 
 ### 5. DevOps
 ```
-[ ] Docker compose với PostgreSQL, Redis, App
-[ ] GitHub Actions CI/CD
-[ ] Environment configs (staging, prod)
+[x] Docker compose với PostgreSQL, Redis, App
+[x] GitHub Actions CI/CD
+[x] Environment configs (staging, prod)
 [ ] Error tracking (Sentry integration)
 ```
