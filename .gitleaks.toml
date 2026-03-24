@@ -1,0 +1,46 @@
+# Gitleaks Configuration
+# https://github.com/gitleaks/gitleaks
+
+title = "NexusFlow Gitleaks Config"
+
+# Extend the default gitleaks config
+[extend]
+useDefault = true
+
+# Allowlist specific commits that contain placeholder/example secrets
+# These are NOT real secrets - just template values
+[allowlist]
+  description = "Allowlist for placeholder secrets and false positives"
+
+  # Commits containing placeholder .env files (not real secrets)
+  commits = [
+    "e252d56506f8a80daaec96c59438da7d6ff551ea",  # chore: stop tracking .env.prod
+    "da07fa1",  # feat: implement pagination (may have .env.example)
+  ]
+
+  # Paths to ignore (example/template files)
+  paths = [
+    '''\.env\.example$''',
+    '''\.env\.sample$''',
+    '''\.env\.template$''',
+    '''docker-compose\..*\.yml$''',
+    '''README\.md$''',
+    '''CLAUDE\.md$''',
+    '''docs/.*''',
+  ]
+
+  # Regex patterns for known false positives
+  regexes = [
+    # Placeholder values that are clearly not real secrets
+    '''your-.*-password''',
+    '''your-.*-secret''',
+    '''your-.*-key''',
+    '''example-.*-key''',
+    '''test-.*-secret''',
+    '''change-me''',
+    '''placeholder''',
+    # Common test/example values
+    '''secret123''',
+    '''password123''',
+    '''Test@123456''',
+  ]

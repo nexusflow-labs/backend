@@ -18,23 +18,10 @@ npm install
 
 ### 2. Environment Configuration
 
-Project sử dụng 2 file môi trường:
-
 | File | Mục đích |
 |------|----------|
 | `.env.local` | Development (local) |
-| `.env.prod` | Production |
-
-**Cấu hình database trong `.env.local`:**
-
-```env
-DB_HOST=YOUR_HOST
-DB_PORT=YOUR_PORT
-DB_USER=YOUR_USER
-DB_PASSWORD=YOUR_PASSWORD
-DB_NAME=YOUR_DB
-DATABASE_URL="postgresql://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}?schema=public"
-```
+| `.env.production` | Production |
 
 ## Scripts
 

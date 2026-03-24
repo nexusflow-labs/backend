@@ -38,6 +38,7 @@ Thumbs.db
 *.launch
 .settings/
 *.sublime-workspace
+claude.md
 
 # IDE - VSCode
 .vscode/*

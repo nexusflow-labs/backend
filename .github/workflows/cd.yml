@@ -118,6 +118,15 @@ jobs:
             echo "tag=${{ needs.build-and-push.outputs.image_tag }}" >> $GITHUB_OUTPUT
           fi
 
+      - name: Sync docker-compose file to server
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.STAGING_HOST }}
+          username: ${{ secrets.STAGING_SSH_USER }}
+          key: ${{ secrets.STAGING_SSH_KEY }}
+          source: "docker-compose.staging.yml"
+          target: "/opt/nexusflow"
+
       - name: Deploy to staging server
         uses: appleboy/ssh-action@v1.2.0
         with:
@@ -183,6 +192,15 @@ jobs:
           else
             echo "tag=${{ needs.build-and-push.outputs.image_tag }}" >> $GITHUB_OUTPUT
           fi
+
+      - name: Sync docker-compose file to server
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.PRODUCTION_HOST }}
+          username: ${{ secrets.PRODUCTION_SSH_USER }}
+          key: ${{ secrets.PRODUCTION_SSH_KEY }}
+          source: "docker-compose.production.yml"
+          target: "/opt/nexusflow"
 
       - name: Deploy to production server
         uses: appleboy/ssh-action@v1.2.0
