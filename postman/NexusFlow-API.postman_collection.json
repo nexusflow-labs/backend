@@ -82,8 +82,8 @@
                 "exec": [
                   "if (pm.response.code === 200) {",
                   "    const response = pm.response.json();",
-                  "    pm.collectionVariables.set('accessToken', response.accessToken);",
-                  "    pm.collectionVariables.set('refreshToken', response.refreshToken);",
+                  "    pm.collectionVariables.set('accessToken', response.data.accessToken);",
+                  "    pm.collectionVariables.set('refreshToken', response.data.refreshToken);",
                   "    console.log('Tokens saved to collection variables');",
                   "}"
                 ],

@@ -27,8 +27,17 @@ export class DashboardController {
 
   @Get()
   @ApiOperation({ summary: 'Get workspace statistics and dashboard data' })
-  @ApiParam({ name: 'workspaceId', description: 'Workspace ID', type: 'string', format: 'uuid' })
-  @ApiResponse({ status: 200, description: 'Workspace statistics', type: WorkspaceStatisticsResponseDto })
+  @ApiParam({
+    name: 'workspaceId',
+    description: 'Workspace ID',
+    type: 'string',
+    format: 'uuid',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Workspace statistics',
+    type: WorkspaceStatisticsResponseDto,
+  })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 403, description: 'Not a workspace member' })
   @ApiResponse({ status: 404, description: 'Workspace not found' })

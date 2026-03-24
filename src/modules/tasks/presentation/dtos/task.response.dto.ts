@@ -119,7 +119,10 @@ export class PaginationMetaDto {
   @ApiPropertyOptional({ description: 'Items per page' })
   pageSize?: number;
 
-  @ApiPropertyOptional({ description: 'Next cursor for cursor-based pagination', nullable: true })
+  @ApiPropertyOptional({
+    description: 'Next cursor for cursor-based pagination',
+    nullable: true,
+  })
   nextCursor?: string | null;
 
   @ApiProperty({ description: 'Whether there is a next page' })

@@ -1,13 +1,7 @@
-# ===========================================
-# Build & Dependencies
-# ===========================================
 /dist
 /node_modules
 /build
 
-# ===========================================
-# Logs
-# ===========================================
 logs
 *.log
 npm-debug.log*
@@ -16,21 +10,12 @@ yarn-debug.log*
 yarn-error.log*
 lerna-debug.log*
 
-# ===========================================
-# OS
-# ===========================================
 .DS_Store
 Thumbs.db
 
-# ===========================================
-# Tests
-# ===========================================
 /coverage
 /.nyc_output
 
-# ===========================================
-# IDEs and editors
-# ===========================================
 /.idea
 .project
 .classpath
@@ -38,48 +23,39 @@ Thumbs.db
 *.launch
 .settings/
 *.sublime-workspace
-claude.md
 
-# IDE - VSCode
 .vscode/*
 !.vscode/settings.json
 !.vscode/tasks.json
 !.vscode/launch.json
 !.vscode/extensions.json
 
-# ===========================================
-# Environment files
-# ===========================================
+.claude/
+.claudeignore
+.claude_cache/
+*.claude
+claude.md
+CLAUDE.md
+
 .env
 .env.local
-.env.prod
+.env.production
 .env.staging
 .env.*.local
 !.env.example
 
-# ===========================================
-# Temporary files
-# ===========================================
 .temp
 .tmp
 *.tmp
 *.swp
 *~
 
-# ===========================================
-# Runtime data
-# ===========================================
 pids
 *.pid
 *.seed
 *.pid.lock
 
-# ===========================================
-# Diagnostic reports
-# ===========================================
+
 report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 
-# ===========================================
-# Prisma
-# ===========================================
 /generated/prisma

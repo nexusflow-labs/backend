@@ -123,7 +123,10 @@ export class UnreadCountResponseDto {
 }
 
 export class PaginationMetaDto {
-  @ApiPropertyOptional({ description: 'Next cursor for pagination', nullable: true })
+  @ApiPropertyOptional({
+    description: 'Next cursor for pagination',
+    nullable: true,
+  })
   nextCursor?: string | null;
 
   @ApiProperty({ description: 'Whether there is a next page' })
@@ -134,7 +137,10 @@ export class PaginationMetaDto {
 }
 
 export class PaginatedNotificationResponseDto {
-  @ApiProperty({ description: 'List of notifications', type: [NotificationResponseDto] })
+  @ApiProperty({
+    description: 'List of notifications',
+    type: [NotificationResponseDto],
+  })
   items: NotificationResponseDto[];
 
   @ApiProperty({ description: 'Pagination metadata', type: PaginationMetaDto })

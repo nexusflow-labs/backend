@@ -118,7 +118,8 @@ export class ResetPasswordDto {
   token: string;
 
   @ApiProperty({
-    description: 'New password (min 8 chars, 1 uppercase, 1 lowercase, 1 number, 1 symbol)',
+    description:
+      'New password (min 8 chars, 1 uppercase, 1 lowercase, 1 number, 1 symbol)',
     example: 'NewTest@123456',
   })
   @IsStrongPassword({
@@ -132,7 +133,10 @@ export class ResetPasswordDto {
 }
 
 export class UserResponseDto {
-  @ApiProperty({ description: 'User ID', example: 'c7b7649c-7390-4494-8fe7-c21df469fc09' })
+  @ApiProperty({
+    description: 'User ID',
+    example: 'c7b7649c-7390-4494-8fe7-c21df469fc09',
+  })
   id: string;
 
   @ApiProperty({ description: 'User full name', example: 'John Doe' })
@@ -154,6 +158,9 @@ export class AuthResponseDto {
 }
 
 export class MessageResponseDto {
-  @ApiProperty({ description: 'Response message', example: 'Operation successful' })
+  @ApiProperty({
+    description: 'Response message',
+    example: 'Operation successful',
+  })
   message: string;
 }

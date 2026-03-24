@@ -23,7 +23,7 @@ export class RedisIoAdapter extends IoAdapter {
       'redis://localhost:6379',
     );
     this.pubClient = new Redis(redisUrl);
-    this.subClient = this.pubClient.duplicate();
+    this.subClient = this.pubClient.duplicate({ enableReadyCheck: false });
 
     this.pubClient.on('error', (err) => {
       console.error('Redis pubClient error:', err);

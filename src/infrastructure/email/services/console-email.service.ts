@@ -15,7 +15,7 @@ export class ConsoleEmailService extends IEmailService {
     super();
   }
 
-  async send(options: SendEmailOptions): Promise<void> {
+  send(options: SendEmailOptions): Promise<void> {
     const recipients = Array.isArray(options.to)
       ? options.to.join(', ')
       : options.to;
@@ -35,12 +35,10 @@ export class ConsoleEmailService extends IEmailService {
       this.logger.log(options.text);
     }
     this.logger.log('='.repeat(60));
+    return Promise.resolve();
   }
 
-  async sendInvitation(
-    email: string,
-    data: InvitationEmailData,
-  ): Promise<void> {
+  sendInvitation(email: string, data: InvitationEmailData): Promise<void> {
     const rendered = this.templateService.renderInvitation(data);
 
     this.logger.log('='.repeat(60));
@@ -53,9 +51,10 @@ export class ConsoleEmailService extends IEmailService {
     this.logger.log(`Invite Link: ${data.inviteLink}`);
     this.logger.log(`Expires At: ${data.expiresAt.toISOString()}`);
     this.logger.log('='.repeat(60));
+    return Promise.resolve();
   }
 
-  async sendPasswordReset(
+  sendPasswordReset(
     email: string,
     data: PasswordResetEmailData,
   ): Promise<void> {
@@ -70,5 +69,6 @@ export class ConsoleEmailService extends IEmailService {
     this.logger.log(`Reset Link: ${data.resetLink}`);
     this.logger.log(`Expires At: ${data.expiresAt.toISOString()}`);
     this.logger.log('='.repeat(60));
+    return Promise.resolve();
   }
 }

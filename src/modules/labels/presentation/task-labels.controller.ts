@@ -37,8 +37,17 @@ export class TaskLabelsController {
 
   @Get()
   @ApiOperation({ summary: 'Get labels attached to a task' })
-  @ApiParam({ name: 'taskId', description: 'Task ID', type: 'string', format: 'uuid' })
-  @ApiResponse({ status: 200, description: 'List of labels', type: [LabelResponseDto] })
+  @ApiParam({
+    name: 'taskId',
+    description: 'Task ID',
+    type: 'string',
+    format: 'uuid',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'List of labels',
+    type: [LabelResponseDto],
+  })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 404, description: 'Task not found' })
   async getTaskLabels(
@@ -51,8 +60,18 @@ export class TaskLabelsController {
   @Post(':labelId')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Add a label to a task' })
-  @ApiParam({ name: 'taskId', description: 'Task ID', type: 'string', format: 'uuid' })
-  @ApiParam({ name: 'labelId', description: 'Label ID', type: 'string', format: 'uuid' })
+  @ApiParam({
+    name: 'taskId',
+    description: 'Task ID',
+    type: 'string',
+    format: 'uuid',
+  })
+  @ApiParam({
+    name: 'labelId',
+    description: 'Label ID',
+    type: 'string',
+    format: 'uuid',
+  })
   @ApiResponse({ status: 201, description: 'Label added to task' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 404, description: 'Task or label not found' })
@@ -68,8 +87,18 @@ export class TaskLabelsController {
   @Delete(':labelId')
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Remove a label from a task' })
-  @ApiParam({ name: 'taskId', description: 'Task ID', type: 'string', format: 'uuid' })
-  @ApiParam({ name: 'labelId', description: 'Label ID', type: 'string', format: 'uuid' })
+  @ApiParam({
+    name: 'taskId',
+    description: 'Task ID',
+    type: 'string',
+    format: 'uuid',
+  })
+  @ApiParam({
+    name: 'labelId',
+    description: 'Label ID',
+    type: 'string',
+    format: 'uuid',
+  })
   @ApiResponse({ status: 204, description: 'Label removed from task' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 404, description: 'Task or label not found' })

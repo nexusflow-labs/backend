@@ -21,7 +21,11 @@ import { AddMemberUseCase } from '../application/use-cases/add-member.use-case';
 import { UpdateMemberRoleUseCase } from '../application/use-cases/update-member-role.use-case';
 import { RemoveMemberUseCase } from '../application/use-cases/remove-member.use-case';
 import { GetWorkspaceMembersUseCase } from '../application/use-cases/get-workspace-members.use-case';
-import { AddMemberDto, UpdateMemberRoleDto, MemberResponseDto } from './dtos/members.dtos';
+import {
+  AddMemberDto,
+  UpdateMemberRoleDto,
+  MemberResponseDto,
+} from './dtos/members.dtos';
 import { MemberWithUserResponseDto } from './dtos/member-with-user.response.dto';
 import { WorkspaceMemberGuard } from 'src/infrastructure/authorization/guards/workspace-member.guard';
 import { RolesGuard } from 'src/infrastructure/authorization/guards/roles.guard';
@@ -44,11 +48,22 @@ export class MemberController {
 
   @Get()
   @ApiOperation({ summary: 'List all members of a workspace' })
-  @ApiParam({ name: 'workspaceId', description: 'Workspace ID', type: 'string', format: 'uuid' })
-  @ApiResponse({ status: 200, description: 'List of members with user info', type: [MemberWithUserResponseDto] })
+  @ApiParam({
+    name: 'workspaceId',
+    description: 'Workspace ID',
+    type: 'string',
+    format: 'uuid',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'List of members with user info',
+    type: [MemberWithUserResponseDto],
+  })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 403, description: 'Not a workspace member' })
-  async getMembers(@Param('workspaceId') workspaceId: string): Promise<MemberWithUserResponseDto[]> {
+  async getMembers(
+    @Param('workspaceId') workspaceId: string,
+  ): Promise<MemberWithUserResponseDto[]> {
     const members = await this.getMembersUseCase.execute(workspaceId);
     return MemberWithUserResponseDto.fromEntities(members);
   }
@@ -56,8 +71,17 @@ export class MemberController {
   @Post()
   @Roles(MemberRole.OWNER, MemberRole.ADMIN)
   @ApiOperation({ summary: 'Add a member to workspace (OWNER/ADMIN only)' })
-  @ApiParam({ name: 'workspaceId', description: 'Workspace ID', type: 'string', format: 'uuid' })
-  @ApiResponse({ status: 201, description: 'Member added', type: MemberResponseDto })
+  @ApiParam({
+    name: 'workspaceId',
+    description: 'Workspace ID',
+    type: 'string',
+    format: 'uuid',
+  })
+  @ApiResponse({
+    status: 201,
+    description: 'Member added',
+    type: MemberResponseDto,
+  })
   @ApiResponse({ status: 400, description: 'Validation error' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 403, description: 'Insufficient permissions' })
@@ -79,8 +103,18 @@ export class MemberController {
   @HttpCode(HttpStatus.NO_CONTENT)
   @Roles(MemberRole.OWNER, MemberRole.ADMIN)
   @ApiOperation({ summary: 'Update member role (OWNER/ADMIN only)' })
-  @ApiParam({ name: 'workspaceId', description: 'Workspace ID', type: 'string', format: 'uuid' })
-  @ApiParam({ name: 'targetId', description: 'Target member ID', type: 'string', format: 'uuid' })
+  @ApiParam({
+    name: 'workspaceId',
+    description: 'Workspace ID',
+    type: 'string',
+    format: 'uuid',
+  })
+  @ApiParam({
+    name: 'targetId',
+    description: 'Target member ID',
+    type: 'string',
+    format: 'uuid',
+  })
   @ApiResponse({ status: 204, description: 'Role updated' })
   @ApiResponse({ status: 400, description: 'Cannot change OWNER role' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
@@ -104,8 +138,18 @@ export class MemberController {
   @HttpCode(HttpStatus.NO_CONTENT)
   @Roles(MemberRole.OWNER, MemberRole.ADMIN)
   @ApiOperation({ summary: 'Remove member from workspace (OWNER/ADMIN only)' })
-  @ApiParam({ name: 'workspaceId', description: 'Workspace ID', type: 'string', format: 'uuid' })
-  @ApiParam({ name: 'targetId', description: 'Target member ID', type: 'string', format: 'uuid' })
+  @ApiParam({
+    name: 'workspaceId',
+    description: 'Workspace ID',
+    type: 'string',
+    format: 'uuid',
+  })
+  @ApiParam({
+    name: 'targetId',
+    description: 'Target member ID',
+    type: 'string',
+    format: 'uuid',
+  })
   @ApiResponse({ status: 204, description: 'Member removed' })
   @ApiResponse({ status: 400, description: 'Cannot remove OWNER' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
@@ -116,10 +160,6 @@ export class MemberController {
     @Param('targetId') targetId: string,
     @CurrentUser() user: JwtUser,
   ): Promise<void> {
-    await this.removeMemberUseCase.execute(
-      workspaceId,
-      user.id,
-      targetId,
-    );
+    await this.removeMemberUseCase.execute(workspaceId, user.id, targetId);
   }
 }

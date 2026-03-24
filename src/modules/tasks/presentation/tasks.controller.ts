@@ -33,7 +33,10 @@ import {
   AssignTaskDto,
   TaskQueryDto,
 } from './dtos/task.request.dto';
-import { TaskResponseDto, PaginatedTaskResponseDto } from './dtos/task.response.dto';
+import {
+  TaskResponseDto,
+  PaginatedTaskResponseDto,
+} from './dtos/task.response.dto';
 import { PaginatedResult } from 'src/infrastructure/common/pagination';
 import { TaskQueryFilters } from '../domain/repositories/task.repository';
 import { CurrentUser } from 'src/modules/auth/presentation/decorators/current-user.decorator';
@@ -60,8 +63,17 @@ export class TasksController {
 
   @Get()
   @ApiOperation({ summary: 'List tasks with pagination and filters' })
-  @ApiParam({ name: 'projectId', description: 'Project ID', type: 'string', format: 'uuid' })
-  @ApiResponse({ status: 200, description: 'Paginated list of tasks', type: PaginatedTaskResponseDto })
+  @ApiParam({
+    name: 'projectId',
+    description: 'Project ID',
+    type: 'string',
+    format: 'uuid',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Paginated list of tasks',
+    type: PaginatedTaskResponseDto,
+  })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 403, description: 'Not a workspace member' })
   async list(
@@ -104,9 +116,23 @@ export class TasksController {
 
   @Get(':id')
   @ApiOperation({ summary: 'Get task by ID' })
-  @ApiParam({ name: 'projectId', description: 'Project ID', type: 'string', format: 'uuid' })
-  @ApiParam({ name: 'id', description: 'Task ID', type: 'string', format: 'uuid' })
-  @ApiResponse({ status: 200, description: 'Task details', type: TaskResponseDto })
+  @ApiParam({
+    name: 'projectId',
+    description: 'Project ID',
+    type: 'string',
+    format: 'uuid',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'Task ID',
+    type: 'string',
+    format: 'uuid',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Task details',
+    type: TaskResponseDto,
+  })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 404, description: 'Task not found' })
   async get(
@@ -119,8 +145,17 @@ export class TasksController {
   @Post()
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Create a new task' })
-  @ApiParam({ name: 'projectId', description: 'Project ID', type: 'string', format: 'uuid' })
-  @ApiResponse({ status: 201, description: 'Task created', type: TaskResponseDto })
+  @ApiParam({
+    name: 'projectId',
+    description: 'Project ID',
+    type: 'string',
+    format: 'uuid',
+  })
+  @ApiResponse({
+    status: 201,
+    description: 'Task created',
+    type: TaskResponseDto,
+  })
   @ApiResponse({ status: 400, description: 'Validation error' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 403, description: 'Not a workspace member' })
@@ -143,9 +178,23 @@ export class TasksController {
 
   @Get(':id/subtasks')
   @ApiOperation({ summary: 'Get subtasks of a task' })
-  @ApiParam({ name: 'projectId', description: 'Project ID', type: 'string', format: 'uuid' })
-  @ApiParam({ name: 'id', description: 'Parent task ID', type: 'string', format: 'uuid' })
-  @ApiResponse({ status: 200, description: 'List of subtasks', type: [TaskResponseDto] })
+  @ApiParam({
+    name: 'projectId',
+    description: 'Project ID',
+    type: 'string',
+    format: 'uuid',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'Parent task ID',
+    type: 'string',
+    format: 'uuid',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'List of subtasks',
+    type: [TaskResponseDto],
+  })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 404, description: 'Task not found' })
   async getSubtasks(
@@ -159,9 +208,23 @@ export class TasksController {
   @UseGuards(ResourceOwnerGuard)
   @CheckOwnership({ resourceType: ResourceType.TASK })
   @ApiOperation({ summary: 'Update task (owner or ADMIN/OWNER role)' })
-  @ApiParam({ name: 'projectId', description: 'Project ID', type: 'string', format: 'uuid' })
-  @ApiParam({ name: 'id', description: 'Task ID', type: 'string', format: 'uuid' })
-  @ApiResponse({ status: 200, description: 'Task updated', type: TaskResponseDto })
+  @ApiParam({
+    name: 'projectId',
+    description: 'Project ID',
+    type: 'string',
+    format: 'uuid',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'Task ID',
+    type: 'string',
+    format: 'uuid',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Task updated',
+    type: TaskResponseDto,
+  })
   @ApiResponse({ status: 400, description: 'Validation error' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 403, description: 'Insufficient permissions' })
@@ -189,9 +252,23 @@ export class TasksController {
 
   @Patch(':id/assign')
   @ApiOperation({ summary: 'Assign task to a user' })
-  @ApiParam({ name: 'projectId', description: 'Project ID', type: 'string', format: 'uuid' })
-  @ApiParam({ name: 'id', description: 'Task ID', type: 'string', format: 'uuid' })
-  @ApiResponse({ status: 200, description: 'Task assigned', type: TaskResponseDto })
+  @ApiParam({
+    name: 'projectId',
+    description: 'Project ID',
+    type: 'string',
+    format: 'uuid',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'Task ID',
+    type: 'string',
+    format: 'uuid',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Task assigned',
+    type: TaskResponseDto,
+  })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 404, description: 'Task or user not found' })
   async assign(
@@ -212,8 +289,18 @@ export class TasksController {
   @UseGuards(ResourceOwnerGuard)
   @CheckOwnership({ resourceType: ResourceType.TASK })
   @ApiOperation({ summary: 'Delete task (owner or ADMIN/OWNER role)' })
-  @ApiParam({ name: 'projectId', description: 'Project ID', type: 'string', format: 'uuid' })
-  @ApiParam({ name: 'id', description: 'Task ID', type: 'string', format: 'uuid' })
+  @ApiParam({
+    name: 'projectId',
+    description: 'Project ID',
+    type: 'string',
+    format: 'uuid',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'Task ID',
+    type: 'string',
+    format: 'uuid',
+  })
   @ApiResponse({ status: 204, description: 'Task deleted' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 403, description: 'Insufficient permissions' })

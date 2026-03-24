@@ -45,8 +45,17 @@ export class LabelsController {
 
   @Get()
   @ApiOperation({ summary: 'List all labels in workspace' })
-  @ApiParam({ name: 'workspaceId', description: 'Workspace ID', type: 'string', format: 'uuid' })
-  @ApiResponse({ status: 200, description: 'List of labels', type: [LabelResponseDto] })
+  @ApiParam({
+    name: 'workspaceId',
+    description: 'Workspace ID',
+    type: 'string',
+    format: 'uuid',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'List of labels',
+    type: [LabelResponseDto],
+  })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 403, description: 'Not a workspace member' })
   async list(
@@ -60,8 +69,17 @@ export class LabelsController {
   @HttpCode(HttpStatus.CREATED)
   @Roles(MemberRole.OWNER, MemberRole.ADMIN)
   @ApiOperation({ summary: 'Create a new label (OWNER/ADMIN only)' })
-  @ApiParam({ name: 'workspaceId', description: 'Workspace ID', type: 'string', format: 'uuid' })
-  @ApiResponse({ status: 201, description: 'Label created', type: LabelResponseDto })
+  @ApiParam({
+    name: 'workspaceId',
+    description: 'Workspace ID',
+    type: 'string',
+    format: 'uuid',
+  })
+  @ApiResponse({
+    status: 201,
+    description: 'Label created',
+    type: LabelResponseDto,
+  })
   @ApiResponse({ status: 400, description: 'Validation error' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 403, description: 'Insufficient permissions' })
@@ -82,9 +100,23 @@ export class LabelsController {
   @Put(':id')
   @Roles(MemberRole.OWNER, MemberRole.ADMIN)
   @ApiOperation({ summary: 'Update label (OWNER/ADMIN only)' })
-  @ApiParam({ name: 'workspaceId', description: 'Workspace ID', type: 'string', format: 'uuid' })
-  @ApiParam({ name: 'id', description: 'Label ID', type: 'string', format: 'uuid' })
-  @ApiResponse({ status: 200, description: 'Label updated', type: LabelResponseDto })
+  @ApiParam({
+    name: 'workspaceId',
+    description: 'Workspace ID',
+    type: 'string',
+    format: 'uuid',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'Label ID',
+    type: 'string',
+    format: 'uuid',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Label updated',
+    type: LabelResponseDto,
+  })
   @ApiResponse({ status: 400, description: 'Validation error' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 403, description: 'Insufficient permissions' })
@@ -102,8 +134,18 @@ export class LabelsController {
   @HttpCode(HttpStatus.NO_CONTENT)
   @Roles(MemberRole.OWNER, MemberRole.ADMIN)
   @ApiOperation({ summary: 'Delete label (OWNER/ADMIN only)' })
-  @ApiParam({ name: 'workspaceId', description: 'Workspace ID', type: 'string', format: 'uuid' })
-  @ApiParam({ name: 'id', description: 'Label ID', type: 'string', format: 'uuid' })
+  @ApiParam({
+    name: 'workspaceId',
+    description: 'Workspace ID',
+    type: 'string',
+    format: 'uuid',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'Label ID',
+    type: 'string',
+    format: 'uuid',
+  })
   @ApiResponse({ status: 204, description: 'Label deleted' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 403, description: 'Insufficient permissions' })

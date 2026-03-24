@@ -67,8 +67,8 @@ async function bootstrap() {
     }
   };
 
-  process.on('SIGTERM', () => shutdown('SIGTERM'));
-  process.on('SIGINT', () => shutdown('SIGINT'));
+  process.on('SIGTERM', () => void shutdown('SIGTERM'));
+  process.on('SIGINT', () => void shutdown('SIGINT'));
 
   app.useGlobalPipes(
     new ValidationPipe({
@@ -82,4 +82,7 @@ async function bootstrap() {
   app.useGlobalFilters(new HttpExceptionFilter());
   await app.listen(3000);
 }
-bootstrap();
+bootstrap().catch((err) => {
+  console.error('Failed to start application:', err);
+  process.exit(1);
+});

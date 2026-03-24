@@ -55,8 +55,17 @@ export class CommentsController {
 
   @Get()
   @ApiOperation({ summary: 'List comments for a task' })
-  @ApiParam({ name: 'taskId', description: 'Task ID', type: 'string', format: 'uuid' })
-  @ApiResponse({ status: 200, description: 'Paginated list of comments', type: PaginatedCommentResponseDto })
+  @ApiParam({
+    name: 'taskId',
+    description: 'Task ID',
+    type: 'string',
+    format: 'uuid',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Paginated list of comments',
+    type: PaginatedCommentResponseDto,
+  })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 404, description: 'Task not found' })
   async list(
@@ -82,8 +91,17 @@ export class CommentsController {
   @Post()
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Create a new comment' })
-  @ApiParam({ name: 'taskId', description: 'Task ID', type: 'string', format: 'uuid' })
-  @ApiResponse({ status: 201, description: 'Comment created', type: CommentResponseDto })
+  @ApiParam({
+    name: 'taskId',
+    description: 'Task ID',
+    type: 'string',
+    format: 'uuid',
+  })
+  @ApiResponse({
+    status: 201,
+    description: 'Comment created',
+    type: CommentResponseDto,
+  })
   @ApiResponse({ status: 400, description: 'Validation error' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 404, description: 'Task not found' })
@@ -104,9 +122,23 @@ export class CommentsController {
   @UseGuards(ResourceOwnerGuard)
   @CheckOwnership({ resourceType: ResourceType.COMMENT })
   @ApiOperation({ summary: 'Update comment (owner only)' })
-  @ApiParam({ name: 'taskId', description: 'Task ID', type: 'string', format: 'uuid' })
-  @ApiParam({ name: 'id', description: 'Comment ID', type: 'string', format: 'uuid' })
-  @ApiResponse({ status: 200, description: 'Comment updated', type: CommentResponseDto })
+  @ApiParam({
+    name: 'taskId',
+    description: 'Task ID',
+    type: 'string',
+    format: 'uuid',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'Comment ID',
+    type: 'string',
+    format: 'uuid',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Comment updated',
+    type: CommentResponseDto,
+  })
   @ApiResponse({ status: 400, description: 'Validation error' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 403, description: 'Not the comment owner' })
@@ -129,8 +161,18 @@ export class CommentsController {
   @UseGuards(ResourceOwnerGuard)
   @CheckOwnership({ resourceType: ResourceType.COMMENT })
   @ApiOperation({ summary: 'Delete comment (owner only)' })
-  @ApiParam({ name: 'taskId', description: 'Task ID', type: 'string', format: 'uuid' })
-  @ApiParam({ name: 'id', description: 'Comment ID', type: 'string', format: 'uuid' })
+  @ApiParam({
+    name: 'taskId',
+    description: 'Task ID',
+    type: 'string',
+    format: 'uuid',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'Comment ID',
+    type: 'string',
+    format: 'uuid',
+  })
   @ApiResponse({ status: 204, description: 'Comment deleted' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 403, description: 'Not the comment owner' })

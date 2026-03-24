@@ -52,12 +52,27 @@ export class InvitationController {
   @Roles(MemberRole.OWNER, MemberRole.ADMIN)
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Create workspace invitation (OWNER/ADMIN only)' })
-  @ApiParam({ name: 'workspaceId', description: 'Workspace ID', type: 'string', format: 'uuid' })
-  @ApiResponse({ status: 201, description: 'Invitation created', type: InvitationResponseDto })
-  @ApiResponse({ status: 400, description: 'Invalid email or user already member' })
+  @ApiParam({
+    name: 'workspaceId',
+    description: 'Workspace ID',
+    type: 'string',
+    format: 'uuid',
+  })
+  @ApiResponse({
+    status: 201,
+    description: 'Invitation created',
+    type: InvitationResponseDto,
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Invalid email or user already member',
+  })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 403, description: 'Insufficient permissions' })
-  @ApiResponse({ status: 409, description: 'Pending invitation already exists' })
+  @ApiResponse({
+    status: 409,
+    description: 'Pending invitation already exists',
+  })
   async createInvitation(
     @Param('workspaceId', new ParseUUIDPipe()) workspaceId: string,
     @Body() dto: CreateInvitationDTO,
@@ -76,8 +91,17 @@ export class InvitationController {
   @UseGuards(WorkspaceMemberGuard, RolesGuard)
   @Roles(MemberRole.OWNER, MemberRole.ADMIN)
   @ApiOperation({ summary: 'List pending invitations (OWNER/ADMIN only)' })
-  @ApiParam({ name: 'workspaceId', description: 'Workspace ID', type: 'string', format: 'uuid' })
-  @ApiResponse({ status: 200, description: 'List of invitations', type: [InvitationResponseDto] })
+  @ApiParam({
+    name: 'workspaceId',
+    description: 'Workspace ID',
+    type: 'string',
+    format: 'uuid',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'List of invitations',
+    type: [InvitationResponseDto],
+  })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 403, description: 'Insufficient permissions' })
   async listInvitations(
@@ -92,8 +116,18 @@ export class InvitationController {
   @Roles(MemberRole.OWNER, MemberRole.ADMIN)
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Cancel an invitation (OWNER/ADMIN only)' })
-  @ApiParam({ name: 'workspaceId', description: 'Workspace ID', type: 'string', format: 'uuid' })
-  @ApiParam({ name: 'invitationId', description: 'Invitation ID', type: 'string', format: 'uuid' })
+  @ApiParam({
+    name: 'workspaceId',
+    description: 'Workspace ID',
+    type: 'string',
+    format: 'uuid',
+  })
+  @ApiParam({
+    name: 'invitationId',
+    description: 'Invitation ID',
+    type: 'string',
+    format: 'uuid',
+  })
   @ApiResponse({ status: 204, description: 'Invitation cancelled' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 403, description: 'Insufficient permissions' })
@@ -108,7 +142,11 @@ export class InvitationController {
   @Post('invitations/accept')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Accept a workspace invitation' })
-  @ApiResponse({ status: 200, description: 'Invitation accepted, member created', type: MemberResponseDto })
+  @ApiResponse({
+    status: 200,
+    description: 'Invitation accepted, member created',
+    type: MemberResponseDto,
+  })
   @ApiResponse({ status: 400, description: 'Invalid or expired token' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 404, description: 'Invitation not found' })

@@ -1,4 +1,9 @@
-import { BadRequestException, Logger, Injectable, Inject } from '@nestjs/common';
+import {
+  BadRequestException,
+  Logger,
+  Injectable,
+  Inject,
+} from '@nestjs/common';
 import { IUserRepository } from '../../domain/repositories/user.repository';
 import { IPasswordResetTokenRepository } from '../../domain/repositories/password-reset-token.repository';
 import { IRefreshTokenRepository } from '../../domain/repositories/refresh-token.repository';

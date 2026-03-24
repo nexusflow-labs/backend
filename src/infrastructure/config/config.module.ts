@@ -21,9 +21,9 @@ function getEnvFilePaths(): string[] {
 
   return [
     `.env.${nodeEnv}.local`, // Highest priority: local overrides for env
-    `.env.${nodeEnv}`,       // Environment-specific
-    '.env.local',            // Local development
-    '.env',                  // Default fallback
+    `.env.${nodeEnv}`, // Environment-specific
+    '.env.local', // Local development
+    '.env', // Default fallback
   ];
 }
 

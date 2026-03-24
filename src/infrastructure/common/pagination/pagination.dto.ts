@@ -34,7 +34,11 @@ export class SortableDto {
 
   @IsOptional()
   @IsEnum(['asc', 'desc'])
-  @Transform(({ value }) => value?.toLowerCase())
+  @Transform(({ value }): 'asc' | 'desc' | undefined =>
+    typeof value === 'string'
+      ? (value.toLowerCase() as 'asc' | 'desc')
+      : undefined,
+  )
   sortDirection?: 'asc' | 'desc' = 'desc';
 }
 
@@ -45,6 +49,10 @@ export class PaginatedSortableDto extends PaginationDto {
 
   @IsOptional()
   @IsEnum(['asc', 'desc'])
-  @Transform(({ value }) => value?.toLowerCase())
+  @Transform(({ value }): 'asc' | 'desc' | undefined =>
+    typeof value === 'string'
+      ? (value.toLowerCase() as 'asc' | 'desc')
+      : undefined,
+  )
   sortDirection?: 'asc' | 'desc' = 'desc';
 }

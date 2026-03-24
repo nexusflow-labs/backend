@@ -117,9 +117,7 @@ export class FileUpload {
    * Check if the file can still be uploaded (not expired and not yet uploaded)
    */
   canBeUploaded(): boolean {
-    return (
-      this.props.status === FileUploadStatus.PENDING && !this.isExpired()
-    );
+    return this.props.status === FileUploadStatus.PENDING && !this.isExpired();
   }
 
   /**
@@ -133,7 +131,10 @@ export class FileUpload {
    * Mark the file as uploaded
    */
   markAsUploaded(size: number): void {
-    if (!this.canBeUploaded() && this.props.status !== FileUploadStatus.PENDING) {
+    if (
+      !this.canBeUploaded() &&
+      this.props.status !== FileUploadStatus.PENDING
+    ) {
       throw new Error('File cannot be marked as uploaded');
     }
     (this.props as any).status = FileUploadStatus.UPLOADED;

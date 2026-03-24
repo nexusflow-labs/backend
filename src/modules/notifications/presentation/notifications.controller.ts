@@ -43,7 +43,11 @@ export class NotificationsController {
 
   @Get()
   @ApiOperation({ summary: 'List notifications for current user' })
-  @ApiResponse({ status: 200, description: 'Paginated list of notifications', type: PaginatedNotificationResponseDto })
+  @ApiResponse({
+    status: 200,
+    description: 'Paginated list of notifications',
+    type: PaginatedNotificationResponseDto,
+  })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   async list(
     @CurrentUser() user: JwtUser,
@@ -68,7 +72,11 @@ export class NotificationsController {
 
   @Get('unread-count')
   @ApiOperation({ summary: 'Get unread notification count' })
-  @ApiResponse({ status: 200, description: 'Unread count', type: UnreadCountResponseDto })
+  @ApiResponse({
+    status: 200,
+    description: 'Unread count',
+    type: UnreadCountResponseDto,
+  })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   async getUnreadCount(
     @CurrentUser() user: JwtUser,
@@ -80,8 +88,17 @@ export class NotificationsController {
   @Patch(':id/read')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Mark a notification as read' })
-  @ApiParam({ name: 'id', description: 'Notification ID', type: 'string', format: 'uuid' })
-  @ApiResponse({ status: 200, description: 'Notification marked as read', type: NotificationResponseDto })
+  @ApiParam({
+    name: 'id',
+    description: 'Notification ID',
+    type: 'string',
+    format: 'uuid',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Notification marked as read',
+    type: NotificationResponseDto,
+  })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 404, description: 'Notification not found' })
   async markAsRead(

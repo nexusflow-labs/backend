@@ -16,7 +16,7 @@ export class HealthController {
   @Public()
   @ApiOperation({ summary: 'Liveness check' })
   @ApiResponse({ status: 200, description: 'Application is alive' })
-  async liveness() {
+  liveness() {
     return {
       status: 'ok',
       timestamp: new Date().toISOString(),

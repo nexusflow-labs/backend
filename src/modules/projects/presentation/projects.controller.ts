@@ -18,8 +18,6 @@ import {
   ApiResponse,
   ApiBearerAuth,
   ApiParam,
-  ApiExtraModels,
-  getSchemaPath,
 } from '@nestjs/swagger';
 import { CreateProjectUseCase } from '../application/use-cases/create-project.use-case';
 import { ListProjectsUseCase } from '../application/use-cases/list-projects.use-case';
@@ -31,7 +29,10 @@ import {
   UpdateProjectDto,
   ProjectQueryDto,
 } from './dtos/project.request.dto';
-import { ProjectResponseDto, PaginatedProjectResponseDto } from './dtos/project.response.dto';
+import {
+  ProjectResponseDto,
+  PaginatedProjectResponseDto,
+} from './dtos/project.response.dto';
 import { PaginatedResult } from 'src/infrastructure/common/pagination';
 import { ProjectQueryFilters } from '../domain/repositories/project.repository';
 import { CurrentUser } from 'src/modules/auth/presentation/decorators/current-user.decorator';
@@ -56,8 +57,17 @@ export class ProjectsController {
 
   @Get()
   @ApiOperation({ summary: 'List projects with pagination and filters' })
-  @ApiParam({ name: 'workspaceId', description: 'Workspace ID', type: 'string', format: 'uuid' })
-  @ApiResponse({ status: 200, description: 'Paginated list of projects', type: PaginatedProjectResponseDto })
+  @ApiParam({
+    name: 'workspaceId',
+    description: 'Workspace ID',
+    type: 'string',
+    format: 'uuid',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Paginated list of projects',
+    type: PaginatedProjectResponseDto,
+  })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 403, description: 'Not a workspace member' })
   async list(
@@ -91,9 +101,23 @@ export class ProjectsController {
 
   @Get(':id')
   @ApiOperation({ summary: 'Get project by ID' })
-  @ApiParam({ name: 'workspaceId', description: 'Workspace ID', type: 'string', format: 'uuid' })
-  @ApiParam({ name: 'id', description: 'Project ID', type: 'string', format: 'uuid' })
-  @ApiResponse({ status: 200, description: 'Project details', type: ProjectResponseDto })
+  @ApiParam({
+    name: 'workspaceId',
+    description: 'Workspace ID',
+    type: 'string',
+    format: 'uuid',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'Project ID',
+    type: 'string',
+    format: 'uuid',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Project details',
+    type: ProjectResponseDto,
+  })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 403, description: 'Not a workspace member' })
   @ApiResponse({ status: 404, description: 'Project not found' })
@@ -107,8 +131,17 @@ export class ProjectsController {
   @Post()
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Create a new project' })
-  @ApiParam({ name: 'workspaceId', description: 'Workspace ID', type: 'string', format: 'uuid' })
-  @ApiResponse({ status: 201, description: 'Project created', type: ProjectResponseDto })
+  @ApiParam({
+    name: 'workspaceId',
+    description: 'Workspace ID',
+    type: 'string',
+    format: 'uuid',
+  })
+  @ApiResponse({
+    status: 201,
+    description: 'Project created',
+    type: ProjectResponseDto,
+  })
   @ApiResponse({ status: 400, description: 'Validation error' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 403, description: 'Not a workspace member' })
@@ -130,9 +163,23 @@ export class ProjectsController {
   @UseGuards(ResourceOwnerGuard)
   @CheckOwnership({ resourceType: ResourceType.PROJECT })
   @ApiOperation({ summary: 'Update project (owner or ADMIN/OWNER role)' })
-  @ApiParam({ name: 'workspaceId', description: 'Workspace ID', type: 'string', format: 'uuid' })
-  @ApiParam({ name: 'id', description: 'Project ID', type: 'string', format: 'uuid' })
-  @ApiResponse({ status: 200, description: 'Project updated', type: ProjectResponseDto })
+  @ApiParam({
+    name: 'workspaceId',
+    description: 'Workspace ID',
+    type: 'string',
+    format: 'uuid',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'Project ID',
+    type: 'string',
+    format: 'uuid',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Project updated',
+    type: ProjectResponseDto,
+  })
   @ApiResponse({ status: 400, description: 'Validation error' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 403, description: 'Insufficient permissions' })
@@ -151,8 +198,18 @@ export class ProjectsController {
   @UseGuards(ResourceOwnerGuard)
   @CheckOwnership({ resourceType: ResourceType.PROJECT })
   @ApiOperation({ summary: 'Delete project (owner or ADMIN/OWNER role)' })
-  @ApiParam({ name: 'workspaceId', description: 'Workspace ID', type: 'string', format: 'uuid' })
-  @ApiParam({ name: 'id', description: 'Project ID', type: 'string', format: 'uuid' })
+  @ApiParam({
+    name: 'workspaceId',
+    description: 'Workspace ID',
+    type: 'string',
+    format: 'uuid',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'Project ID',
+    type: 'string',
+    format: 'uuid',
+  })
   @ApiResponse({ status: 204, description: 'Project deleted' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 403, description: 'Insufficient permissions' })

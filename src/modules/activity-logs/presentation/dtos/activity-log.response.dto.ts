@@ -87,7 +87,10 @@ export class PaginationMetaDto {
 }
 
 export class PaginatedActivityLogResponseDto {
-  @ApiProperty({ description: 'List of activity logs', type: [ActivityLogResponseDto] })
+  @ApiProperty({
+    description: 'List of activity logs',
+    type: [ActivityLogResponseDto],
+  })
   items: ActivityLogResponseDto[];
 
   @ApiProperty({ description: 'Pagination metadata', type: PaginationMetaDto })
