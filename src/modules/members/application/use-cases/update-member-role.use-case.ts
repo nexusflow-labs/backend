@@ -71,7 +71,8 @@ export class UpdateMemberRoleUseCase {
       EntityType.MEMBER,
       targetMember.id,
       operatorId,
-      { workspaceId, targetUserId, oldRole, newRole },
+      workspaceId,
+      { targetUserId, oldRole, newRole },
     );
 
     this.wsEmitter.emitToWorkspace(

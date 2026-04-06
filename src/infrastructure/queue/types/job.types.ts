@@ -105,6 +105,7 @@ export interface ActivityLogJobPayload {
   entityType: string;
   entityId: string;
   userId: string;
+  workspaceId: string;
   metadata?: Record<string, any> | null;
 }
 

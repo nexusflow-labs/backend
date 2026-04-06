@@ -36,6 +36,7 @@ export class CreateCommentUseCase {
     }
 
     const task = await this.taskRepository.findById(taskId);
+
     if (!task) {
       throw new NotFoundException('Task not found');
     }
@@ -46,7 +47,14 @@ export class CreateCommentUseCase {
       authorId,
     });
 
-    await this.activityLogService.logComment(taskId, comment.id, authorId);
+    const project = await this.projectRepository.findById(task.projectId);
+
+    await this.activityLogService.logComment(
+      taskId,
+      comment.id,
+      authorId,
+      project?.workspaceId ?? '',
+    );
 
     this.wsEmitter.emitToTask(taskId, RealtimeEvents.COMMENT_CREATED, {
       comment: {
@@ -58,9 +66,7 @@ export class CreateCommentUseCase {
       },
     });
 
-    // Notify task assignee about new comment (skip if author is assignee)
     if (task.assigneeId && task.assigneeId !== authorId) {
-      const project = await this.projectRepository.findById(task.projectId);
       await this.createNotificationUseCase.execute(
         task.assigneeId,
         NotificationType.COMMENT_ADDED,

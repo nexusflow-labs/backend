@@ -60,9 +60,15 @@ export class UpdateProjectUseCase {
     await this.projectRepository.save(project);
 
     if (Object.keys(changes).length > 0) {
-      await this.activityLogService.logUpdate(EntityType.PROJECT, id, userId, {
-        changes,
-      });
+      await this.activityLogService.logUpdate(
+        EntityType.PROJECT,
+        id,
+        userId,
+        project.workspaceId,
+        {
+          changes,
+        },
+      );
 
       this.wsEmitter.emitToWorkspace(
         project.workspaceId,

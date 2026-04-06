@@ -1,5 +1,6 @@
 import { Injectable, NotFoundException, Inject } from '@nestjs/common';
 import { ITaskRepository } from '../../domain/repositories/task.repository';
+import { IProjectRepository } from 'src/modules/projects/domain/repositories/project.repository';
 import { ActivityLogService } from 'src/modules/activity-logs/application/services/activity-log.service';
 import { EntityType } from 'src/modules/activity-logs/domain/enums/entity-type.enum';
 import {
@@ -12,6 +13,8 @@ export class DeleteTaskUseCase {
   constructor(
     @Inject(ITaskRepository)
     private readonly taskRepository: ITaskRepository,
+    @Inject(IProjectRepository)
+    private readonly projectRepository: IProjectRepository,
     private readonly activityLogService: ActivityLogService,
     private readonly wsEmitter: WebsocketEmitterService,
   ) {}
@@ -24,13 +27,17 @@ export class DeleteTaskUseCase {
     }
 
     const projectId = task.projectId;
+    const project = await this.projectRepository.findById(projectId);
 
     await this.taskRepository.delete(id);
 
-    await this.activityLogService.logDelete(EntityType.TASK, id, userId, {
-      title: task.title,
-      projectId,
-    });
+    await this.activityLogService.logDelete(
+      EntityType.TASK,
+      id,
+      userId,
+      project?.workspaceId ?? '',
+      { title: task.title, projectId },
+    );
 
     this.wsEmitter.emitToProject(projectId, RealtimeEvents.TASK_DELETED, {
       taskId: id,

@@ -39,10 +39,10 @@ export class CancelInvitationUseCase {
       EntityType.INVITATION,
       invitation.id,
       operatorId,
+      invitation.workspaceId,
       {
         previousStatus: InvitationStatus.PENDING,
         newStatus: InvitationStatus.CANCELLED,
-        workspaceId: invitation.workspaceId,
       },
     );
   }

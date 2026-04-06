@@ -8,6 +8,7 @@ export interface CreateActivityLogData {
   entityType: EntityType;
   entityId: string;
   userId: string;
+  workspaceId: string;
   metadata?: Record<string, any> | null;
 }
 
@@ -15,6 +16,7 @@ export interface ActivityLogFilters {
   entityType?: EntityType;
   entityId?: string;
   userId?: string;
+  workspaceId?: string;
   action?: ActivityAction;
   fromDate?: Date;
   toDate?: Date;

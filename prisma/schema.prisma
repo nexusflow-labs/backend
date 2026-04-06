@@ -23,6 +23,7 @@ model Workspace {
   projects    Project[]
   labels      Label[]
   invitations Invitation[]
+  activityLogs        ActivityLog[]
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
   deletedAt   DateTime?
@@ -221,12 +222,15 @@ model ActivityLog {
   entityType String // WORKSPACE, PROJECT, TASK, MEMBER, COMMENT
   entityId   String
   userId     String
+  workspaceId     String
   user       User     @relation(fields: [userId], references: [id])
+  workspace       Workspace     @relation(fields: [workspaceId], references: [id])
   metadata   Json? // Store additional context (old values, new values, etc.)
   createdAt  DateTime @default(now())
 
   @@index([entityType, entityId])
   @@index([userId])
+  @@index([workspaceId])
   @@index([createdAt])
 }
 

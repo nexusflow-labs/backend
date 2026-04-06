@@ -22,9 +22,14 @@ export class DeleteLabelUseCase {
 
     await this.labelRepository.delete(id);
 
-    await this.activityLogService.logDelete(EntityType.LABEL, id, userId, {
-      name,
+    await this.activityLogService.logDelete(
+      EntityType.LABEL,
+      id,
+      userId,
       workspaceId,
-    });
+      {
+        name,
+      },
+    );
   }
 }

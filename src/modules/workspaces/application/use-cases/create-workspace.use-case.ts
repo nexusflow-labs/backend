@@ -31,6 +31,7 @@ export class CreateWorkspaceUseCase {
       EntityType.WORKSPACE,
       workspace.id,
       creatorId,
+      workspace.id,
       { name: workspace.name },
     );
 

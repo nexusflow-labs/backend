@@ -43,18 +43,17 @@ export class AssignTaskUseCase {
     }
 
     const previousAssigneeId = task.assigneeId;
-    let workspaceId: string | undefined;
+
+    const project = await this.projectRepository.findById(task.projectId);
+
+    if (!project) {
+      throw new NotFoundException('Project not found');
+    }
+
+    const workspaceId = project.workspaceId;
 
     // If assigning to someone (not unassigning)
     if (assigneeId) {
-      // Get the project to find the workspace
-      const project = await this.projectRepository.findById(task.projectId);
-      if (!project) {
-        throw new NotFoundException('Project not found');
-      }
-
-      workspaceId = project.workspaceId;
-
       // Verify assignee is a member of the workspace
       const member = await this.memberRepository.findByWorkspaceAndUser(
         workspaceId,
@@ -73,11 +72,17 @@ export class AssignTaskUseCase {
 
     // Log the assignment/unassignment
     if (assigneeId) {
-      await this.activityLogService.logAssign(taskId, userId, assigneeId);
+      await this.activityLogService.logAssign(
+        taskId,
+        userId,
+        workspaceId,
+        assigneeId,
+      );
     } else if (previousAssigneeId) {
       await this.activityLogService.logUnassign(
         taskId,
         userId,
+        workspaceId,
         previousAssigneeId,
       );
     }

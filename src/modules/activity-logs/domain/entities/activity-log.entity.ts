@@ -7,6 +7,11 @@ export interface ActivityLogProps {
   entityType: EntityType;
   entityId: string;
   userId: string;
+  user: {
+    name: string;
+    avatar: string;
+  };
+  workspaceId: string;
   metadata?: Record<string, any> | null;
   createdAt: Date;
 }
@@ -36,6 +41,14 @@ export class ActivityLog {
 
   get userId(): string {
     return this.props.userId;
+  }
+
+  get user(): { name: string; avatar: string } {
+    return this.props.user;
+  }
+
+  get workspaceId(): string {
+    return this.props.workspaceId;
   }
 
   get metadata(): Record<string, any> | null | undefined {

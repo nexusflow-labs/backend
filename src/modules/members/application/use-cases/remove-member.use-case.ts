@@ -75,7 +75,8 @@ export class RemoveMemberUseCase {
       EntityType.MEMBER,
       memberId,
       operatorId,
-      { workspaceId, targetUserId, role },
+      workspaceId,
+      { targetUserId, role },
     );
 
     this.wsEmitter.emitToWorkspace(workspaceId, RealtimeEvents.MEMBER_REMOVED, {

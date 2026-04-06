@@ -8,6 +8,7 @@ export class WorkspaceResponseMapper {
       name: entity.name,
       createdAt: entity.createdAt,
       updatedAt: entity.updatedAt,
+      description: entity.description ?? undefined,
     };
   }
 }

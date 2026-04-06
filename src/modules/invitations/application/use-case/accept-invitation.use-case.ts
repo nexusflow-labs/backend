@@ -89,10 +89,10 @@ export class AcceptInvitationUseCase {
       EntityType.INVITATION,
       invitation.id,
       userId,
+      invitation.workspaceId,
       {
         previousStatus: InvitationStatus.PENDING,
         newStatus: InvitationStatus.ACCEPTED,
-        workspaceId: invitation.workspaceId,
       },
     );
 
@@ -100,6 +100,7 @@ export class AcceptInvitationUseCase {
       EntityType.MEMBER,
       member.id,
       userId,
+      invitation.workspaceId,
       {
         workspaceId: invitation.workspaceId,
         userId,

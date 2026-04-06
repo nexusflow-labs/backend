@@ -15,6 +15,7 @@ export class ActivityLogService {
     entityType: EntityType,
     entityId: string,
     userId: string,
+    workspaceId: string,
     metadata?: Record<string, any>,
   ): Promise<ActivityLog> {
     return this.activityLogRepository.create({
@@ -22,6 +23,7 @@ export class ActivityLogService {
       entityType,
       entityId,
       userId,
+      workspaceId,
       metadata,
     });
   }
@@ -30,6 +32,7 @@ export class ActivityLogService {
     entityType: EntityType,
     entityId: string,
     userId: string,
+    workspaceId: string,
     metadata?: Record<string, any>,
   ): Promise<ActivityLog> {
     return this.activityLogRepository.create({
@@ -37,6 +40,7 @@ export class ActivityLogService {
       entityType,
       entityId,
       userId,
+      workspaceId,
       metadata,
     });
   }
@@ -45,6 +49,7 @@ export class ActivityLogService {
     entityType: EntityType,
     entityId: string,
     userId: string,
+    workspaceId: string,
     metadata?: Record<string, any>,
   ): Promise<ActivityLog> {
     return this.activityLogRepository.create({
@@ -52,6 +57,7 @@ export class ActivityLogService {
       entityType,
       entityId,
       userId,
+      workspaceId,
       metadata,
     });
   }
@@ -59,6 +65,7 @@ export class ActivityLogService {
   async logAssign(
     entityId: string,
     userId: string,
+    workspaceId: string,
     assigneeId: string,
   ): Promise<ActivityLog> {
     return this.activityLogRepository.create({
@@ -66,6 +73,7 @@ export class ActivityLogService {
       entityType: EntityType.TASK,
       entityId,
       userId,
+      workspaceId,
       metadata: { assigneeId },
     });
   }
@@ -73,6 +81,7 @@ export class ActivityLogService {
   async logUnassign(
     entityId: string,
     userId: string,
+    workspaceId: string,
     previousAssigneeId: string,
   ): Promise<ActivityLog> {
     return this.activityLogRepository.create({
@@ -80,6 +89,7 @@ export class ActivityLogService {
       entityType: EntityType.TASK,
       entityId,
       userId,
+      workspaceId,
       metadata: { previousAssigneeId },
     });
   }
@@ -88,12 +98,14 @@ export class ActivityLogService {
     taskId: string,
     commentId: string,
     userId: string,
+    workspaceId: string,
   ): Promise<ActivityLog> {
     return this.activityLogRepository.create({
       action: ActivityAction.COMMENT,
       entityType: EntityType.TASK,
       entityId: taskId,
       userId,
+      workspaceId,
       metadata: { commentId },
     });
   }
@@ -101,6 +113,7 @@ export class ActivityLogService {
   async logStatusChange(
     entityId: string,
     userId: string,
+    workspaceId: string,
     oldStatus: string,
     newStatus: string,
   ): Promise<ActivityLog> {
@@ -109,6 +122,7 @@ export class ActivityLogService {
       entityType: EntityType.TASK,
       entityId,
       userId,
+      workspaceId,
       metadata: { oldStatus, newStatus },
     });
   }

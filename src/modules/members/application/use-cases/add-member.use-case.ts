@@ -45,7 +45,8 @@ export class AddMemberUseCase {
       EntityType.MEMBER,
       member.id,
       operatorId,
-      { workspaceId, userId, role },
+      workspaceId,
+      { userId, role },
     );
 
     this.wsEmitter.emitToWorkspace(workspaceId, RealtimeEvents.MEMBER_ADDED, {

@@ -135,6 +135,7 @@ export class WorkspacesController {
     const workspace = await this.updateWorkspaceUseCase.execute(
       id,
       dto.name,
+      dto.description,
       user.id,
     );
     return WorkspaceResponseMapper.entitytoWorkspaceResponse(workspace);

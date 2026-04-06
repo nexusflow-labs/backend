@@ -3,6 +3,26 @@ import { ActivityLog } from '../../domain/entities/activity-log.entity';
 import { ActivityAction } from '../../domain/enums/activity-action.enum';
 import { EntityType } from '../../domain/enums/entity-type.enum';
 
+class ActivityLogUserDto {
+  @ApiProperty({
+    description: 'User ID',
+    example: 'c7b7649c-7390-4494-8fe7-c21df469fc09',
+  })
+  id: string;
+
+  @ApiProperty({
+    description: 'User name',
+    example: 'Nguyen Van A',
+  })
+  name: string;
+
+  @ApiProperty({
+    description: 'User avatar URL',
+    example: 'https://example.com/avatar.png',
+  })
+  avatar: string;
+}
+
 export class ActivityLogResponseDto {
   @ApiProperty({
     description: 'Activity log ID',
@@ -31,10 +51,10 @@ export class ActivityLogResponseDto {
   entityId: string;
 
   @ApiProperty({
-    description: 'User ID who performed the action',
-    example: 'c7b7649c-7390-4494-8fe7-c21df469fc09',
+    description: 'User who performed the action',
+    type: ActivityLogUserDto,
   })
-  userId: string;
+  user: ActivityLogUserDto;
 
   @ApiPropertyOptional({
     description: 'Additional metadata about the action',
@@ -55,7 +75,11 @@ export class ActivityLogResponseDto {
     dto.action = entity.action;
     dto.entityType = entity.entityType;
     dto.entityId = entity.entityId;
-    dto.userId = entity.userId;
+    dto.user = {
+      id: entity.userId,
+      name: entity.user.name,
+      avatar: entity.user.avatar,
+    };
     dto.metadata = entity.metadata ?? null;
     dto.createdAt = entity.createdAt;
     return dto;

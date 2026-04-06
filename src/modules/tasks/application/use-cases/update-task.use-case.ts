@@ -5,6 +5,7 @@ import {
   TaskPriority,
 } from '../../domain/entities/task.entity';
 import { ITaskRepository } from '../../domain/repositories/task.repository';
+import { IProjectRepository } from 'src/modules/projects/domain/repositories/project.repository';
 import { ActivityLogService } from 'src/modules/activity-logs/application/services/activity-log.service';
 import { EntityType } from 'src/modules/activity-logs/domain/enums/entity-type.enum';
 import {
@@ -25,6 +26,8 @@ export class UpdateTaskUseCase {
   constructor(
     @Inject(ITaskRepository)
     private readonly taskRepository: ITaskRepository,
+    @Inject(IProjectRepository)
+    private readonly projectRepository: IProjectRepository,
     private readonly activityLogService: ActivityLogService,
     private readonly wsEmitter: WebsocketEmitterService,
   ) {}
@@ -77,18 +80,26 @@ export class UpdateTaskUseCase {
 
     await this.taskRepository.save(task);
 
+    const project = await this.projectRepository.findById(task.projectId);
+    const workspaceId = project?.workspaceId ?? '';
+
     // Log status change separately if status was updated
     if (input.status !== undefined && input.status !== oldStatus) {
       await this.activityLogService.logStatusChange(
         id,
         userId,
+        workspaceId,
         oldStatus,
         input.status,
       );
     } else if (Object.keys(changes).length > 0) {
-      await this.activityLogService.logUpdate(EntityType.TASK, id, userId, {
-        changes,
-      });
+      await this.activityLogService.logUpdate(
+        EntityType.TASK,
+        id,
+        userId,
+        workspaceId,
+        { changes },
+      );
     }
 
     this.wsEmitter.emitToProject(task.projectId, RealtimeEvents.TASK_UPDATED, {

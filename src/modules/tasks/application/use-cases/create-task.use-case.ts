@@ -72,6 +72,7 @@ export class CreateTaskUseCase {
       EntityType.TASK,
       task.id,
       creatorId,
+      project.workspaceId,
       {
         title: task.title,
         projectId,

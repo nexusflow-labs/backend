@@ -52,7 +52,8 @@ export class CreateProjectUseCase {
       EntityType.PROJECT,
       project.id,
       ownerId,
-      { name: project.name, workspaceId },
+      project.workspaceId,
+      { name: project.name },
     );
 
     this.wsEmitter.emitToWorkspace(

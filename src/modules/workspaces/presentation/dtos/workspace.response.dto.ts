@@ -24,4 +24,10 @@ export class WorkspaceResponseDto {
     example: '2024-01-15T10:30:00.000Z',
   })
   updatedAt: Date;
+
+  @ApiProperty({
+    description: 'Workspace description',
+    example: 'A simple workspace for my projects',
+  })
+  description?: string;
 }

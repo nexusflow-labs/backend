@@ -59,10 +59,16 @@ export class AddLabelToTaskUseCase {
 
     await this.labelRepository.addLabelToTask(taskId, labelId);
 
-    await this.activityLogService.logUpdate(EntityType.TASK, taskId, userId, {
-      action: 'LABEL_ADDED',
-      labelId,
-      labelName: label.name,
-    });
+    await this.activityLogService.logUpdate(
+      EntityType.TASK,
+      taskId,
+      userId,
+      label.workspaceId,
+      {
+        action: 'LABEL_ADDED',
+        labelId,
+        labelName: label.name,
+      },
+    );
   }
 }

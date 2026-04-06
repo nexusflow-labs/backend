@@ -163,16 +163,25 @@ export class ActivityLogsController {
   @ApiResponse({ status: 403, description: 'Not a workspace member' })
   async getWorkspaceActivities(
     @Param('workspaceId', new ParseUUIDPipe()) workspaceId: string,
-    @Query() query: EntityActivityQueryDto,
+    @Query() query: ActivityLogQueryDto,
   ): Promise<PaginatedResult<ActivityLogResponseDto>> {
+    const filters: ActivityLogFilters = {
+      entityType: query.entityType,
+      entityId: query.entityId,
+      userId: query.userId,
+      workspaceId: workspaceId,
+      action: query.action,
+      fromDate: query.fromDate ? new Date(query.fromDate) : undefined,
+      toDate: query.toDate ? new Date(query.toDate) : undefined,
+    };
+
     const pagination = {
       page: query.page ?? 1,
       pageSize: query.pageSize ?? 20,
     };
 
-    const result = await this.listActivitiesUseCase.executeByEntityPaginated(
-      EntityType.WORKSPACE,
-      workspaceId,
+    const result = await this.listActivitiesUseCase.executePaginated(
+      filters,
       pagination,
     );
 

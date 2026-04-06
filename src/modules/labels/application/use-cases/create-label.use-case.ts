@@ -42,10 +42,10 @@ export class CreateLabelUseCase {
       EntityType.LABEL,
       label.id,
       userId,
+      workspaceId,
       {
         name: label.name,
         color: label.color,
-        workspaceId,
       },
     );
 

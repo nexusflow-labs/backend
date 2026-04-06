@@ -15,6 +15,7 @@ export class UpdateWorkspaceUseCase {
   async execute(
     workspaceId: string,
     name: string,
+    description: string | undefined,
     userId: string,
   ): Promise<Workspace> {
     const workspace = await this.workspaceRepository.findById(workspaceId);
@@ -25,12 +26,14 @@ export class UpdateWorkspaceUseCase {
 
     const oldName = workspace.name;
     workspace.updateName(name);
+    workspace.updateDescription(description ?? null);
     await this.workspaceRepository.save(workspace);
 
     await this.activityLogService.logUpdate(
       EntityType.WORKSPACE,
       workspaceId,
       userId,
+      workspaceId,
       { oldName, newName: name },
     );
 

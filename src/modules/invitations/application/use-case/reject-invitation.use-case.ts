@@ -68,10 +68,10 @@ export class RejectInvitationUseCase {
       EntityType.INVITATION,
       invitation.id,
       userId,
+      invitation.workspaceId,
       {
         previousStatus: InvitationStatus.PENDING,
         newStatus: InvitationStatus.REJECTED,
-        workspaceId: invitation.workspaceId,
       },
     );
 

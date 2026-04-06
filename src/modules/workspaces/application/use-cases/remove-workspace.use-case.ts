@@ -24,6 +24,7 @@ export class RemoveWorkspaceUseCase {
       EntityType.WORKSPACE,
       workspaceId,
       userId,
+      workspaceId,
       { name: workspace.name },
     );
   }

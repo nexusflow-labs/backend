@@ -1,5 +1,7 @@
 import { Injectable, NotFoundException, Inject } from '@nestjs/common';
 import { ICommentRepository } from '../../domain/repositories/comment.repository';
+import { ITaskRepository } from 'src/modules/tasks/domain/repositories/task.repository';
+import { IProjectRepository } from 'src/modules/projects/domain/repositories/project.repository';
 import { ActivityLogService } from 'src/modules/activity-logs/application/services/activity-log.service';
 import { EntityType } from 'src/modules/activity-logs/domain/enums/entity-type.enum';
 import {
@@ -12,6 +14,10 @@ export class DeleteCommentUseCase {
   constructor(
     @Inject(ICommentRepository)
     private readonly commentRepository: ICommentRepository,
+    @Inject(ITaskRepository)
+    private readonly taskRepository: ITaskRepository,
+    @Inject(IProjectRepository)
+    private readonly projectRepository: IProjectRepository,
     private readonly activityLogService: ActivityLogService,
     private readonly wsEmitter: WebsocketEmitterService,
   ) {}
@@ -23,11 +29,24 @@ export class DeleteCommentUseCase {
     }
 
     const taskId = comment.taskId;
+
+    const task = await this.taskRepository.findById(taskId);
+    const project = task
+      ? await this.projectRepository.findById(task.projectId)
+      : null;
+    const workspaceId = project?.workspaceId ?? '';
+
     await this.commentRepository.delete(id);
 
-    await this.activityLogService.logDelete(EntityType.COMMENT, id, userId, {
-      taskId,
-    });
+    await this.activityLogService.logDelete(
+      EntityType.COMMENT,
+      id,
+      userId,
+      workspaceId,
+      {
+        taskId,
+      },
+    );
 
     this.wsEmitter.emitToTask(taskId, RealtimeEvents.COMMENT_DELETED, {
       commentId: id,

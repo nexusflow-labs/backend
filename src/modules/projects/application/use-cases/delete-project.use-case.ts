@@ -27,10 +27,15 @@ export class DeleteProjectUseCase {
 
     await this.projectRepository.delete(id);
 
-    await this.activityLogService.logDelete(EntityType.PROJECT, id, userId, {
-      name: project.name,
-      workspaceId,
-    });
+    await this.activityLogService.logDelete(
+      EntityType.PROJECT,
+      id,
+      userId,
+      project.workspaceId,
+      {
+        name: project.name,
+      },
+    );
 
     this.wsEmitter.emitToWorkspace(
       workspaceId,

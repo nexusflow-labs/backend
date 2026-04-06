@@ -32,6 +32,7 @@ export class ActivityLogProcessor implements IJobProcessor, OnModuleInit {
           entityType,
           payload.entityId,
           payload.userId,
+          payload.workspaceId,
           payload.metadata ?? undefined,
         );
         break;
@@ -41,6 +42,7 @@ export class ActivityLogProcessor implements IJobProcessor, OnModuleInit {
           entityType,
           payload.entityId,
           payload.userId,
+          payload.workspaceId,
           payload.metadata ?? undefined,
         );
         break;
@@ -50,6 +52,7 @@ export class ActivityLogProcessor implements IJobProcessor, OnModuleInit {
           entityType,
           payload.entityId,
           payload.userId,
+          payload.workspaceId,
           payload.metadata ?? undefined,
         );
         break;

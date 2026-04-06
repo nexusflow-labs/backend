@@ -56,9 +56,15 @@ export class UpdateLabelUseCase {
     await this.labelRepository.save(label);
 
     if (Object.keys(changes).length > 0) {
-      await this.activityLogService.logUpdate(EntityType.LABEL, id, userId, {
-        changes,
-      });
+      await this.activityLogService.logUpdate(
+        EntityType.LABEL,
+        id,
+        userId,
+        label.workspaceId,
+        {
+          changes,
+        },
+      );
     }
 
     return label;

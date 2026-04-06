@@ -87,8 +87,8 @@ export class CreateInvitationUseCase {
       EntityType.INVITATION,
       invitation.id,
       inviterId,
+      workspaceId,
       {
-        workspaceId,
         email,
         role,
       },
@@ -164,7 +164,7 @@ export class CreateInvitationUseCase {
       );
 
       this.logger.log(`Invitation email queued for ${recipientEmail}`);
-    } catch (error) {
+    } catch (error: any) {
       // Log the error but don't fail the invitation creation
       this.logger.error(
         `Failed to queue invitation email for ${recipientEmail}: ${error.message}`,

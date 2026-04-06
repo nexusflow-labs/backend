@@ -80,6 +80,21 @@ async function bootstrap() {
   );
   app.useGlobalInterceptors(new TransformInterceptor());
   app.useGlobalFilters(new HttpExceptionFilter());
+
+  const fontendUrl = configService.get<string>(
+    'FRONTEND_URL',
+    'http://localhost:4200',
+  );
+
+  console.log(fontendUrl);
+
+  app.enableCors({
+    origin: [fontendUrl],
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    preflightContinue: false,
+    optionsSuccessStatus: 204,
+    credentials: true,
+  });
   await app.listen(3000);
 }
 bootstrap().catch((err) => {

@@ -27,6 +27,7 @@ export class PrismaActivityLogRepository implements IActivityLogRepository {
         entityType: data.entityType,
         entityId: data.entityId,
         userId: data.userId,
+        workspaceId: data.workspaceId,
         metadata: data.metadata ?? undefined,
       },
     });
@@ -41,6 +42,14 @@ export class PrismaActivityLogRepository implements IActivityLogRepository {
       where,
       orderBy: { createdAt: 'desc' },
       take: 100,
+      include: {
+        user: {
+          select: {
+            fullName: true,
+            avatar: true,
+          },
+        },
+      },
     });
 
     return logs.map((l) => ActivityLogMapper.toEntity(l));
@@ -62,6 +71,14 @@ export class PrismaActivityLogRepository implements IActivityLogRepository {
         orderBy: { createdAt: 'desc' },
         skip,
         take,
+        include: {
+          user: {
+            select: {
+              fullName: true,
+              avatar: true,
+            },
+          },
+        },
       }),
       this.prisma.activityLog.count({ where }),
     ]);
@@ -87,6 +104,15 @@ export class PrismaActivityLogRepository implements IActivityLogRepository {
       },
       orderBy: { createdAt: 'desc' },
       take: 100,
+      include: {
+        user: {
+          select: {
+            id: true,
+            fullName: true,
+            avatar: true,
+          },
+        },
+      },
     });
 
     return logs.map((l) => ActivityLogMapper.toEntity(l));
@@ -127,6 +153,10 @@ export class PrismaActivityLogRepository implements IActivityLogRepository {
     filters: ActivityLogFilters,
   ): Prisma.ActivityLogWhereInput {
     const where: Prisma.ActivityLogWhereInput = {};
+
+    if (filters.workspaceId) {
+      where.workspaceId = filters.workspaceId;
+    }
 
     if (filters.entityType) {
       where.entityType = filters.entityType;

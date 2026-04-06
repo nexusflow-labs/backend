@@ -38,6 +38,8 @@ export class LoginUseCase {
     const payload = {
       sub: user.id,
       email: user.email,
+      fullName: user.name,
+      avatar: user.avatar,
     };
 
     const accessToken = await this.jwtService.signAsync(payload);
