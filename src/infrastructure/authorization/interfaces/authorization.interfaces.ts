@@ -74,5 +74,6 @@ export interface CheckOwnershipOptions {
 
 export interface ResourceOwnerInfo {
   ownerId: string;
+  assigneeId?: string | null;
   workspaceId: string;
 }

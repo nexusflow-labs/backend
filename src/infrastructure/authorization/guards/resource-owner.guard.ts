@@ -97,7 +97,10 @@ export class ResourceOwnerGuard implements CanActivate {
     }
 
     // Check if user owns the resource
-    if (resourceOwner.ownerId !== workspaceContext.userId) {
+    if (
+      resourceOwner.ownerId !== workspaceContext.userId &&
+      resourceOwner.assigneeId !== workspaceContext.userId
+    ) {
       throw new ForbiddenException(
         'You do not have permission to modify this resource',
       );

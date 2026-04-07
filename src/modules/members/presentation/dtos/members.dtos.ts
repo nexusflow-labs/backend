@@ -47,14 +47,6 @@ export class MemberResponseDto {
 
 export class UpdateMemberRoleDto {
   @ApiProperty({
-    description: 'Operation ID (deprecated, will be removed)',
-    example: 'op-123',
-  })
-  @IsNotEmpty()
-  @IsString()
-  operationId: string;
-
-  @ApiProperty({
     description: 'New role for the member',
     enum: MemberRole,
     example: MemberRole.ADMIN,

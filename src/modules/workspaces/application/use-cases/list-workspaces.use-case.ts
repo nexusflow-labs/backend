@@ -9,7 +9,7 @@ export class ListWorkspacesUseCase {
     private readonly workspaceRepository: IWorkspaceRepository,
   ) {}
 
-  async execute(): Promise<Workspace[]> {
-    return await this.workspaceRepository.findAll();
+  async execute(userId: string): Promise<Workspace[]> {
+    return await this.workspaceRepository.findByUserId(userId);
   }
 }

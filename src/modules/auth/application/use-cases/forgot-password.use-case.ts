@@ -73,7 +73,7 @@ export class ForgotPasswordUseCase {
       );
 
       this.logger.log(`Password reset email queued for ${email}`);
-    } catch (error) {
+    } catch (error: any) {
       this.logger.error(
         `Failed to queue password reset email for ${email}: ${error.message}`,
         error.stack,

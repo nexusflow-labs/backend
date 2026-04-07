@@ -92,6 +92,7 @@ export class ResourceResolverService {
 
         return {
           ownerId: task.creatorId,
+          assigneeId: task.assigneeId,
           workspaceId: project.workspaceId,
         };
       }

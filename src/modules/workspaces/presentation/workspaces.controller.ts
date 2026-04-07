@@ -56,8 +56,8 @@ export class WorkspacesController {
     type: [WorkspaceResponseDto],
   })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-  async list(): Promise<WorkspaceResponseDto[]> {
-    const workspaces = await this.listWorkspacesUseCase.execute();
+  async list(@CurrentUser() user: JwtUser): Promise<WorkspaceResponseDto[]> {
+    const workspaces = await this.listWorkspacesUseCase.execute(user.id);
     return workspaces.map((ws) =>
       WorkspaceResponseMapper.entitytoWorkspaceResponse(ws),
     );
